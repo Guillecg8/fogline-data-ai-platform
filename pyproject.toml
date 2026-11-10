@@ -1,0 +1,29 @@
+[project]
+name = "fogline-platform"
+version = "0.1.0"
+description = "Data & AI platform for a fictional hospitality and retail group"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = ["ruff>=0.6", "pytest>=8", "pre-commit>=3.8", "poethepoet>=0.29"]
+
+[tool.uv.workspace]
+members = ["projects/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["projects"]
+addopts = "--import-mode=importlib"
+
+[tool.poe.tasks]
+lint = [{ cmd = "ruff check ." }, { cmd = "ruff format --check ." }]
+format = [{ cmd = "ruff check --fix ." }, { cmd = "ruff format ." }]
+test = "pytest"
+check = ["lint", "test"]
