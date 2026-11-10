@@ -30,3 +30,4 @@ test = "pytest"
 check = ["lint", "test"]
 ingest = "python -m ops_copilot.ingestion.pipeline"
 search = "python -m ops_copilot.retrieval.cli"
+ask = "python -m ops_copilot.generation.cli"

@@ -1,6 +1,7 @@
 """Hybrid search: BM25 and vector rankings merged with Reciprocal Rank Fusion."""
 
 import hashlib
+import uuid
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -64,24 +65,29 @@ class HybridRetriever:
         self._ids = list(self._chunks)
         self._embedder = embedder
         self._bm25 = BM25Okapi([tokenize(c.embedding_text) for c in chunks])
-        self._collection = self._open_collection(client or chromadb.EphemeralClient(), fingerprint)
+        if client is None:
+            # In-memory clients share state inside one process: use a name nobody else has.
+            client, name = chromadb.EphemeralClient(), f"{COLLECTION}_{uuid.uuid4().hex}"
+        else:
+            name = COLLECTION
+        self._collection = self._open_collection(client, name, fingerprint)
 
-    def _open_collection(self, client: ClientAPI, fingerprint: str):
+    def _open_collection(self, client: ClientAPI, name: str, fingerprint: str):
         """Reuse the stored vectors only if they are complete and built from the same chunks."""
         existing = {c.name for c in client.list_collections()}
-        if COLLECTION in existing:
-            collection = client.get_collection(COLLECTION, embedding_function=None)
+        if name in existing:
+            collection = client.get_collection(name, embedding_function=None)
             metadata = collection.metadata or {}
             same_source = bool(fingerprint) and metadata.get("chunks_sha256") == fingerprint
             if same_source and collection.count() == len(self._ids):
                 return collection
-            client.delete_collection(COLLECTION)
+            client.delete_collection(name)
 
         # Embed first: if the model fails, no half-built collection is left behind.
         chunks = list(self._chunks.values())
         embeddings = self._embedder([c.embedding_text for c in chunks])
         collection = client.create_collection(
-            COLLECTION,
+            name,
             embedding_function=None,
             metadata={"hnsw:space": "cosine", "chunks_sha256": fingerprint},
         )
