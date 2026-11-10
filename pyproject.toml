@@ -14,6 +14,7 @@ members = ["projects/*"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+src = ["projects/*/src"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
@@ -27,3 +28,4 @@ lint = [{ cmd = "ruff check ." }, { cmd = "ruff format --check ." }]
 format = [{ cmd = "ruff check --fix ." }, { cmd = "ruff format ." }]
 test = "pytest"
 check = ["lint", "test"]
+ingest = "python -m ops_copilot.ingestion.pipeline"
