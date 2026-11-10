@@ -29,3 +29,4 @@ format = [{ cmd = "ruff check --fix ." }, { cmd = "ruff format ." }]
 test = "pytest"
 check = ["lint", "test"]
 ingest = "python -m ops_copilot.ingestion.pipeline"
+search = "python -m ops_copilot.retrieval.cli"
