@@ -1,0 +1,31 @@
+# Data contract between project 01 (producer) and project 02 (consumer).
+# Project 01 must export these tables with exactly these columns.
+# Until it does, project 02 reads a synthetic sample that follows the same contract.
+version: 1
+owner: revenue-lakehouse
+consumers: [ops-knowledge-copilot]
+
+tables:
+  hotel_daily:
+    grain: one row per hotel per day
+    columns:
+      date: DATE
+      venue: VARCHAR
+      rooms_available: INTEGER
+      rooms_sold: INTEGER
+      room_revenue: DOUBLE
+    checks:
+      - rooms_available > 0
+      - rooms_sold BETWEEN 0 AND rooms_available
+      - room_revenue >= 0
+
+  restaurant_daily:
+    grain: one row per restaurant per day
+    columns:
+      date: DATE
+      venue: VARCHAR
+      covers: INTEGER
+      revenue: DOUBLE
+    checks:
+      - covers >= 0
+      - revenue >= 0

@@ -72,6 +72,10 @@ class HybridRetriever:
             name = COLLECTION
         self._collection = self._open_collection(client, name, fingerprint)
 
+    @property
+    def chunks(self) -> list[Chunk]:
+        return list(self._chunks.values())
+
     def _open_collection(self, client: ClientAPI, name: str, fingerprint: str):
         """Reuse the stored vectors only if they are complete and built from the same chunks."""
         existing = {c.name for c in client.list_collections()}
