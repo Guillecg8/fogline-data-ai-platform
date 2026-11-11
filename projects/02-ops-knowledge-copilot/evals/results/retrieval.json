@@ -1,0 +1,33 @@
+{
+  "run_date": "2026-11-11",
+  "kind": "retrieval",
+  "fingerprint": "cd412d7fda0d",
+  "modes": {
+    "bm25": {
+      "cases": 51,
+      "recall_at_1": 0.843,
+      "recall_at_3": 0.902,
+      "recall_at_6": 0.98,
+      "mrr": 0.89,
+      "misses": [
+        "v07"
+      ]
+    },
+    "vector": {
+      "cases": 51,
+      "recall_at_1": 0.902,
+      "recall_at_3": 0.961,
+      "recall_at_6": 1.0,
+      "mrr": 0.941,
+      "misses": []
+    },
+    "hybrid": {
+      "cases": 51,
+      "recall_at_1": 0.922,
+      "recall_at_3": 0.98,
+      "recall_at_6": 1.0,
+      "mrr": 0.949,
+      "misses": []
+    }
+  }
+}
