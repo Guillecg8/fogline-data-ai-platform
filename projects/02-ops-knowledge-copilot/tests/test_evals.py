@@ -6,9 +6,9 @@ from datetime import date
 import pytest
 
 from ops_copilot.evals import run as eval_run
-from ops_copilot.evals.golden import GoldenCase, load_golden
+from ops_copilot.evals.golden import HOLDOUT_FILE, GoldenCase, load_golden
 from ops_copilot.evals.metrics import matches, score_case, summarize_generation
-from ops_copilot.generation.answer import Answer, Citation
+from ops_copilot.generation.answer import Answer, AnswerConfig, Citation
 from ops_copilot.generation.llm import LLMReply
 from ops_copilot.ingestion import pipeline
 from ops_copilot.paths import CORPUS_DIR
@@ -16,6 +16,8 @@ from ops_copilot.retrieval.embedding import hashing_embedder
 from ops_copilot.retrieval.hybrid import HybridRetriever, is_valid, load_chunks
 
 CASES = load_golden()
+HOLDOUT = load_golden(HOLDOUT_FILE)
+ALL_CASES = CASES + HOLDOUT
 
 
 @pytest.fixture(scope="module")
@@ -70,8 +72,14 @@ def test_golden_set_has_60_cases_with_unique_ids():
     }
 
 
+def test_held_out_set_has_20_cases_and_shares_no_question_with_the_development_set():
+    assert len(HOLDOUT) == 20
+    assert len({case.id for case in ALL_CASES}) == 80
+    assert not {c.question for c in HOLDOUT} & {c.question for c in CASES}
+
+
 def test_answerable_cases_name_sources_and_facts():
-    for case in CASES:
+    for case in ALL_CASES:
         if case.answerable:
             assert case.expected_docs and case.must_include, case.id
         else:
@@ -82,7 +90,7 @@ def test_expected_documents_were_in_force_on_the_case_date(retriever):
     in_force: dict[str, list] = {}
     for chunk in retriever.chunks:
         in_force.setdefault(f"{chunk.doc_id}@v{chunk.version}", []).append(chunk)
-    for case in CASES:
+    for case in ALL_CASES:
         for key in case.expected_docs:
             assert key in in_force, f"{case.id}: {key} is not in the corpus"
             assert is_valid(in_force[key][0], case.as_of), f"{case.id}: {key} not in force"
@@ -93,7 +101,7 @@ def test_expected_facts_really_appear_in_the_expected_documents(retriever):
     for chunk in retriever.chunks:
         key = f"{chunk.doc_id}@v{chunk.version}"
         text_by_doc[key] = text_by_doc.get(key, "") + " " + chunk.text
-    for case in CASES:
+    for case in ALL_CASES:
         evidence = " ".join(text_by_doc[key] for key in case.expected_docs)
         for pattern in case.must_include:
             assert matches(evidence, pattern), f"{case.id}: {pattern!r} is not in its sources"
@@ -168,7 +176,7 @@ def oracle_llm(messages) -> LLMReply:
     user = messages[1]["content"]
     question = user.rsplit("Question: ", 1)[1]
     as_of = date.fromisoformat(re.search(r"Reference date: (\S+)", user).group(1))
-    case = next(c for c in CASES if c.question == question and c.as_of == as_of)
+    case = next(c for c in ALL_CASES if c.question == question and c.as_of == as_of)
     if not case.answerable:
         return LLMReply(text='{"answerable": false, "answer": "", "citations": []}')
     numbers = [
@@ -190,16 +198,47 @@ def test_harness_gives_a_perfect_model_a_near_perfect_score(retriever):
     assert summary["citation_accuracy"] == 1.0
 
 
-def test_report_lists_models_and_failed_cases(retriever, tmp_path, monkeypatch):
+def test_report_lists_models_variants_and_failed_cases(retriever, tmp_path, monkeypatch):
     monkeypatch.setattr(eval_run, "RESULTS_DIR", tmp_path)
     eval_run.save(eval_run.run_retrieval(CASES, retriever), "retrieval")
-    eval_run.save(
-        eval_run.run_generation(CASES[:5], retriever, oracle_llm, "oracle"), "generation-oracle"
-    )
+    eval_run.run_all(retriever, oracle_llm, "oracle")
     report = eval_run.build_report()
     assert "| hybrid |" in report
-    assert "| oracle | 100% | 0% | 0% |" in report
-    assert "**oracle**: wrong answers: none; false abstentions: none" in report
+    assert "## Answers (held-out set)" in report
+    assert "| oracle | v1-sections |" in report
+    assert "| oracle | v2-documents |" in report
+    assert sorted(path.name for path in tmp_path.glob("generation-*.json")) == [
+        "generation-oracle--holdout.json",
+        "generation-oracle--v2-documents--holdout.json",
+        "generation-oracle--v2-documents.json",
+        "generation-oracle--v2-sections--holdout.json",
+        "generation-oracle--v2-sections.json",
+        "generation-oracle.json",
+    ]
+
+
+def test_run_all_skips_runs_with_a_valid_saved_result(retriever, tmp_path, monkeypatch):
+    monkeypatch.setattr(eval_run, "RESULTS_DIR", tmp_path)
+    calls = []
+
+    def counting_llm(messages):
+        calls.append(1)
+        return oracle_llm(messages)
+
+    eval_run.run_all(retriever, counting_llm, "oracle")
+    first = len(calls)
+    eval_run.run_all(retriever, counting_llm, "oracle")
+    assert first > 0
+    assert len(calls) == first
+
+
+def test_each_variant_and_split_has_its_own_fingerprint(retriever):
+    prints = {
+        eval_run.generation_fingerprint(retriever, "m", config, split)
+        for config in eval_run.VARIANTS
+        for split in ("dev", "holdout")
+    }
+    assert len(prints) == 6
 
 
 def test_saved_results_were_produced_with_the_current_prompt_and_data(retriever):
@@ -209,7 +248,11 @@ def test_saved_results_were_produced_with_the_current_prompt_and_data(retriever)
         if saved["kind"] == "retrieval":
             current = eval_run.fingerprint(retriever)
         else:
-            current = eval_run.generation_fingerprint(retriever, saved["model"])
+            prompt, context = saved.get("variant", "v1-sections").split("-")
+            config = AnswerConfig(prompt=prompt, context=context)
+            current = eval_run.generation_fingerprint(
+                retriever, saved["model"], config, saved.get("split", "dev")
+            )
         assert saved["fingerprint"] == current, (
             f"{path.name} is stale: run the evals again (uv run poe eval / eval-retrieval)"
         )

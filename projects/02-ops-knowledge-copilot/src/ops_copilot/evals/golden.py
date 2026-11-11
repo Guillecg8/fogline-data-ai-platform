@@ -9,7 +9,9 @@ from pydantic import BaseModel, ConfigDict
 from ops_copilot.paths import PROJECT_DIR
 
 EVALS_DIR = PROJECT_DIR / "evals"
-GOLDEN_FILE = EVALS_DIR / "golden.jsonl"
+GOLDEN_FILE = EVALS_DIR / "golden.jsonl"  # development set: used to find and fix problems
+HOLDOUT_FILE = EVALS_DIR / "holdout.jsonl"  # held-out set: never used to tune anything
+SPLITS = {"dev": GOLDEN_FILE, "holdout": HOLDOUT_FILE}
 DEFAULT_AS_OF = date(2026, 11, 10)  # fixed, so results do not depend on the day you run them
 
 Category = Literal[

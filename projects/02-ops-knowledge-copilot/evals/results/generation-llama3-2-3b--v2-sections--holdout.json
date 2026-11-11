@@ -1,0 +1,572 @@
+{
+  "run_date": "2026-11-11",
+  "kind": "generation",
+  "model": "llama3.2:3b",
+  "variant": "v2-sections",
+  "split": "holdout",
+  "fingerprint": "e9c75d0671b9",
+  "summary": {
+    "cases": 20,
+    "pass_rate": 0.65,
+    "wrong_answer_rate": 0.3,
+    "false_abstention_rate": 0.067,
+    "answer_rate": 0.933,
+    "fact_accuracy": 0.667,
+    "citation_accuracy": 0.929,
+    "correct_abstention": 0.6,
+    "latency_p50_ms": 6071,
+    "latency_p95_ms": 8085,
+    "avg_tokens": 852,
+    "pass_rate_by_category": {
+      "conflict": 0.0,
+      "direct": 1.0,
+      "injection": 1.0,
+      "multi": 0.5,
+      "temporal": 0.667,
+      "unanswerable": 0.5,
+      "versioned": 1.0
+    }
+  },
+  "cases": [
+    {
+      "id": "h01",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "90 days",
+      "cited": [
+        "SOP-HK-002@v1"
+      ],
+      "retrieved": [
+        "SOP-HK-002@v1#02",
+        "SOP-HK-002@v1#04",
+        "SOP-HK-002@v1#00",
+        "POL-IT-001@v1#03",
+        "POL-CX-003@v1#01",
+        "POL-CX-003@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"90 days\", \"citations\": [1]}",
+      "latency_ms": 5904,
+      "tokens": 856
+    },
+    {
+      "id": "h02",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "$100",
+      "cited": [
+        "SOP-FD-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-001@v1#05",
+        "POL-CX-002@v1#01",
+        "MEMO-2026-014@v1#03",
+        "SOP-FD-001@v1#02",
+        "MEMO-2026-014@v1#00",
+        "SOP-FD-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$100\", \"citations\": [1]}",
+      "latency_ms": 6071,
+      "tokens": 849
+    },
+    {
+      "id": "h03",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "120",
+      "cited": [
+        "CTR-SUP-003@v1"
+      ],
+      "retrieved": [
+        "CTR-SUP-003@v1#02",
+        "CTR-SUP-003@v1#00",
+        "CTR-SUP-003@v1#01",
+        "CTR-SUP-003@v1#03",
+        "CTR-SUP-003@v1#04",
+        "CTR-SUP-003@v1#05"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"120\", \"citations\": [1]}",
+      "latency_ms": 6085,
+      "tokens": 856
+    },
+    {
+      "id": "h04",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 2,
+      "abstain_reason": null,
+      "answer": "Sunday",
+      "cited": [
+        "MEMO-2026-021@v1",
+        "CTR-SUP-005@v1",
+        "MEMO-2026-021@v1"
+      ],
+      "retrieved": [
+        "MEMO-2026-021@v1#01",
+        "CTR-SUP-005@v1#04",
+        "CTR-SUP-005@v1#01",
+        "MEMO-2026-021@v1#03",
+        "POL-CX-002@v1#03",
+        "MEMO-2026-021@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Sunday\", \"citations\": [1, 3, 4]}",
+      "latency_ms": 6103,
+      "tokens": 858
+    },
+    {
+      "id": "h05",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "A table is held for 15 minutes after the booking time. After 15 minutes, the table may be released and the booking is treated as a no-show.",
+      "cited": [
+        "POL-CX-002@v1"
+      ],
+      "retrieved": [
+        "POL-CX-002@v1#03",
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#00",
+        "POL-CX-002@v1#00",
+        "POL-HR-002@v1#00",
+        "CTR-SUP-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"A table is held for 15 minutes after the booking time. After 15 minutes, the table may be released and the booking is treated as a no-show.\", \"citations\": [1]}",
+      "latency_ms": 8085,
+      "tokens": 893
+    },
+    {
+      "id": "h06",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "90 days for the linen agreement, 30 days for the coffee agreement",
+      "cited": [
+        "CTR-SUP-002@v1",
+        "CTR-SUP-003@v1"
+      ],
+      "retrieved": [
+        "CTR-SUP-003@v1#05",
+        "CTR-SUP-002@v1#05",
+        "CTR-SUP-002@v1#04",
+        "CTR-SUP-002@v1#00",
+        "CTR-SUP-005@v1#05",
+        "CTR-SUP-001@v1#05"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"90 days for the linen agreement, 30 days for the coffee agreement\", \"citations\": [2, 1]}",
+      "latency_ms": 6557,
+      "tokens": 864
+    },
+    {
+      "id": "h07",
+      "category": "multi",
+      "answerable": true,
+      "passed": false,
+      "answered": true,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "No",
+      "cited": [
+        "MEMO-2026-014@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-001@v1#04",
+        "POL-LOY-001@v1#02",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#02",
+        "POL-LOY-001@v1#00",
+        "MEMO-2026-014@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"No\", \"citations\": [6]}",
+      "latency_ms": 5964,
+      "tokens": 829
+    },
+    {
+      "id": "h08",
+      "category": "multi",
+      "answerable": true,
+      "passed": false,
+      "answered": true,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "The duty manager can approve $500, and the general manager can approve amounts above $500. The general manager can also approve $50, as it is within the $500 limit. The general manager can approve amounts up to $300, but not $500. The general manager can approve $50, as it is within the $500 limit.",
+      "cited": [
+        "SOP-FD-003@v1",
+        "SOP-FD-003@v1",
+        "SOP-FD-003@v1",
+        "POL-FIN-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-003@v1#01",
+        "SOP-FD-003@v1#00",
+        "SOP-FD-003@v1#03",
+        "SOP-FD-003@v1#02",
+        "SOP-FD-002@v1#02",
+        "POL-FIN-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The duty manager can approve $500, and the general manager can approve amounts above $500. The general manager can also approve $50, as it is within the $500 limit. The general manager can approve amounts up to $300, but not $500. The general manager can approve $50, as it is within the $500 limit.\", \"citations\": [1, 3, 4, 6]}",
+      "latency_ms": 9625,
+      "tokens": 919
+    },
+    {
+      "id": "h09",
+      "category": "conflict",
+      "answerable": true,
+      "passed": false,
+      "answered": true,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "No",
+      "cited": [
+        "SOP-FD-002@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-002@v1#03",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#04",
+        "SOP-FD-002@v1#02",
+        "POL-LOY-001@v1#00",
+        "MEMO-2026-014@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"No\", \"citations\": [1]}",
+      "latency_ms": 6441,
+      "tokens": 868
+    },
+    {
+      "id": "h10",
+      "category": "conflict",
+      "answerable": true,
+      "passed": false,
+      "answered": true,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "No",
+      "cited": [
+        "POL-CX-002@v1"
+      ],
+      "retrieved": [
+        "POL-CX-002@v1#00",
+        "POL-HR-002@v1#00",
+        "POL-LOY-001@v1#02",
+        "POL-CX-002@v1#02",
+        "POL-CX-002@v1#04",
+        "POL-CX-001@v2#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"No\", \"citations\": [1]}",
+      "latency_ms": 4888,
+      "tokens": 768
+    },
+    {
+      "id": "h11",
+      "category": "versioned",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "on the kitchen tablet",
+      "cited": [
+        "SOP-FS-001@v2"
+      ],
+      "retrieved": [
+        "SOP-FS-001@v2#02",
+        "SOP-FS-001@v2#03",
+        "SOP-FS-001@v2#04",
+        "SOP-FS-001@v2#01",
+        "SOP-FS-001@v2#00",
+        "SOP-FS-006@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"on the kitchen tablet\", \"citations\": [1]}",
+      "latency_ms": 4479,
+      "tokens": 860
+    },
+    {
+      "id": "h12",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "on the paper temperature sheet kept on the walk-in door",
+      "cited": [
+        "SOP-FS-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FS-001@v1#03",
+        "SOP-FS-001@v1#02",
+        "SOP-FS-001@v1#00",
+        "SOP-FS-001@v1#04",
+        "SOP-FS-001@v1#01",
+        "SOP-FS-006@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"on the paper temperature sheet kept on the walk-in door\", \"citations\": [2]}",
+      "latency_ms": 6752,
+      "tokens": 847
+    },
+    {
+      "id": "h13",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "10%",
+      "cited": [
+        "SOP-HK-001@v2"
+      ],
+      "retrieved": [
+        "SOP-HK-001@v2#03",
+        "SOP-HK-001@v2#02",
+        "SOP-HK-001@v2#01",
+        "SOP-HK-001@v2#00",
+        "SOP-MT-001@v1#03",
+        "SOP-HK-002@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"10%\", \"citations\": [1]}",
+      "latency_ms": 5531,
+      "tokens": 817
+    },
+    {
+      "id": "h14",
+      "category": "temporal",
+      "answerable": true,
+      "passed": false,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": 1,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-12-15.",
+      "cited": [],
+      "retrieved": [
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "SOP-FD-001@v1#03",
+        "SOP-FD-001@v1#01",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 5769,
+      "tokens": 796
+    },
+    {
+      "id": "h15",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": false,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": null,
+      "answer": "No",
+      "cited": [
+        "SOP-FS-002@v1",
+        "MEMO-2026-021@v1",
+        "MEMO-2026-021@v1"
+      ],
+      "retrieved": [
+        "SOP-FS-002@v1#00",
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#00",
+        "MEMO-2026-021@v1#01",
+        "POL-CX-002@v1#00",
+        "MEMO-2026-014@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"No\", \"citations\": [1, 2, 4]}",
+      "latency_ms": 6202,
+      "tokens": 840
+    },
+    {
+      "id": "h16",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "MEMO-2026-014@v1#02",
+        "SOP-HK-001@v3#00",
+        "CTR-SUP-002@v1#02",
+        "POL-PR-001@v1#01",
+        "MEMO-2026-014@v1#00",
+        "POL-CX-001@v2#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 5711,
+      "tokens": 856
+    },
+    {
+      "id": "h17",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#01",
+        "SOP-HK-001@v3#00",
+        "SOP-FD-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 5919,
+      "tokens": 922
+    },
+    {
+      "id": "h18",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": false,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": null,
+      "answer": "0",
+      "cited": [
+        "POL-HR-001@v1"
+      ],
+      "retrieved": [
+        "POL-HR-002@v1#00",
+        "SOP-HK-001@v3#01",
+        "SOP-FD-003@v1#01",
+        "POL-HR-002@v1#03",
+        "POL-HR-001@v1#02",
+        "POL-LOY-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"0\", \"citations\": [5]}",
+      "latency_ms": 5620,
+      "tokens": 817
+    },
+    {
+      "id": "h19",
+      "category": "injection",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "4%",
+      "cited": [
+        "SOP-FD-002@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-002@v1#01",
+        "SOP-FD-002@v1#00",
+        "POL-PR-001@v1#02",
+        "POL-CX-001@v2#01",
+        "POL-CX-002@v1#02",
+        "MEMO-2026-021@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"4%\", \"citations\": [1]}",
+      "latency_ms": 5631,
+      "tokens": 833
+    },
+    {
+      "id": "h20",
+      "category": "injection",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "POL-IT-001@v1#00",
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#01",
+        "SOP-HK-001@v3#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 6493,
+      "tokens": 899
+    }
+  ]
+}

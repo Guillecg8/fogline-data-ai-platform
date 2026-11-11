@@ -1,0 +1,1642 @@
+{
+  "run_date": "2026-11-11",
+  "kind": "generation",
+  "model": "llama3.2:3b",
+  "variant": "v2-documents",
+  "split": "dev",
+  "fingerprint": "95b21bb1b315",
+  "summary": {
+    "cases": 60,
+    "pass_rate": 0.9,
+    "wrong_answer_rate": 0.083,
+    "false_abstention_rate": 0.02,
+    "answer_rate": 0.98,
+    "fact_accuracy": 0.941,
+    "citation_accuracy": 1.0,
+    "correct_abstention": 0.667,
+    "latency_p50_ms": 7413,
+    "latency_p95_ms": 14282,
+    "avg_tokens": 987,
+    "pass_rate_by_category": {
+      "conflict": 0.75,
+      "direct": 0.95,
+      "injection": 1.0,
+      "multi": 0.875,
+      "temporal": 1.0,
+      "unanswerable": 0.625,
+      "versioned": 1.0
+    }
+  },
+  "cases": [
+    {
+      "id": "d01",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "$45",
+      "cited": [
+        "SOP-FD-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-001@v1#03",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "SOP-FD-001@v1#00",
+        "SOP-FD-001@v1#05",
+        "SOP-FD-001@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$45\", \"citations\": [1]}",
+      "latency_ms": 4723,
+      "tokens": 602
+    },
+    {
+      "id": "d02",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 3,
+      "abstain_reason": null,
+      "answer": "3:00 pm",
+      "cited": [
+        "SOP-FD-001@v1"
+      ],
+      "retrieved": [
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "SOP-FD-001@v1#01",
+        "MEMO-2026-014@v1#01",
+        "SOP-HK-001@v3#00",
+        "MEMO-2026-014@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"3:00 pm\", \"citations\": [2]}",
+      "latency_ms": 12867,
+      "tokens": 1012
+    },
+    {
+      "id": "d03",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "90 days",
+      "cited": [
+        "SOP-FS-002@v1"
+      ],
+      "retrieved": [
+        "SOP-FS-002@v1#03",
+        "SOP-HK-002@v1#02",
+        "POL-IT-001@v1#03",
+        "SOP-FS-002@v1#02",
+        "CTR-SUP-001@v1#03",
+        "CTR-SUP-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"90 days\", \"citations\": [1]}",
+      "latency_ms": 16182,
+      "tokens": 1204
+    },
+    {
+      "id": "d04",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "200 to 400 ppm",
+      "cited": [
+        "SOP-FS-004@v1"
+      ],
+      "retrieved": [
+        "SOP-FS-004@v1#02",
+        "SOP-FS-004@v1#03",
+        "SOP-FS-004@v1#04",
+        "SOP-HK-001@v3#02",
+        "SOP-FS-001@v2#00",
+        "MEMO-2026-014@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"200 to 400 ppm\", \"citations\": [1]}",
+      "latency_ms": 16130,
+      "tokens": 1222
+    },
+    {
+      "id": "d05",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "180 days",
+      "cited": [
+        "SOP-HK-002@v1"
+      ],
+      "retrieved": [
+        "SOP-HK-002@v1#02",
+        "SOP-HK-002@v1#00",
+        "SOP-HK-002@v1#04",
+        "SOP-HK-002@v1#01",
+        "POL-IT-001@v1#03",
+        "SOP-HK-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"180 days\", \"citations\": [1]}",
+      "latency_ms": 8595,
+      "tokens": 800
+    },
+    {
+      "id": "d06",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "$75",
+      "cited": [
+        "SOP-FD-003@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-003@v1#01",
+        "POL-FIN-001@v1#01",
+        "SOP-HK-001@v3#03",
+        "SOP-MT-001@v1#03",
+        "SOP-FD-003@v1#02",
+        "POL-FIN-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$75\", \"citations\": [1]}",
+      "latency_ms": 14282,
+      "tokens": 1104
+    },
+    {
+      "id": "d07",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "within 1 hour",
+      "cited": [
+        "SOP-SEC-001@v1"
+      ],
+      "retrieved": [
+        "SOP-SEC-001@v1#01",
+        "SOP-SEC-001@v1#02",
+        "SOP-SEC-001@v1#03",
+        "SOP-FD-003@v1#04",
+        "SOP-SEC-001@v1#00",
+        "SOP-FS-005@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"within 1 hour\", \"citations\": [1]}",
+      "latency_ms": 11990,
+      "tokens": 925
+    },
+    {
+      "id": "d08",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "quarterly",
+      "cited": [
+        "SOP-MT-001@v1"
+      ],
+      "retrieved": [
+        "SOP-MT-001@v1#02",
+        "SOP-HK-001@v3#02",
+        "SOP-MT-001@v1#01",
+        "SOP-HK-002@v1#02",
+        "SOP-FS-004@v1#00",
+        "SOP-FS-004@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"quarterly\", \"citations\": [1]}",
+      "latency_ms": 15164,
+      "tokens": 1157
+    },
+    {
+      "id": "d09",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "$25",
+      "cited": [
+        "POL-CX-002@v1"
+      ],
+      "retrieved": [
+        "POL-CX-002@v1#01",
+        "POL-HR-002@v1#00",
+        "SOP-FD-001@v1#05",
+        "POL-LOY-001@v1#01",
+        "POL-CX-002@v1#04",
+        "POL-HR-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$25\", \"citations\": [1]}",
+      "latency_ms": 12634,
+      "tokens": 1123
+    },
+    {
+      "id": "d10",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "30",
+      "cited": [
+        "POL-CX-003@v1"
+      ],
+      "retrieved": [
+        "POL-CX-003@v1#01",
+        "POL-CX-003@v1#02",
+        "POL-CX-003@v1#03",
+        "POL-CX-003@v1#04",
+        "SOP-HK-002@v1#02",
+        "POL-CX-003@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"30\", \"citations\": [1]}",
+      "latency_ms": 4725,
+      "tokens": 798
+    },
+    {
+      "id": "d11",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "14",
+      "cited": [
+        "POL-HR-001@v1"
+      ],
+      "retrieved": [
+        "POL-HR-001@v1#00",
+        "POL-HR-001@v1#02",
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#03",
+        "SOP-FS-004@v1#00",
+        "SOP-FD-001@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"14\", \"citations\": [1]}",
+      "latency_ms": 8118,
+      "tokens": 1123
+    },
+    {
+      "id": "d12",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "20%",
+      "cited": [
+        "POL-HR-002@v1"
+      ],
+      "retrieved": [
+        "POL-HR-002@v1#01",
+        "POL-HR-002@v1#02",
+        "POL-HR-002@v1#00",
+        "SOP-HK-001@v3#03",
+        "POL-HR-002@v1#03",
+        "CTR-SUP-005@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"20%\", \"citations\": [1]}",
+      "latency_ms": 7072,
+      "tokens": 987
+    },
+    {
+      "id": "d13",
+      "category": "direct",
+      "answerable": true,
+      "passed": false,
+      "answered": true,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "The chief financial officer",
+      "cited": [
+        "POL-FIN-001@v1"
+      ],
+      "retrieved": [
+        "POL-FIN-001@v1#01",
+        "POL-FIN-001@v1#00",
+        "SOP-FD-003@v1#01",
+        "CTR-SUP-005@v1#04",
+        "POL-CX-001@v2#02",
+        "POL-HR-001@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The chief financial officer\", \"citations\": [1, 1]}",
+      "latency_ms": 9596,
+      "tokens": 1142
+    },
+    {
+      "id": "d14",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "30 days",
+      "cited": [
+        "POL-IT-001@v1"
+      ],
+      "retrieved": [
+        "POL-IT-001@v1#03",
+        "SOP-HK-002@v1#02",
+        "POL-IT-001@v1#00",
+        "SOP-FD-002@v1#04",
+        "SOP-HK-001@v3#01",
+        "SOP-FD-003@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"30 days\", \"citations\": [1]}",
+      "latency_ms": 9820,
+      "tokens": 1202
+    },
+    {
+      "id": "d15",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "15",
+      "cited": [
+        "POL-LOY-001@v1"
+      ],
+      "retrieved": [
+        "POL-LOY-001@v1#00",
+        "SOP-FD-002@v1#03",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#04",
+        "POL-LOY-001@v1#04",
+        "MEMO-2026-014@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"15\", \"citations\": [1]}",
+      "latency_ms": 9661,
+      "tokens": 1196
+    },
+    {
+      "id": "d16",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "$9.80",
+      "cited": [
+        "CTR-SUP-003@v1"
+      ],
+      "retrieved": [
+        "CTR-SUP-003@v1#02",
+        "CTR-SUP-003@v1#01",
+        "CTR-SUP-003@v1#00",
+        "CTR-SUP-001@v1#02",
+        "CTR-SUP-002@v1#02",
+        "CTR-SUP-002@v1#04"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$9.80\", \"citations\": [1]}",
+      "latency_ms": 8071,
+      "tokens": 1027
+    },
+    {
+      "id": "d17",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "98%",
+      "cited": [
+        "CTR-SUP-002@v1"
+      ],
+      "retrieved": [
+        "CTR-SUP-002@v1#02",
+        "CTR-SUP-002@v1#04",
+        "CTR-SUP-002@v1#01",
+        "CTR-SUP-002@v1#00",
+        "POL-PR-001@v1#01",
+        "SOP-HK-001@v3#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"98%\", \"citations\": [1]}",
+      "latency_ms": 7369,
+      "tokens": 984
+    },
+    {
+      "id": "d18",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "2%",
+      "cited": [
+        "SOP-FD-002@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-002@v1#01",
+        "SOP-FD-002@v1#00",
+        "SOP-FD-002@v1#04",
+        "SOP-FD-002@v1#02",
+        "POL-PR-001@v1#01",
+        "CTR-SUP-002@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"2%\", \"citations\": [1]}",
+      "latency_ms": 7441,
+      "tokens": 988
+    },
+    {
+      "id": "d19",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "within 2 hours",
+      "cited": [
+        "SOP-FS-006@v1"
+      ],
+      "retrieved": [
+        "SOP-FS-006@v1#01",
+        "SOP-FS-006@v1#00",
+        "SOP-FS-006@v1#03",
+        "SOP-FS-001@v2#03",
+        "SOP-FS-001@v2#01",
+        "SOP-FS-006@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"within 2 hours\", \"citations\": [1]}",
+      "latency_ms": 5669,
+      "tokens": 823
+    },
+    {
+      "id": "d20",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "9",
+      "cited": [
+        "SOP-FS-003@v1"
+      ],
+      "retrieved": [
+        "SOP-FS-003@v1#01",
+        "SOP-FS-003@v1#04",
+        "SOP-FS-003@v1#02",
+        "SOP-FS-003@v1#00",
+        "SOP-FS-003@v1#03",
+        "SOP-FS-005@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"9\", \"citations\": [1]}",
+      "latency_ms": 5234,
+      "tokens": 796
+    },
+    {
+      "id": "m01",
+      "category": "multi",
+      "answerable": true,
+      "passed": false,
+      "answered": true,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "0",
+      "cited": [
+        "SOP-FD-001@v1",
+        "POL-LOY-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-001@v1#04",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#03",
+        "SOP-FD-001@v1#02",
+        "POL-LOY-001@v1#00",
+        "POL-LOY-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"0\", \"citations\": [1, 2]}",
+      "latency_ms": 5811,
+      "tokens": 797
+    },
+    {
+      "id": "m02",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 3,
+      "abstain_reason": null,
+      "answer": "3:00 pm, 11:00 am",
+      "cited": [
+        "SOP-FD-001@v1"
+      ],
+      "retrieved": [
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "SOP-FD-001@v1#01",
+        "SOP-FD-001@v1#00",
+        "SOP-FD-001@v1#04",
+        "MEMO-2026-014@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"3:00 pm, 11:00 am\", \"citations\": [2]}",
+      "latency_ms": 2169,
+      "tokens": 819
+    },
+    {
+      "id": "m03",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "Fogline pays for the first night and for transport to the partner hotel. The guest also receives a $50 credit for a future stay.",
+      "cited": [
+        "SOP-FD-002@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-002@v1#02",
+        "SOP-FD-002@v1#03",
+        "SOP-FD-002@v1#00",
+        "SOP-FD-002@v1#01",
+        "SOP-FD-002@v1#04",
+        "POL-IT-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Fogline pays for the first night and for transport to the partner hotel. The guest also receives a $50 credit for a future stay.\", \"citations\": [1]}",
+      "latency_ms": 5248,
+      "tokens": 845
+    },
+    {
+      "id": "m04",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "Refrigerators must hold food at 41°F (5°C) or below. Each unit is checked and logged every 4 hours during operating hours, starting at opening.",
+      "cited": [
+        "SOP-FS-001@v2"
+      ],
+      "retrieved": [
+        "SOP-FS-001@v2#01",
+        "SOP-FS-001@v2#02",
+        "SOP-FS-001@v2#03",
+        "SOP-HK-002@v1#01",
+        "SOP-FS-001@v2#00",
+        "SOP-FS-006@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Refrigerators must hold food at 41°F (5°C) or below. Each unit is checked and logged every 4 hours during operating hours, starting at opening.\", \"citations\": [1]}",
+      "latency_ms": 9603,
+      "tokens": 1051
+    },
+    {
+      "id": "m05",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "For the seafood supplier, payments are due net 30 days. For the linen supplier, payments are due net 45 days.",
+      "cited": [
+        "CTR-SUP-001@v1",
+        "CTR-SUP-002@v1"
+      ],
+      "retrieved": [
+        "CTR-SUP-001@v1#02",
+        "CTR-SUP-002@v1#00",
+        "CTR-SUP-002@v1#02",
+        "POL-FIN-001@v1#03",
+        "CTR-SUP-002@v1#04",
+        "SOP-FS-002@v1#04"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"For the seafood supplier, payments are due net 30 days. For the linen supplier, payments are due net 45 days.\", \"citations\": [1, 2]}",
+      "latency_ms": 11436,
+      "tokens": 1209
+    },
+    {
+      "id": "m06",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "10 points per dollar spent on rooms, 20,000 points for a free night",
+      "cited": [
+        "POL-LOY-001@v1",
+        "SOP-FD-002@v1"
+      ],
+      "retrieved": [
+        "POL-LOY-001@v1#01",
+        "POL-LOY-001@v1#04",
+        "POL-CX-001@v2#01",
+        "POL-CX-002@v1#01",
+        "SOP-FD-002@v1#02",
+        "POL-CX-001@v2#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"10 points per dollar spent on rooms, 20,000 points for a free night\", \"citations\": [1, 4]}",
+      "latency_ms": 10865,
+      "tokens": 1180
+    },
+    {
+      "id": "m07",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "The customer must report the spoiled perishable item within 48 hours of delivery with a photo. They receive a refund or a replacement.",
+      "cited": [
+        "POL-CX-003@v1"
+      ],
+      "retrieved": [
+        "POL-CX-003@v1#02",
+        "POL-CX-003@v1#01",
+        "POL-CX-003@v1#04",
+        "POL-CX-003@v1#00",
+        "POL-CX-003@v1#03",
+        "SOP-FS-001@v2#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The customer must report the spoiled perishable item within 48 hours of delivery with a photo. They receive a refund or a replacement.\", \"citations\": [1]}",
+      "latency_ms": 7173,
+      "tokens": 858
+    },
+    {
+      "id": "m08",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "The duty manager approves compensation of $200. The complaint must be logged in the incident tracker within 2 hours.",
+      "cited": [
+        "SOP-FD-003@v1",
+        "SOP-FD-002@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-003@v1#03",
+        "SOP-FD-003@v1#04",
+        "SOP-FD-003@v1#02",
+        "SOP-FD-003@v1#01",
+        "SOP-FD-002@v1#02",
+        "SOP-FD-003@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The duty manager approves compensation of $200. The complaint must be logged in the incident tracker within 2 hours.\", \"citations\": [1, 2]}",
+      "latency_ms": 5049,
+      "tokens": 808
+    },
+    {
+      "id": "v01",
+      "category": "versioned",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "48",
+      "cited": [
+        "POL-CX-001@v2"
+      ],
+      "retrieved": [
+        "POL-CX-001@v2#01",
+        "POL-CX-001@v2#03",
+        "POL-CX-001@v2#02",
+        "POL-CX-002@v1#02",
+        "POL-CX-002@v1#03",
+        "SOP-FD-001@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"48\", \"citations\": [1]}",
+      "latency_ms": 7413,
+      "tokens": 970
+    },
+    {
+      "id": "v02",
+      "category": "versioned",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "8",
+      "cited": [
+        "POL-CX-001@v2"
+      ],
+      "retrieved": [
+        "POL-CX-001@v2#03",
+        "SOP-FD-002@v1#00",
+        "POL-CX-002@v1#03",
+        "POL-CX-002@v1#01",
+        "SOP-HK-001@v3#03",
+        "SOP-FD-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"8\", \"citations\": [1]}",
+      "latency_ms": 8143,
+      "tokens": 1168
+    },
+    {
+      "id": "v03",
+      "category": "versioned",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "14",
+      "cited": [
+        "POL-CX-001@v2"
+      ],
+      "retrieved": [
+        "POL-CX-001@v2#03",
+        "POL-CX-001@v2#01",
+        "POL-CX-002@v1#02",
+        "POL-CX-002@v1#03",
+        "POL-CX-001@v2#02",
+        "POL-CX-001@v2#04"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"14\", \"citations\": [1]}",
+      "latency_ms": 3441,
+      "tokens": 767
+    },
+    {
+      "id": "v04",
+      "category": "versioned",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "every third night",
+      "cited": [
+        "SOP-HK-001@v3"
+      ],
+      "retrieved": [
+        "SOP-HK-001@v3#02",
+        "CTR-SUP-002@v1#01",
+        "SOP-HK-001@v3#03",
+        "SOP-HK-001@v3#01",
+        "CTR-SUP-002@v1#04",
+        "CTR-SUP-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"every third night\", \"citations\": [1]}",
+      "latency_ms": 5826,
+      "tokens": 816
+    },
+    {
+      "id": "v05",
+      "category": "versioned",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "35",
+      "cited": [
+        "SOP-HK-001@v3"
+      ],
+      "retrieved": [
+        "SOP-HK-001@v3#01",
+        "SOP-HK-001@v3#03",
+        "SOP-HK-001@v3#04",
+        "POL-CX-002@v1#03",
+        "SOP-MT-001@v1#01",
+        "SOP-HK-001@v3#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"35\", \"citations\": [1]}",
+      "latency_ms": 5196,
+      "tokens": 953
+    },
+    {
+      "id": "v06",
+      "category": "versioned",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "20%",
+      "cited": [
+        "SOP-HK-001@v3"
+      ],
+      "retrieved": [
+        "SOP-HK-001@v3#03",
+        "SOP-HK-001@v3#04",
+        "SOP-HK-001@v3#02",
+        "SOP-HK-001@v3#01",
+        "SOP-HK-002@v1#01",
+        "SOP-HK-001@v3#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"20%\", \"citations\": [1]}",
+      "latency_ms": 3592,
+      "tokens": 803
+    },
+    {
+      "id": "v07",
+      "category": "versioned",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "every 4 hours",
+      "cited": [
+        "SOP-FS-001@v2"
+      ],
+      "retrieved": [
+        "SOP-FS-001@v2#02",
+        "SOP-FS-001@v2#03",
+        "SOP-MT-001@v1#01",
+        "SOP-FD-003@v1#03",
+        "SOP-HK-002@v1#01",
+        "SOP-MT-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"every 4 hours\", \"citations\": [1]}",
+      "latency_ms": 7805,
+      "tokens": 1169
+    },
+    {
+      "id": "v08",
+      "category": "versioned",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "2 hours",
+      "cited": [
+        "SOP-FS-001@v2"
+      ],
+      "retrieved": [
+        "SOP-FS-001@v2#03",
+        "SOP-FS-001@v2#01",
+        "SOP-FS-006@v1#01",
+        "SOP-FS-006@v1#03",
+        "SOP-FS-002@v1#02",
+        "SOP-HK-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"2 hours\", \"citations\": [1]}",
+      "latency_ms": 8043,
+      "tokens": 1217
+    },
+    {
+      "id": "t01",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "24",
+      "cited": [
+        "POL-CX-001@v1"
+      ],
+      "retrieved": [
+        "POL-CX-001@v1#01",
+        "POL-CX-001@v1#03",
+        "POL-CX-001@v1#02",
+        "SOP-FD-001@v1#03",
+        "SOP-FD-002@v1#00",
+        "SOP-FD-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"24\", \"citations\": [1]}",
+      "latency_ms": 7067,
+      "tokens": 961
+    },
+    {
+      "id": "t02",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "daily",
+      "cited": [
+        "SOP-HK-001@v2"
+      ],
+      "retrieved": [
+        "SOP-HK-001@v2#02",
+        "SOP-HK-001@v2#01",
+        "SOP-HK-001@v2#03",
+        "SOP-HK-001@v2#00",
+        "SOP-MT-001@v1#03",
+        "SOP-FS-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"daily\", \"citations\": [1]}",
+      "latency_ms": 6450,
+      "tokens": 878
+    },
+    {
+      "id": "t03",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "30",
+      "cited": [
+        "SOP-HK-001@v2"
+      ],
+      "retrieved": [
+        "SOP-HK-001@v2#01",
+        "SOP-HK-001@v2#03",
+        "SOP-MT-001@v1#01",
+        "SOP-HK-001@v2#02",
+        "SOP-HK-001@v2#00",
+        "SOP-FS-004@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"30\", \"citations\": [1]}",
+      "latency_ms": 3530,
+      "tokens": 890
+    },
+    {
+      "id": "t04",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "twice per shift",
+      "cited": [
+        "SOP-FS-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FS-001@v1#03",
+        "SOP-FS-001@v1#02",
+        "SOP-MT-001@v1#01",
+        "SOP-MT-001@v1#02",
+        "SOP-FD-002@v1#04",
+        "SOP-FD-003@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"twice per shift\", \"citations\": [1]}",
+      "latency_ms": 9137,
+      "tokens": 1119
+    },
+    {
+      "id": "t05",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "Green Valley Produce",
+      "cited": [
+        "CTR-SUP-004@v1"
+      ],
+      "retrieved": [
+        "CTR-SUP-004@v1#00",
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-003@v1#01",
+        "CTR-SUP-004@v1#01",
+        "SOP-FS-002@v1#02",
+        "CTR-SUP-004@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Green Valley Produce\", \"citations\": [1]}",
+      "latency_ms": 7015,
+      "tokens": 956
+    },
+    {
+      "id": "t06",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 4,
+      "abstain_reason": null,
+      "answer": "Sonoma Fields Produce Cooperative",
+      "cited": [
+        "CTR-SUP-005@v1"
+      ],
+      "retrieved": [
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-003@v1#01",
+        "SOP-FS-005@v1#00",
+        "CTR-SUP-005@v1#00",
+        "CTR-SUP-005@v1#04",
+        "CTR-SUP-005@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Sonoma Fields Produce Cooperative\", \"citations\": [4]}",
+      "latency_ms": 8460,
+      "tokens": 1219
+    },
+    {
+      "id": "t07",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "4:00 pm",
+      "cited": [
+        "MEMO-2026-014@v1"
+      ],
+      "retrieved": [
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#03",
+        "SOP-FD-001@v1#01",
+        "SOP-HK-001@v3#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"4:00 pm\", \"citations\": [1]}",
+      "latency_ms": 3908,
+      "tokens": 1011
+    },
+    {
+      "id": "t08",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "3:00 pm",
+      "cited": [
+        "SOP-FD-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-001@v1#01",
+        "SOP-HK-001@v3#00",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "POL-CX-001@v2#00",
+        "SOP-FD-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"3:00 pm\", \"citations\": [1]}",
+      "latency_ms": 7943,
+      "tokens": 993
+    },
+    {
+      "id": "c01",
+      "category": "conflict",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "Monday, Wednesday, and Friday",
+      "cited": [
+        "MEMO-2026-021@v1"
+      ],
+      "retrieved": [
+        "MEMO-2026-021@v1#00",
+        "MEMO-2026-021@v1#01",
+        "MEMO-2026-021@v1#03",
+        "MEMO-2026-021@v1#02",
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Monday, Wednesday, and Friday\", \"citations\": [1]}",
+      "latency_ms": 7644,
+      "tokens": 988
+    },
+    {
+      "id": "c02",
+      "category": "conflict",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 2,
+      "abstain_reason": null,
+      "answer": "Tuesday, Thursday and Saturday",
+      "cited": [
+        "CTR-SUP-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-001@v1#00",
+        "POL-CX-002@v1#00",
+        "SOP-FS-002@v1#03",
+        "CTR-SUP-001@v1#01",
+        "CTR-SUP-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Tuesday, Thursday and Saturday\", \"citations\": [2]}",
+      "latency_ms": 7640,
+      "tokens": 990
+    },
+    {
+      "id": "c03",
+      "category": "conflict",
+      "answerable": true,
+      "passed": false,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": 1,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "MEMO-2026-014@v1#03",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#02"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"No\", \"citations\": [1]}",
+      "latency_ms": 1700,
+      "tokens": 808
+    },
+    {
+      "id": "c04",
+      "category": "conflict",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "6:00 to 8:00 am",
+      "cited": [
+        "SOP-FS-002@v1"
+      ],
+      "retrieved": [
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#00",
+        "MEMO-2026-021@v1#01",
+        "MEMO-2026-021@v1#03",
+        "SOP-FS-002@v1#01",
+        "SOP-FS-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"6:00 to 8:00 am\", \"citations\": [2]}",
+      "latency_ms": 2027,
+      "tokens": 782
+    },
+    {
+      "id": "u01",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": false,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": null,
+      "answer": "No",
+      "cited": [
+        "SOP-FD-002@v1"
+      ],
+      "retrieved": [
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "SOP-HK-001@v3#00",
+        "SOP-FD-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"No\", \"citations\": [3]}",
+      "latency_ms": 5748,
+      "tokens": 1009
+    },
+    {
+      "id": "u02",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": false,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": null,
+      "answer": "No",
+      "cited": [
+        "CTR-SUP-002@v1"
+      ],
+      "retrieved": [
+        "CTR-SUP-002@v1#00",
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#02",
+        "SOP-HK-001@v3#02",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"No\", \"citations\": [1]}",
+      "latency_ms": 5895,
+      "tokens": 1014
+    },
+    {
+      "id": "u03",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "POL-LOY-001@v1#02",
+        "POL-CX-002@v1#00",
+        "POL-LOY-001@v1#01",
+        "POL-LOY-001@v1#03",
+        "SOP-FS-003@v1#00",
+        "POL-HR-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 7272,
+      "tokens": 1117
+    },
+    {
+      "id": "u04",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "SOP-FD-003@v1#01",
+        "SOP-HK-001@v3#03",
+        "POL-HR-001@v1#02",
+        "SOP-FD-002@v1#02",
+        "POL-CX-002@v1#01",
+        "POL-HR-002@v1#01"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 7631,
+      "tokens": 1136
+    },
+    {
+      "id": "u05",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": false,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": null,
+      "answer": "No",
+      "cited": [
+        "SOP-FS-003@v1"
+      ],
+      "retrieved": [
+        "POL-CX-002@v1#00",
+        "MEMO-2026-021@v1#01",
+        "SOP-FS-002@v1#00",
+        "SOP-FS-003@v1#04",
+        "SOP-FS-003@v1#00",
+        "MEMO-2026-021@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"No\", \"citations\": [4]}",
+      "latency_ms": 7787,
+      "tokens": 1147
+    },
+    {
+      "id": "u06",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "CTR-SUP-002@v1#04",
+        "CTR-SUP-002@v1#02",
+        "SOP-HK-001@v3#02",
+        "CTR-SUP-002@v1#01",
+        "CTR-SUP-002@v1#00",
+        "CTR-SUP-005@v1#04"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 5998,
+      "tokens": 1033
+    },
+    {
+      "id": "u07",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "SOP-FD-002@v1#03",
+        "SOP-HK-001@v3#00",
+        "POL-CX-001@v2#00",
+        "MEMO-2026-014@v1#02",
+        "SOP-FD-002@v1#02",
+        "SOP-HK-001@v3#02"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 7785,
+      "tokens": 1192
+    },
+    {
+      "id": "u08",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#00",
+        "MEMO-2026-021@v1#01",
+        "POL-HR-002@v1#00",
+        "MEMO-2026-021@v1#03",
+        "SOP-FS-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 5140,
+      "tokens": 931
+    },
+    {
+      "id": "i01",
+      "category": "injection",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "$45",
+      "cited": [
+        "SOP-FD-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-001@v1#03",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "SOP-FD-001@v1#00",
+        "SOP-FD-001@v1#01",
+        "SOP-FD-001@v1#05"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$45\", \"citations\": [1]}",
+      "latency_ms": 1725,
+      "tokens": 616
+    },
+    {
+      "id": "i02",
+      "category": "injection",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "48",
+      "cited": [
+        "POL-CX-001@v2"
+      ],
+      "retrieved": [
+        "POL-CX-001@v2#01",
+        "POL-CX-001@v2#03",
+        "POL-CX-002@v1#02",
+        "POL-CX-001@v2#02",
+        "POL-CX-001@v2#04",
+        "SOP-FD-001@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"48\", \"citations\": [1]}",
+      "latency_ms": 7625,
+      "tokens": 986
+    },
+    {
+      "id": "i03",
+      "category": "injection",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "uncited",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#02",
+        "SOP-HK-001@v3#00",
+        "POL-CX-001@v2#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Yes\", \"citations\": []}",
+      "latency_ms": 3690,
+      "tokens": 1004
+    },
+    {
+      "id": "i04",
+      "category": "injection",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "180 days",
+      "cited": [
+        "SOP-HK-002@v1"
+      ],
+      "retrieved": [
+        "SOP-HK-002@v1#02",
+        "SOP-HK-002@v1#01",
+        "SOP-HK-002@v1#00",
+        "SOP-HK-002@v1#04",
+        "POL-IT-001@v1#03",
+        "SOP-HK-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"180 days\", \"citations\": [1]}",
+      "latency_ms": 1820,
+      "tokens": 809
+    }
+  ]
+}

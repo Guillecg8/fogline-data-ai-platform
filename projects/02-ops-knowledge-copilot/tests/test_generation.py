@@ -4,7 +4,14 @@ from datetime import date
 import httpx
 import pytest
 
-from ops_copilot.generation.answer import answer_question, build_messages, parse_output
+from ops_copilot.generation.answer import (
+    AnswerConfig,
+    answer_question,
+    build_messages,
+    document_sources,
+    parse_output,
+    section_sources,
+)
 from ops_copilot.generation.llm import ChatClient, LLMReply
 from ops_copilot.ingestion import pipeline
 from ops_copilot.paths import CORPUS_DIR
@@ -41,7 +48,7 @@ def reply(answerable=True, answer="The fee is $45.", citations=(1,)) -> str:
 
 def test_prompt_numbers_the_sources_and_shows_their_dates(retriever):
     hits = retriever.search(QUESTION, as_of=TODAY)
-    user = build_messages(QUESTION, hits, TODAY)[1]["content"]
+    user = build_messages(QUESTION, section_sources(hits), TODAY)[1]["content"]
     assert "Reference date: 2026-11-10" in user
     assert "[1] Check-in and Check-out (SOP-FD-001 v1" in user
     assert "effective from 2025-04-01" in user
@@ -130,3 +137,27 @@ def test_numeric_answers_are_accepted_exactly_as_written():
 def test_raw_model_output_is_kept_for_debugging(retriever):
     answer = answer_question(QUESTION, retriever, FakeLLM("nope", "still nope"), as_of=TODAY)
     assert answer.raw_output == "still nope"
+
+
+def test_document_context_gives_the_model_sections_that_search_missed(retriever):
+    question = "What are the payment terms for the seafood supplier?"
+    hits = [h for h in retriever.search(question, as_of=TODAY) if h.chunk.doc_id == "CTR-SUP-001"]
+    assert hits and all(hit.chunk.section != "Payment" for hit in hits[:1])
+    sources = document_sources(hits[:1], retriever, max_documents=4)
+    assert len(sources) == 1
+    assert "## Payment\nInvoices are payable net 30 days." in sources[0].body
+
+
+def test_document_context_cites_documents(retriever):
+    llm = FakeLLM(reply(citations=(1,)))
+    config = AnswerConfig(prompt="v2", context="documents")
+    answer = answer_question(QUESTION, retriever, llm, as_of=TODAY, config=config)
+    assert answer.citations[0].section == "Full document"
+    assert answer.citations[0].doc_id == "SOP-FD-001"
+    assert "How to answer:" in llm.calls[0][0]["content"]
+    assert "## Late check-out" in llm.calls[0][1]["content"]
+
+
+def test_unknown_variant_is_rejected():
+    with pytest.raises(ValueError, match="unknown prompt"):
+        AnswerConfig(prompt="v9")

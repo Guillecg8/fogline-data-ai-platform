@@ -9,7 +9,7 @@ from datetime import date
 
 import httpx
 
-from ops_copilot.generation.answer import answer_question
+from ops_copilot.generation.answer import AnswerConfig, answer_question
 from ops_copilot.generation.llm import ChatClient
 from ops_copilot.net import use_system_certificates
 from ops_copilot.retrieval.cli import build_retriever
@@ -23,8 +23,11 @@ def main() -> None:
 
     use_system_certificates()
     llm = ChatClient()
+    config = AnswerConfig.from_env()
     try:
-        answer = answer_question(args.question, build_retriever(), llm, as_of=args.as_of)
+        answer = answer_question(
+            args.question, build_retriever(), llm, as_of=args.as_of, config=config
+        )
     except httpx.ConnectError:
         raise SystemExit(
             f"Cannot reach the model at {llm.base_url}. Is Ollama running? Try: ollama list"
@@ -37,7 +40,8 @@ def main() -> None:
     for c in answer.citations:
         print(f"   [{c.number}] {c.doc_id} v{c.version} - {c.title} > {c.section}")
     tokens = answer.prompt_tokens + answer.completion_tokens
-    print(f"\nmodel={llm.model} latency={answer.latency_ms} ms tokens={tokens}")
+    print(f"\nmodel={llm.model} variant={config.variant}")
+    print(f"latency={answer.latency_ms} ms tokens={tokens}")
 
 
 if __name__ == "__main__":
