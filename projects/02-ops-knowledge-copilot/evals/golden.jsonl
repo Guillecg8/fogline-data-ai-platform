@@ -13,7 +13,7 @@
 {"id": "d13", "category": "direct", "question": "Who must approve a purchase of $3,000?", "expected_docs": ["POL-FIN-001@v1"], "must_include": ["general manager"]}
 {"id": "d14", "category": "direct", "question": "How long is security camera footage kept?", "expected_docs": ["POL-IT-001@v1"], "must_include": ["30 days|30-day"]}
 {"id": "d15", "category": "direct", "question": "How many nights are needed to reach Gold status in Fogline Circle?", "expected_docs": ["POL-LOY-001@v1"], "must_include": ["15"]}
-{"id": "d16", "category": "direct", "question": "What is the wholesale price per pound of the Fogline House coffee blend?", "expected_docs": ["CTR-SUP-003@v1"], "must_include": ["9.80"]}
+{"id": "d16", "category": "direct", "question": "What is the wholesale price per pound of the Fogline House coffee blend?", "expected_docs": ["CTR-SUP-003@v1"], "must_include": ["9.8"]}
 {"id": "d17", "category": "direct", "question": "What fill rate does the linen supplier guarantee?", "expected_docs": ["CTR-SUP-002@v1"], "must_include": ["98"]}
 {"id": "d18", "category": "direct", "question": "What is the maximum overbooking allowed on weekends?", "expected_docs": ["SOP-FD-002@v1"], "must_include": ["2%|2 %|2 percent|two percent"]}
 {"id": "d19", "category": "direct", "question": "How quickly must cooked food cool from 135°F to 70°F?", "expected_docs": ["SOP-FS-006@v1"], "must_include": ["2 hours|two hours"]}

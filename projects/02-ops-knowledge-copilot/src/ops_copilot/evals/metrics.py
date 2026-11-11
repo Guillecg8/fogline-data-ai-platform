@@ -50,6 +50,8 @@ class CaseResult(BaseModel):
     abstain_reason: str | None
     answer: str
     cited: list[str]
+    retrieved: list[str]
+    raw_output: str
     latency_ms: int
     tokens: int
 
@@ -78,6 +80,8 @@ def score_case(case: GoldenCase, answer: Answer) -> CaseResult:
         abstain_reason=answer.abstain_reason,
         answer=answer.text,
         cited=cited,
+        retrieved=answer.retrieved,
+        raw_output=answer.raw_output,
         latency_ms=answer.latency_ms,
         tokens=answer.prompt_tokens + answer.completion_tokens,
     )
@@ -100,6 +104,10 @@ def summarize_generation(results: list[CaseResult]) -> dict:
     return {
         "cases": len(results),
         "pass_rate": rate([r.passed for r in results]),
+        # The two ways to fail are not equally bad: a wrong answer misleads the reader,
+        # an unnecessary abstention only sends them to look elsewhere.
+        "wrong_answer_rate": rate([r.answered and not r.passed for r in results]),
+        "false_abstention_rate": rate([not r.answered for r in answerable]),
         "answer_rate": rate([r.answered for r in answerable]),
         "fact_accuracy": rate([r.facts_ok and not r.forbidden for r in answerable]),
         "citation_accuracy": rate([r.citation_ok for r in answered]),

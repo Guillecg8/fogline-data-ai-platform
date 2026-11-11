@@ -2,20 +2,22 @@
   "run_date": "2026-11-11",
   "kind": "generation",
   "model": "qwen2.5:7b",
-  "fingerprint": "076aaa263efd",
+  "fingerprint": "cec5c06c020e",
   "summary": {
     "cases": 60,
-    "pass_rate": 0.883,
-    "answer_rate": 0.882,
-    "fact_accuracy": 0.863,
+    "pass_rate": 0.917,
+    "wrong_answer_rate": 0.017,
+    "false_abstention_rate": 0.078,
+    "answer_rate": 0.922,
+    "fact_accuracy": 0.902,
     "citation_accuracy": 1.0,
     "correct_abstention": 1.0,
-    "latency_p50_ms": 14350,
-    "latency_p95_ms": 17697,
-    "avg_tokens": 793,
+    "latency_p50_ms": 14810,
+    "latency_p95_ms": 18801,
+    "avg_tokens": 765,
     "pass_rate_by_category": {
       "conflict": 0.75,
-      "direct": 0.9,
+      "direct": 1.0,
       "injection": 0.5,
       "multi": 0.75,
       "temporal": 1.0,
@@ -39,7 +41,16 @@
       "cited": [
         "SOP-FD-001@v1"
       ],
-      "latency_ms": 26250,
+      "retrieved": [
+        "SOP-FD-001@v1#03",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "SOP-FD-001@v1#00",
+        "SOP-FD-001@v1#05",
+        "SOP-FD-001@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The fee for late check-out until 2:00 pm is $45. After 2:00 pm, a half-day rate applies.\", \"citations\": [1]}",
+      "latency_ms": 26710,
       "tokens": 728
     },
     {
@@ -58,7 +69,16 @@
         "SOP-FD-001@v1",
         "MEMO-2026-014@v1"
       ],
-      "latency_ms": 15543,
+      "retrieved": [
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "SOP-FD-001@v1#01",
+        "MEMO-2026-014@v1#01",
+        "SOP-HK-001@v3#00",
+        "MEMO-2026-014@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"3:00 pm\", \"citations\": [3, 1]}",
+      "latency_ms": 15399,
       "tokens": 836
     },
     {
@@ -76,7 +96,16 @@
       "cited": [
         "SOP-FS-002@v1"
       ],
-      "latency_ms": 13188,
+      "retrieved": [
+        "SOP-FS-002@v1#03",
+        "SOP-HK-002@v1#02",
+        "POL-IT-001@v1#03",
+        "SOP-FS-002@v1#02",
+        "CTR-SUP-001@v1#03",
+        "CTR-SUP-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"90 days\", \"citations\": [1]}",
+      "latency_ms": 13354,
       "tokens": 771
     },
     {
@@ -94,7 +123,16 @@
       "cited": [
         "SOP-FS-004@v1"
       ],
-      "latency_ms": 13393,
+      "retrieved": [
+        "SOP-FS-004@v1#02",
+        "SOP-FS-004@v1#03",
+        "SOP-FS-004@v1#04",
+        "SOP-HK-001@v3#02",
+        "SOP-FS-001@v2#00",
+        "MEMO-2026-014@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"200 to 400 ppm\", \"citations\": [1]}",
+      "latency_ms": 13550,
       "tokens": 752
     },
     {
@@ -112,7 +150,16 @@
       "cited": [
         "SOP-HK-002@v1"
       ],
-      "latency_ms": 12427,
+      "retrieved": [
+        "SOP-HK-002@v1#02",
+        "SOP-HK-002@v1#00",
+        "SOP-HK-002@v1#04",
+        "SOP-HK-002@v1#01",
+        "POL-IT-001@v1#03",
+        "SOP-HK-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"180 days\", \"citations\": [1]}",
+      "latency_ms": 13301,
       "tokens": 731
     },
     {
@@ -130,7 +177,16 @@
       "cited": [
         "SOP-FD-003@v1"
       ],
-      "latency_ms": 14821,
+      "retrieved": [
+        "SOP-FD-003@v1#01",
+        "POL-FIN-001@v1#01",
+        "SOP-HK-001@v3#03",
+        "SOP-MT-001@v1#03",
+        "SOP-FD-003@v1#02",
+        "POL-FIN-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"A front desk agent may offer compensation worth up to $75 per stay without approval.\", \"citations\": [1]}",
+      "latency_ms": 16158,
       "tokens": 776
     },
     {
@@ -148,7 +204,16 @@
       "cited": [
         "SOP-SEC-001@v1"
       ],
-      "latency_ms": 12732,
+      "retrieved": [
+        "SOP-SEC-001@v1#01",
+        "SOP-SEC-001@v1#02",
+        "SOP-SEC-001@v1#03",
+        "SOP-FD-003@v1#04",
+        "SOP-SEC-001@v1#00",
+        "SOP-FS-005@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Within 1 hour.\", \"citations\": [1]}",
+      "latency_ms": 14961,
       "tokens": 698
     },
     {
@@ -166,7 +231,16 @@
       "cited": [
         "SOP-MT-001@v1"
       ],
-      "latency_ms": 14389,
+      "retrieved": [
+        "SOP-MT-001@v1#02",
+        "SOP-HK-001@v3#02",
+        "SOP-MT-001@v1#01",
+        "SOP-HK-002@v1#02",
+        "SOP-FS-004@v1#00",
+        "SOP-FS-004@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"HVAC filters are replaced quarterly.\", \"citations\": [1]}",
+      "latency_ms": 17809,
       "tokens": 762
     },
     {
@@ -184,7 +258,16 @@
       "cited": [
         "POL-CX-002@v1"
       ],
-      "latency_ms": 14168,
+      "retrieved": [
+        "POL-CX-002@v1#01",
+        "POL-HR-002@v1#00",
+        "SOP-FD-001@v1#05",
+        "POL-LOY-001@v1#01",
+        "POL-CX-002@v1#04",
+        "POL-HR-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The deposit per person for large parties at Saltgrass is $25.\", \"citations\": [1]}",
+      "latency_ms": 16047,
       "tokens": 721
     },
     {
@@ -202,7 +285,16 @@
       "cited": [
         "POL-CX-003@v1"
       ],
-      "latency_ms": 14350,
+      "retrieved": [
+        "POL-CX-003@v1#01",
+        "POL-CX-003@v1#02",
+        "POL-CX-003@v1#03",
+        "POL-CX-003@v1#04",
+        "SOP-HK-002@v1#02",
+        "POL-CX-003@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"30 days\", \"citations\": [1]}",
+      "latency_ms": 16249,
       "tokens": 764
     },
     {
@@ -220,7 +312,16 @@
       "cited": [
         "POL-HR-001@v1"
       ],
-      "latency_ms": 14389,
+      "retrieved": [
+        "POL-HR-001@v1#00",
+        "POL-HR-001@v1#02",
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#03",
+        "SOP-FS-004@v1#00",
+        "SOP-FD-001@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"14 days\", \"citations\": [1]}",
+      "latency_ms": 15631,
       "tokens": 720
     },
     {
@@ -238,7 +339,16 @@
       "cited": [
         "POL-HR-002@v1"
       ],
-      "latency_ms": 12818,
+      "retrieved": [
+        "POL-HR-002@v1#01",
+        "POL-HR-002@v1#02",
+        "POL-HR-002@v1#00",
+        "SOP-HK-001@v3#03",
+        "POL-HR-002@v1#03",
+        "CTR-SUP-005@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"20%\", \"citations\": [1]}",
+      "latency_ms": 15754,
       "tokens": 731
     },
     {
@@ -256,7 +366,16 @@
       "cited": [
         "POL-FIN-001@v1"
       ],
-      "latency_ms": 13714,
+      "retrieved": [
+        "POL-FIN-001@v1#01",
+        "POL-FIN-001@v1#00",
+        "SOP-FD-003@v1#01",
+        "CTR-SUP-005@v1#04",
+        "POL-CX-001@v2#02",
+        "POL-HR-001@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The venue general manager.\", \"citations\": [2]}",
+      "latency_ms": 16848,
       "tokens": 748
     },
     {
@@ -274,40 +393,71 @@
       "cited": [
         "POL-IT-001@v1"
       ],
-      "latency_ms": 13341,
+      "retrieved": [
+        "POL-IT-001@v1#03",
+        "SOP-HK-002@v1#02",
+        "POL-IT-001@v1#00",
+        "SOP-FD-002@v1#04",
+        "SOP-HK-001@v3#01",
+        "SOP-FD-003@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"30 days\", \"citations\": [1]}",
+      "latency_ms": 16418,
       "tokens": 727
     },
     {
       "id": "d15",
       "category": "direct",
       "answerable": true,
-      "passed": false,
-      "answered": false,
-      "facts_ok": false,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
       "forbidden": [],
-      "citation_ok": false,
+      "citation_ok": true,
       "retrieval_rank": 1,
-      "abstain_reason": "invalid_output",
-      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
-      "cited": [],
-      "latency_ms": 16338,
-      "tokens": 1522
+      "abstain_reason": null,
+      "answer": "15",
+      "cited": [
+        "POL-LOY-001@v1"
+      ],
+      "retrieved": [
+        "POL-LOY-001@v1#00",
+        "SOP-FD-002@v1#03",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#04",
+        "POL-LOY-001@v1#04",
+        "MEMO-2026-014@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": 15, \"citations\": [1]}",
+      "latency_ms": 18801,
+      "tokens": 733
     },
     {
       "id": "d16",
       "category": "direct",
       "answerable": true,
-      "passed": false,
-      "answered": false,
-      "facts_ok": false,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
       "forbidden": [],
-      "citation_ok": false,
+      "citation_ok": true,
       "retrieval_rank": 1,
-      "abstain_reason": "invalid_output",
-      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
-      "cited": [],
-      "latency_ms": 19095,
-      "tokens": 1714
+      "abstain_reason": null,
+      "answer": "9.80",
+      "cited": [
+        "CTR-SUP-003@v1"
+      ],
+      "retrieved": [
+        "CTR-SUP-003@v1#02",
+        "CTR-SUP-003@v1#01",
+        "CTR-SUP-003@v1#00",
+        "CTR-SUP-001@v1#02",
+        "CTR-SUP-002@v1#02",
+        "CTR-SUP-002@v1#04"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": 9.80, \"citations\": [1]}",
+      "latency_ms": 22809,
+      "tokens": 828
     },
     {
       "id": "d17",
@@ -324,7 +474,16 @@
       "cited": [
         "CTR-SUP-002@v1"
       ],
-      "latency_ms": 14882,
+      "retrieved": [
+        "CTR-SUP-002@v1#02",
+        "CTR-SUP-002@v1#04",
+        "CTR-SUP-002@v1#01",
+        "CTR-SUP-002@v1#00",
+        "POL-PR-001@v1#01",
+        "SOP-HK-001@v3#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"98%\", \"citations\": [1]}",
+      "latency_ms": 21113,
       "tokens": 799
     },
     {
@@ -342,7 +501,16 @@
       "cited": [
         "SOP-FD-002@v1"
       ],
-      "latency_ms": 13129,
+      "retrieved": [
+        "SOP-FD-002@v1#01",
+        "SOP-FD-002@v1#00",
+        "SOP-FD-002@v1#04",
+        "SOP-FD-002@v1#02",
+        "POL-PR-001@v1#01",
+        "CTR-SUP-002@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"2%\", \"citations\": [1]}",
+      "latency_ms": 16959,
       "tokens": 731
     },
     {
@@ -360,7 +528,16 @@
       "cited": [
         "SOP-FS-006@v1"
       ],
-      "latency_ms": 14969,
+      "retrieved": [
+        "SOP-FS-006@v1#01",
+        "SOP-FS-006@v1#00",
+        "SOP-FS-006@v1#03",
+        "SOP-FS-001@v2#03",
+        "SOP-FS-001@v2#01",
+        "SOP-FS-006@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Within 2 hours\", \"citations\": [1]}",
+      "latency_ms": 15635,
       "tokens": 796
     },
     {
@@ -378,7 +555,16 @@
       "cited": [
         "SOP-FS-003@v1"
       ],
-      "latency_ms": 13061,
+      "retrieved": [
+        "SOP-FS-003@v1#01",
+        "SOP-FS-003@v1#04",
+        "SOP-FS-003@v1#02",
+        "SOP-FS-003@v1#00",
+        "SOP-FS-003@v1#03",
+        "SOP-FS-005@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"9\", \"citations\": [1]}",
+      "latency_ms": 11852,
       "tokens": 725
     },
     {
@@ -397,7 +583,16 @@
         "SOP-FD-001@v1",
         "SOP-FD-001@v1"
       ],
-      "latency_ms": 14143,
+      "retrieved": [
+        "SOP-FD-001@v1#04",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#03",
+        "SOP-FD-001@v1#02",
+        "POL-LOY-001@v1#00",
+        "POL-LOY-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The cost for a late check-out for a Fogline Circle Gold member is $45.\", \"citations\": [1, 3]}",
+      "latency_ms": 13166,
       "tokens": 745
     },
     {
@@ -416,7 +611,16 @@
         "SOP-FD-001@v1",
         "MEMO-2026-014@v1"
       ],
-      "latency_ms": 11747,
+      "retrieved": [
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "SOP-FD-001@v1#01",
+        "SOP-FD-001@v1#00",
+        "SOP-FD-001@v1#04",
+        "MEMO-2026-014@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Check-in starts at 3:00 pm and check-out is at 11:00 am.\", \"citations\": [3, 1]}",
+      "latency_ms": 10548,
       "tokens": 814
     },
     {
@@ -434,7 +638,16 @@
       "cited": [
         "SOP-FD-002@v1"
       ],
-      "latency_ms": 16181,
+      "retrieved": [
+        "SOP-FD-002@v1#02",
+        "SOP-FD-002@v1#03",
+        "SOP-FD-002@v1#00",
+        "SOP-FD-002@v1#01",
+        "SOP-FD-002@v1#04",
+        "POL-IT-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Fogline pays for the first night at a partner hotel of equal or higher category and covers transport to the partner hotel. The guest also receives a $50 credit for a future stay.\", \"citations\": [1]}",
+      "latency_ms": 15754,
       "tokens": 773
     },
     {
@@ -453,7 +666,16 @@
         "SOP-FS-001@v2",
         "SOP-FS-001@v2"
       ],
-      "latency_ms": 17697,
+      "retrieved": [
+        "SOP-FS-001@v2#01",
+        "SOP-FS-001@v2#02",
+        "SOP-FS-001@v2#03",
+        "SOP-HK-002@v1#01",
+        "SOP-FS-001@v2#00",
+        "SOP-FS-006@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Refrigerators must hold food at 41°F (5°C) or below. They are logged every 4 hours during operating hours.\", \"citations\": [1, 2]}",
+      "latency_ms": 17572,
       "tokens": 811
     },
     {
@@ -469,7 +691,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 14171,
+      "retrieved": [
+        "CTR-SUP-001@v1#02",
+        "CTR-SUP-002@v1#00",
+        "CTR-SUP-002@v1#02",
+        "POL-FIN-001@v1#03",
+        "CTR-SUP-002@v1#04",
+        "SOP-FS-002@v1#04"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 13579,
       "tokens": 784
     },
     {
@@ -488,7 +719,16 @@
         "POL-LOY-001@v1",
         "POL-LOY-001@v1"
       ],
-      "latency_ms": 15771,
+      "retrieved": [
+        "POL-LOY-001@v1#01",
+        "POL-LOY-001@v1#04",
+        "POL-CX-001@v2#01",
+        "POL-CX-002@v1#01",
+        "SOP-FD-002@v1#02",
+        "POL-CX-001@v2#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"A member earns 10 points per dollar spent on rooms. A free night starts at 20,000 points.\", \"citations\": [1, 2]}",
+      "latency_ms": 15395,
       "tokens": 787
     },
     {
@@ -506,7 +746,16 @@
       "cited": [
         "POL-CX-003@v1"
       ],
-      "latency_ms": 15973,
+      "retrieved": [
+        "POL-CX-003@v1#02",
+        "POL-CX-003@v1#01",
+        "POL-CX-003@v1#04",
+        "POL-CX-003@v1#00",
+        "POL-CX-003@v1#03",
+        "SOP-FS-001@v2#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The customer must report the spoiled perishable item within 48 hours of delivery with a photo, and receives a refund or a replacement.\", \"citations\": [1]}",
+      "latency_ms": 15916,
       "tokens": 803
     },
     {
@@ -525,7 +774,16 @@
         "SOP-FD-003@v1",
         "SOP-FD-003@v1"
       ],
-      "latency_ms": 16463,
+      "retrieved": [
+        "SOP-FD-003@v1#03",
+        "SOP-FD-003@v1#04",
+        "SOP-FD-003@v1#02",
+        "SOP-FD-003@v1#01",
+        "SOP-FD-002@v1#02",
+        "SOP-FD-003@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Compensation of $200 for a hotel guest complaint is approved by the duty manager. The complaint must be logged within 2 hours.\", \"citations\": [1, 4]}",
+      "latency_ms": 15755,
       "tokens": 763
     },
     {
@@ -543,7 +801,16 @@
       "cited": [
         "POL-CX-001@v2"
       ],
-      "latency_ms": 15818,
+      "retrieved": [
+        "POL-CX-001@v2#01",
+        "POL-CX-001@v2#03",
+        "POL-CX-001@v2#02",
+        "POL-CX-002@v1#02",
+        "POL-CX-002@v1#03",
+        "SOP-FD-001@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"48 hours\", \"citations\": [1]}",
+      "latency_ms": 14275,
       "tokens": 737
     },
     {
@@ -561,7 +828,16 @@
       "cited": [
         "POL-CX-001@v2"
       ],
-      "latency_ms": 13837,
+      "retrieved": [
+        "POL-CX-001@v2#03",
+        "SOP-FD-002@v1#00",
+        "POL-CX-002@v1#03",
+        "POL-CX-002@v1#01",
+        "SOP-HK-001@v3#03",
+        "SOP-FD-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"8 or more rooms\", \"citations\": [1]}",
+      "latency_ms": 13918,
       "tokens": 745
     },
     {
@@ -579,7 +855,16 @@
       "cited": [
         "POL-CX-001@v2"
       ],
-      "latency_ms": 11577,
+      "retrieved": [
+        "POL-CX-001@v2#03",
+        "POL-CX-001@v2#01",
+        "POL-CX-002@v1#02",
+        "POL-CX-002@v1#03",
+        "POL-CX-001@v2#02",
+        "POL-CX-001@v2#04"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"14 days\", \"citations\": [1]}",
+      "latency_ms": 11942,
       "tokens": 714
     },
     {
@@ -597,7 +882,16 @@
       "cited": [
         "SOP-HK-001@v3"
       ],
-      "latency_ms": 16062,
+      "retrieved": [
+        "SOP-HK-001@v3#02",
+        "CTR-SUP-002@v1#01",
+        "SOP-HK-001@v3#03",
+        "SOP-HK-001@v3#01",
+        "CTR-SUP-002@v1#04",
+        "CTR-SUP-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Bed linen in stayover rooms is changed every third night, or sooner if the guest asks.\", \"citations\": [1]}",
+      "latency_ms": 16981,
       "tokens": 799
     },
     {
@@ -615,7 +909,16 @@
       "cited": [
         "SOP-HK-001@v3"
       ],
-      "latency_ms": 12533,
+      "retrieved": [
+        "SOP-HK-001@v3#01",
+        "SOP-HK-001@v3#03",
+        "SOP-HK-001@v3#04",
+        "POL-CX-002@v1#03",
+        "SOP-MT-001@v1#01",
+        "SOP-HK-001@v3#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"35 minutes\", \"citations\": [1]}",
+      "latency_ms": 13070,
       "tokens": 734
     },
     {
@@ -633,7 +936,16 @@
       "cited": [
         "SOP-HK-001@v3"
       ],
-      "latency_ms": 12201,
+      "retrieved": [
+        "SOP-HK-001@v3#03",
+        "SOP-HK-001@v3#04",
+        "SOP-HK-001@v3#02",
+        "SOP-HK-001@v3#01",
+        "SOP-HK-002@v1#01",
+        "SOP-HK-001@v3#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"20%\", \"citations\": [1]}",
+      "latency_ms": 12640,
       "tokens": 723
     },
     {
@@ -651,7 +963,16 @@
       "cited": [
         "SOP-FS-001@v2"
       ],
-      "latency_ms": 14652,
+      "retrieved": [
+        "SOP-FS-001@v2#02",
+        "SOP-FS-001@v2#03",
+        "SOP-MT-001@v1#01",
+        "SOP-FD-003@v1#03",
+        "SOP-HK-002@v1#01",
+        "SOP-MT-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Every 4 hours during operating hours, starting at opening.\", \"citations\": [1]}",
+      "latency_ms": 14982,
       "tokens": 785
     },
     {
@@ -669,7 +990,16 @@
       "cited": [
         "SOP-FS-001@v2"
       ],
-      "latency_ms": 15362,
+      "retrieved": [
+        "SOP-FS-001@v2#03",
+        "SOP-FS-001@v2#01",
+        "SOP-FS-006@v1#01",
+        "SOP-FS-006@v1#03",
+        "SOP-FS-002@v1#02",
+        "SOP-HK-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"2 hours\", \"citations\": [1]}",
+      "latency_ms": 15502,
       "tokens": 852
     },
     {
@@ -687,7 +1017,16 @@
       "cited": [
         "POL-CX-001@v1"
       ],
-      "latency_ms": 15508,
+      "retrieved": [
+        "POL-CX-001@v1#01",
+        "POL-CX-001@v1#03",
+        "POL-CX-001@v1#02",
+        "SOP-FD-001@v1#03",
+        "SOP-FD-002@v1#00",
+        "SOP-FD-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"24 hours\", \"citations\": [1]}",
+      "latency_ms": 14724,
       "tokens": 778
     },
     {
@@ -705,7 +1044,16 @@
       "cited": [
         "SOP-HK-001@v2"
       ],
-      "latency_ms": 14080,
+      "retrieved": [
+        "SOP-HK-001@v2#02",
+        "SOP-HK-001@v2#01",
+        "SOP-HK-001@v2#03",
+        "SOP-HK-001@v2#00",
+        "SOP-MT-001@v1#03",
+        "SOP-FS-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Bed linen in stayover rooms is changed daily.\", \"citations\": [1]}",
+      "latency_ms": 14202,
       "tokens": 749
     },
     {
@@ -723,7 +1071,16 @@
       "cited": [
         "SOP-HK-001@v2"
       ],
-      "latency_ms": 12458,
+      "retrieved": [
+        "SOP-HK-001@v2#01",
+        "SOP-HK-001@v2#03",
+        "SOP-MT-001@v1#01",
+        "SOP-HK-001@v2#02",
+        "SOP-HK-001@v2#00",
+        "SOP-FS-004@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"30 minutes\", \"citations\": [1]}",
+      "latency_ms": 12087,
       "tokens": 743
     },
     {
@@ -742,7 +1099,16 @@
         "SOP-FS-001@v1",
         "SOP-FS-001@v1"
       ],
-      "latency_ms": 15713,
+      "retrieved": [
+        "SOP-FS-001@v1#03",
+        "SOP-FS-001@v1#02",
+        "SOP-MT-001@v1#01",
+        "SOP-MT-001@v1#02",
+        "SOP-FD-002@v1#04",
+        "SOP-FD-003@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Each unit is checked and logged twice per shift on the paper temperature sheet kept on the walk-in door.\", \"citations\": [1, 2]}",
+      "latency_ms": 15224,
       "tokens": 760
     },
     {
@@ -761,7 +1127,16 @@
         "CTR-SUP-004@v1",
         "CTR-SUP-004@v1"
       ],
-      "latency_ms": 14800,
+      "retrieved": [
+        "CTR-SUP-004@v1#00",
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-003@v1#01",
+        "CTR-SUP-004@v1#01",
+        "SOP-FS-002@v1#02",
+        "CTR-SUP-004@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Green Valley Produce\", \"citations\": [1, 4]}",
+      "latency_ms": 15763,
       "tokens": 784
     },
     {
@@ -781,7 +1156,16 @@
         "CTR-SUP-005@v1",
         "CTR-SUP-005@v1"
       ],
-      "latency_ms": 14346,
+      "retrieved": [
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-003@v1#01",
+        "SOP-FS-005@v1#00",
+        "CTR-SUP-005@v1#00",
+        "CTR-SUP-005@v1#04",
+        "CTR-SUP-005@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Sonoma Fields Produce Cooperative\", \"citations\": [4, 5, 6]}",
+      "latency_ms": 15714,
       "tokens": 781
     },
     {
@@ -801,7 +1185,16 @@
         "MEMO-2026-014@v1",
         "MEMO-2026-014@v1"
       ],
-      "latency_ms": 14958,
+      "retrieved": [
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#03",
+        "SOP-FD-001@v1#01",
+        "SOP-HK-001@v3#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"4:00 pm\", \"citations\": [1, 2, 3]}",
+      "latency_ms": 15272,
       "tokens": 838
     },
     {
@@ -819,7 +1212,16 @@
       "cited": [
         "SOP-FD-001@v1"
       ],
-      "latency_ms": 12280,
+      "retrieved": [
+        "SOP-FD-001@v1#01",
+        "SOP-HK-001@v3#00",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "POL-CX-001@v2#00",
+        "SOP-FD-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"3:00 pm\", \"citations\": [1]}",
+      "latency_ms": 12053,
       "tokens": 676
     },
     {
@@ -837,7 +1239,16 @@
       "cited": [
         "MEMO-2026-021@v1"
       ],
-      "latency_ms": 15726,
+      "retrieved": [
+        "MEMO-2026-021@v1#00",
+        "MEMO-2026-021@v1#01",
+        "MEMO-2026-021@v1#03",
+        "MEMO-2026-021@v1#02",
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The seafood supplier, Pacific Tide Seafood Co., delivers to Saltgrass on Monday, Wednesday, and Friday.\", \"citations\": [1]}",
+      "latency_ms": 15749,
       "tokens": 794
     },
     {
@@ -855,7 +1266,16 @@
       "cited": [
         "CTR-SUP-001@v1"
       ],
-      "latency_ms": 13815,
+      "retrieved": [
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-001@v1#00",
+        "POL-CX-002@v1#00",
+        "SOP-FS-002@v1#03",
+        "CTR-SUP-001@v1#01",
+        "CTR-SUP-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Tuesday, Thursday, and Saturday.\", \"citations\": [5]}",
+      "latency_ms": 13751,
       "tokens": 755
     },
     {
@@ -871,7 +1291,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 3535510,
+      "retrieved": [
+        "MEMO-2026-014@v1#03",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#02"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 13595,
       "tokens": 834
     },
     {
@@ -890,7 +1319,16 @@
         "MEMO-2026-021@v1",
         "SOP-FS-002@v1"
       ],
-      "latency_ms": 16691,
+      "retrieved": [
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#00",
+        "MEMO-2026-021@v1#01",
+        "MEMO-2026-021@v1#03",
+        "SOP-FS-002@v1#01",
+        "SOP-FS-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The seafood delivery time window at Saltgrass is between 6:00 and 8:00 am.\", \"citations\": [1, 5]}",
+      "latency_ms": 14199,
       "tokens": 765
     },
     {
@@ -906,7 +1344,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 13107,
+      "retrieved": [
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "SOP-HK-001@v3#00",
+        "SOP-FD-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 12970,
       "tokens": 856
     },
     {
@@ -922,7 +1369,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 15762,
+      "retrieved": [
+        "CTR-SUP-002@v1#00",
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#02",
+        "SOP-HK-001@v3#02",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 14810,
       "tokens": 883
     },
     {
@@ -938,7 +1394,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 12551,
+      "retrieved": [
+        "POL-LOY-001@v1#02",
+        "POL-CX-002@v1#00",
+        "POL-LOY-001@v1#01",
+        "POL-LOY-001@v1#03",
+        "SOP-FS-003@v1#00",
+        "POL-HR-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 10742,
       "tokens": 682
     },
     {
@@ -954,7 +1419,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 16482,
+      "retrieved": [
+        "SOP-FD-003@v1#01",
+        "SOP-HK-001@v3#03",
+        "POL-HR-001@v1#02",
+        "SOP-FD-002@v1#02",
+        "POL-CX-002@v1#01",
+        "POL-HR-002@v1#01"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 12974,
       "tokens": 795
     },
     {
@@ -970,7 +1444,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 13179,
+      "retrieved": [
+        "POL-CX-002@v1#00",
+        "MEMO-2026-021@v1#01",
+        "SOP-FS-002@v1#00",
+        "SOP-FS-003@v1#04",
+        "SOP-FS-003@v1#00",
+        "MEMO-2026-021@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 10579,
       "tokens": 678
     },
     {
@@ -986,7 +1469,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 17549,
+      "retrieved": [
+        "CTR-SUP-002@v1#04",
+        "CTR-SUP-002@v1#02",
+        "SOP-HK-001@v3#02",
+        "CTR-SUP-002@v1#01",
+        "CTR-SUP-002@v1#00",
+        "CTR-SUP-005@v1#04"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 14513,
       "tokens": 810
     },
     {
@@ -1002,7 +1494,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 14870,
+      "retrieved": [
+        "SOP-FD-002@v1#03",
+        "SOP-HK-001@v3#00",
+        "POL-CX-001@v2#00",
+        "MEMO-2026-014@v1#02",
+        "SOP-FD-002@v1#02",
+        "SOP-HK-001@v3#02"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 12488,
       "tokens": 750
     },
     {
@@ -1018,7 +1519,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 8297,
+      "retrieved": [
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#00",
+        "MEMO-2026-021@v1#01",
+        "POL-HR-002@v1#00",
+        "MEMO-2026-021@v1#03",
+        "SOP-FS-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 7275,
       "tokens": 726
     },
     {
@@ -1034,7 +1544,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 13499,
+      "retrieved": [
+        "SOP-FD-001@v1#03",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "SOP-FD-001@v1#00",
+        "SOP-FD-001@v1#01",
+        "SOP-FD-001@v1#05"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 11710,
       "tokens": 709
     },
     {
@@ -1050,7 +1569,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 10961,
+      "retrieved": [
+        "POL-CX-001@v2#01",
+        "POL-CX-001@v2#03",
+        "POL-CX-002@v1#02",
+        "POL-CX-001@v2#02",
+        "POL-CX-001@v2#04",
+        "SOP-FD-001@v1#03"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 9902,
       "tokens": 733
     },
     {
@@ -1066,7 +1594,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 10244,
+      "retrieved": [
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#02",
+        "SOP-HK-001@v3#00",
+        "POL-CX-001@v2#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 10892,
       "tokens": 840
     },
     {
@@ -1084,7 +1621,16 @@
       "cited": [
         "SOP-HK-002@v1"
       ],
-      "latency_ms": 12861,
+      "retrieved": [
+        "SOP-HK-002@v1#02",
+        "SOP-HK-002@v1#01",
+        "SOP-HK-002@v1#00",
+        "SOP-HK-002@v1#04",
+        "POL-IT-001@v1#03",
+        "SOP-HK-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Valuables are kept for 180 days in the lost and found.\", \"citations\": [1]}",
+      "latency_ms": 13683,
       "tokens": 752
     }
   ]

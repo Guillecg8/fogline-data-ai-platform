@@ -63,6 +63,7 @@ class Answer(BaseModel):
     latency_ms: int
     prompt_tokens: int
     completion_tokens: int
+    raw_output: str = ""  # the model's last reply, kept for debugging
 
 
 class _ModelOutput(BaseModel):
@@ -94,7 +95,10 @@ def parse_output(text: str) -> _ModelOutput | None:
     if match is None:
         return None
     try:
-        return _ModelOutput.model_validate(json.loads(match.group(0)))
+        # Models sometimes write a bare number ("answer": 15). Reading numbers as text keeps
+        # them exactly as written (9.80 stays "9.80") and lets the answer field accept them.
+        data = json.loads(match.group(0), parse_int=str, parse_float=str)
+        return _ModelOutput.model_validate(data)
     except (json.JSONDecodeError, ValidationError):
         return None
 
@@ -114,6 +118,7 @@ def answer_question(
     started = time.perf_counter()
     hits = retriever.search(question, k=k, as_of=as_of)
     prompt_tokens = completion_tokens = 0
+    raw_output = ""
 
     def finish(text: str, citations: list[Citation], reason: AbstainReason | None) -> Answer:
         return Answer(
@@ -127,6 +132,7 @@ def answer_question(
             latency_ms=round((time.perf_counter() - started) * 1000),
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
+            raw_output=raw_output,
         )
 
     if not hits:
@@ -138,6 +144,7 @@ def answer_question(
         reply = llm(messages)
         prompt_tokens += reply.prompt_tokens
         completion_tokens += reply.completion_tokens
+        raw_output = reply.text
         output = parse_output(reply.text)
         if output is not None:
             break

@@ -7,8 +7,8 @@ import pytest
 
 from ops_copilot.evals import run as eval_run
 from ops_copilot.evals.golden import GoldenCase, load_golden
-from ops_copilot.evals.metrics import matches, score_case
-from ops_copilot.generation.answer import SYSTEM_PROMPT, Answer, Citation
+from ops_copilot.evals.metrics import matches, score_case, summarize_generation
+from ops_copilot.generation.answer import Answer, Citation
 from ops_copilot.generation.llm import LLMReply
 from ops_copilot.ingestion import pipeline
 from ops_copilot.paths import CORPUS_DIR
@@ -142,6 +142,18 @@ def test_unanswerable_question_passes_only_by_abstaining():
     assert not score_case(PARKING, make_answer(text="Parking is free.")).passed
 
 
+def test_summary_separates_wrong_answers_from_false_abstentions():
+    results = [
+        score_case(LATE_CHECKOUT, make_answer()),  # pass
+        score_case(LATE_CHECKOUT, make_answer(text="It costs $35.")),  # wrong answer
+        score_case(LATE_CHECKOUT, make_answer(answerable=False)),  # false abstention
+        score_case(PARKING, make_answer(text="Parking is free.")),  # wrong: should abstain
+    ]
+    summary = summarize_generation(results)
+    assert summary["wrong_answer_rate"] == 0.5
+    assert summary["false_abstention_rate"] == 0.333
+
+
 # ---------------------------------------------------------------- gates that run in CI
 
 
@@ -186,8 +198,8 @@ def test_report_lists_models_and_failed_cases(retriever, tmp_path, monkeypatch):
     )
     report = eval_run.build_report()
     assert "| hybrid |" in report
-    assert "| oracle | 100% |" in report
-    assert "**oracle**: none" in report
+    assert "| oracle | 100% | 0% | 0% |" in report
+    assert "**oracle**: wrong answers: none; false abstentions: none" in report
 
 
 def test_saved_results_were_produced_with_the_current_prompt_and_data(retriever):
@@ -197,7 +209,7 @@ def test_saved_results_were_produced_with_the_current_prompt_and_data(retriever)
         if saved["kind"] == "retrieval":
             current = eval_run.fingerprint(retriever)
         else:
-            current = eval_run.fingerprint(retriever, SYSTEM_PROMPT, saved["model"])
+            current = eval_run.generation_fingerprint(retriever, saved["model"])
         assert saved["fingerprint"] == current, (
             f"{path.name} is stale: run the evals again (uv run poe eval / eval-retrieval)"
         )

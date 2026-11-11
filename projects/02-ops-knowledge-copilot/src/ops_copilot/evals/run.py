@@ -28,6 +28,7 @@ from ops_copilot.retrieval.hybrid import HybridRetriever
 RESULTS_DIR = EVALS_DIR / "results"
 REPORT_FILE = EVALS_DIR / "REPORT.md"
 MODES = ("bm25", "vector", "hybrid")
+PIPELINE_VERSION = "2"  # raise it when the answering code changes, so saved results go stale
 
 
 def fingerprint(retriever: HybridRetriever, *extra: str) -> str:
@@ -39,6 +40,10 @@ def fingerprint(retriever: HybridRetriever, *extra: str) -> str:
     for item in extra:
         digest.update(item.encode("utf-8"))
     return digest.hexdigest()[:12]
+
+
+def generation_fingerprint(retriever: HybridRetriever, model: str) -> str:
+    return fingerprint(retriever, SYSTEM_PROMPT, model, PIPELINE_VERSION)
 
 
 def run_retrieval(cases: list[GoldenCase], retriever: HybridRetriever) -> dict:
@@ -72,7 +77,7 @@ def run_generation(
     return {
         "kind": "generation",
         "model": model,
-        "fingerprint": fingerprint(retriever, SYSTEM_PROMPT, model),
+        "fingerprint": generation_fingerprint(retriever, model),
         "summary": summarize_generation(results),
         "cases": [result.model_dump() for result in results],
     }
@@ -131,18 +136,24 @@ def build_report() -> str:
         lines += [
             "## Answers",
             "",
-            "| Model | Pass rate | Fact accuracy | Citation accuracy | Correct abstention | "
-            "p50 latency | p95 latency | Avg tokens |",
+            "| Model | Pass rate | Wrong answers | False abstentions | Citation accuracy | "
+            "Correct abstention | p50 latency | p95 latency |",
             "|---|---|---|---|---|---|---|---|",
         ]
         for run in runs:
             s = run["summary"]
             lines.append(
-                f"| {run['model']} | {_percent(s['pass_rate'])} | {_percent(s['fact_accuracy'])} | "
+                f"| {run['model']} | {_percent(s['pass_rate'])} | "
+                f"{_percent(s['wrong_answer_rate'])} | {_percent(s['false_abstention_rate'])} | "
                 f"{_percent(s['citation_accuracy'])} | {_percent(s['correct_abstention'])} | "
-                f"{s['latency_p50_ms'] / 1000:.1f} s | {s['latency_p95_ms'] / 1000:.1f} s | "
-                f"{s['avg_tokens']} |"
+                f"{s['latency_p50_ms'] / 1000:.1f} s | {s['latency_p95_ms'] / 1000:.1f} s |"
             )
+        lines += [
+            "",
+            "Wrong answers: the copilot answered and the answer was wrong, incomplete, or "
+            "should have been an abstention (share of all questions). False abstentions: it "
+            "abstained although the documents had the answer (share of answerable questions).",
+        ]
         categories = sorted({c for run in runs for c in run["summary"]["pass_rate_by_category"]})
         lines += [
             "",
@@ -157,8 +168,12 @@ def build_report() -> str:
             lines.append(f"| {run['model']} | {cells} |")
         lines += ["", "### Failed cases", ""]
         for run in runs:
-            failed = [case["id"] for case in run["cases"] if not case["passed"]]
-            lines.append(f"- **{run['model']}**: {', '.join(failed) or 'none'}")
+            wrong = [c["id"] for c in run["cases"] if c["answered"] and not c["passed"]]
+            silent = [c["id"] for c in run["cases"] if not c["answered"] and not c["passed"]]
+            lines.append(
+                f"- **{run['model']}**: wrong answers: {', '.join(wrong) or 'none'}; "
+                f"false abstentions: {', '.join(silent) or 'none'}"
+            )
         lines.append("")
     return "\n".join(lines)
 

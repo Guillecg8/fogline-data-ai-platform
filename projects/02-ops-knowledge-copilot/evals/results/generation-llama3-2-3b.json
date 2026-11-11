@@ -2,17 +2,19 @@
   "run_date": "2026-11-11",
   "kind": "generation",
   "model": "llama3.2:3b",
-  "fingerprint": "0cb47e4ed2b9",
+  "fingerprint": "07c362d091cb",
   "summary": {
     "cases": 60,
-    "pass_rate": 0.85,
-    "answer_rate": 0.961,
-    "fact_accuracy": 0.843,
+    "pass_rate": 0.867,
+    "wrong_answer_rate": 0.117,
+    "false_abstention_rate": 0.02,
+    "answer_rate": 0.98,
+    "fact_accuracy": 0.863,
     "citation_accuracy": 1.0,
     "correct_abstention": 0.889,
-    "latency_p50_ms": 5499,
-    "latency_p95_ms": 6988,
-    "avg_tokens": 730,
+    "latency_p50_ms": 5886,
+    "latency_p95_ms": 6892,
+    "avg_tokens": 718,
     "pass_rate_by_category": {
       "conflict": 0.75,
       "direct": 1.0,
@@ -20,7 +22,7 @@
       "multi": 0.5,
       "temporal": 0.875,
       "unanswerable": 0.875,
-      "versioned": 0.875
+      "versioned": 1.0
     }
   },
   "cases": [
@@ -39,7 +41,16 @@
       "cited": [
         "SOP-FD-001@v1"
       ],
-      "latency_ms": 3277,
+      "retrieved": [
+        "SOP-FD-001@v1#03",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "SOP-FD-001@v1#00",
+        "SOP-FD-001@v1#05",
+        "SOP-FD-001@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$45\", \"citations\": [1]}",
+      "latency_ms": 14889,
       "tokens": 659
     },
     {
@@ -57,7 +68,16 @@
       "cited": [
         "SOP-FD-001@v1"
       ],
-      "latency_ms": 1350,
+      "retrieved": [
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "SOP-FD-001@v1#01",
+        "MEMO-2026-014@v1#01",
+        "SOP-HK-001@v3#00",
+        "MEMO-2026-014@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"3:00 pm\", \"citations\": [3]}",
+      "latency_ms": 6271,
       "tokens": 763
     },
     {
@@ -75,7 +95,16 @@
       "cited": [
         "SOP-FS-002@v1"
       ],
-      "latency_ms": 1237,
+      "retrieved": [
+        "SOP-FS-002@v1#03",
+        "SOP-HK-002@v1#02",
+        "POL-IT-001@v1#03",
+        "SOP-FS-002@v1#02",
+        "CTR-SUP-001@v1#03",
+        "CTR-SUP-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"90 days\", \"citations\": [1]}",
+      "latency_ms": 5420,
       "tokens": 723
     },
     {
@@ -93,7 +122,16 @@
       "cited": [
         "SOP-FS-004@v1"
       ],
-      "latency_ms": 1398,
+      "retrieved": [
+        "SOP-FS-004@v1#02",
+        "SOP-FS-004@v1#03",
+        "SOP-FS-004@v1#04",
+        "SOP-HK-001@v3#02",
+        "SOP-FS-001@v2#00",
+        "MEMO-2026-014@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"200 to 400 ppm\", \"citations\": [1]}",
+      "latency_ms": 5500,
       "tokens": 709
     },
     {
@@ -111,7 +149,16 @@
       "cited": [
         "SOP-HK-002@v1"
       ],
-      "latency_ms": 1305,
+      "retrieved": [
+        "SOP-HK-002@v1#02",
+        "SOP-HK-002@v1#00",
+        "SOP-HK-002@v1#04",
+        "SOP-HK-002@v1#01",
+        "POL-IT-001@v1#03",
+        "SOP-HK-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"180 days\", \"citations\": [1]}",
+      "latency_ms": 5274,
       "tokens": 693
     },
     {
@@ -129,7 +176,16 @@
       "cited": [
         "SOP-FD-003@v1"
       ],
-      "latency_ms": 4971,
+      "retrieved": [
+        "SOP-FD-003@v1#01",
+        "POL-FIN-001@v1#01",
+        "SOP-HK-001@v3#03",
+        "SOP-MT-001@v1#03",
+        "SOP-FD-003@v1#02",
+        "POL-FIN-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$75\", \"citations\": [1]}",
+      "latency_ms": 5642,
       "tokens": 714
     },
     {
@@ -147,7 +203,16 @@
       "cited": [
         "SOP-SEC-001@v1"
       ],
-      "latency_ms": 4453,
+      "retrieved": [
+        "SOP-SEC-001@v1#01",
+        "SOP-SEC-001@v1#02",
+        "SOP-SEC-001@v1#03",
+        "SOP-FD-003@v1#04",
+        "SOP-SEC-001@v1#00",
+        "SOP-FS-005@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"1 hour\", \"citations\": [1]}",
+      "latency_ms": 5557,
       "tokens": 665
     },
     {
@@ -165,7 +230,16 @@
       "cited": [
         "SOP-MT-001@v1"
       ],
-      "latency_ms": 5009,
+      "retrieved": [
+        "SOP-MT-001@v1#02",
+        "SOP-HK-001@v3#02",
+        "SOP-MT-001@v1#01",
+        "SOP-HK-002@v1#02",
+        "SOP-FS-004@v1#00",
+        "SOP-FS-004@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"quarterly\", \"citations\": [1]}",
+      "latency_ms": 5952,
       "tokens": 722
     },
     {
@@ -184,7 +258,16 @@
         "POL-CX-002@v1",
         "POL-CX-002@v1"
       ],
-      "latency_ms": 4725,
+      "retrieved": [
+        "POL-CX-002@v1#01",
+        "POL-HR-002@v1#00",
+        "SOP-FD-001@v1#05",
+        "POL-LOY-001@v1#01",
+        "POL-CX-002@v1#04",
+        "POL-HR-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$25\", \"citations\": [1, 5]}",
+      "latency_ms": 5163,
       "tokens": 677
     },
     {
@@ -202,7 +285,16 @@
       "cited": [
         "POL-CX-003@v1"
       ],
-      "latency_ms": 5174,
+      "retrieved": [
+        "POL-CX-003@v1#01",
+        "POL-CX-003@v1#02",
+        "POL-CX-003@v1#03",
+        "POL-CX-003@v1#04",
+        "SOP-HK-002@v1#02",
+        "POL-CX-003@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"30\", \"citations\": [1]}",
+      "latency_ms": 5831,
       "tokens": 726
     },
     {
@@ -220,7 +312,16 @@
       "cited": [
         "POL-HR-001@v1"
       ],
-      "latency_ms": 4739,
+      "retrieved": [
+        "POL-HR-001@v1#00",
+        "POL-HR-001@v1#02",
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#03",
+        "SOP-FS-004@v1#00",
+        "SOP-FD-001@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"14\", \"citations\": [1]}",
+      "latency_ms": 5338,
       "tokens": 675
     },
     {
@@ -238,7 +339,16 @@
       "cited": [
         "POL-HR-002@v1"
       ],
-      "latency_ms": 5378,
+      "retrieved": [
+        "POL-HR-002@v1#01",
+        "POL-HR-002@v1#02",
+        "POL-HR-002@v1#00",
+        "SOP-HK-001@v3#03",
+        "POL-HR-002@v1#03",
+        "CTR-SUP-005@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"20%\", \"citations\": [1]}",
+      "latency_ms": 5593,
       "tokens": 691
     },
     {
@@ -256,7 +366,16 @@
       "cited": [
         "POL-FIN-001@v1"
       ],
-      "latency_ms": 5922,
+      "retrieved": [
+        "POL-FIN-001@v1#01",
+        "POL-FIN-001@v1#00",
+        "SOP-FD-003@v1#01",
+        "CTR-SUP-005@v1#04",
+        "POL-CX-001@v2#02",
+        "POL-HR-001@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The venue general manager\", \"citations\": [2]}",
+      "latency_ms": 5768,
       "tokens": 697
     },
     {
@@ -274,7 +393,16 @@
       "cited": [
         "POL-IT-001@v1"
       ],
-      "latency_ms": 6988,
+      "retrieved": [
+        "POL-IT-001@v1#03",
+        "SOP-HK-002@v1#02",
+        "POL-IT-001@v1#00",
+        "SOP-FD-002@v1#04",
+        "SOP-HK-001@v3#01",
+        "SOP-FD-003@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"30 days\", \"citations\": [1]}",
+      "latency_ms": 5750,
       "tokens": 688
     },
     {
@@ -293,7 +421,16 @@
         "POL-LOY-001@v1",
         "POL-LOY-001@v1"
       ],
-      "latency_ms": 5499,
+      "retrieved": [
+        "POL-LOY-001@v1#00",
+        "SOP-FD-002@v1#03",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#04",
+        "POL-LOY-001@v1#04",
+        "MEMO-2026-014@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"15\", \"citations\": [1, 3]}",
+      "latency_ms": 5435,
       "tokens": 694
     },
     {
@@ -311,7 +448,16 @@
       "cited": [
         "CTR-SUP-003@v1"
       ],
-      "latency_ms": 6272,
+      "retrieved": [
+        "CTR-SUP-003@v1#02",
+        "CTR-SUP-003@v1#01",
+        "CTR-SUP-003@v1#00",
+        "CTR-SUP-001@v1#02",
+        "CTR-SUP-002@v1#02",
+        "CTR-SUP-002@v1#04"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$9.80\", \"citations\": [1]}",
+      "latency_ms": 6136,
       "tokens": 765
     },
     {
@@ -329,7 +475,16 @@
       "cited": [
         "CTR-SUP-002@v1"
       ],
-      "latency_ms": 5979,
+      "retrieved": [
+        "CTR-SUP-002@v1#02",
+        "CTR-SUP-002@v1#04",
+        "CTR-SUP-002@v1#01",
+        "CTR-SUP-002@v1#00",
+        "POL-PR-001@v1#01",
+        "SOP-HK-001@v3#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"98%\", \"citations\": [1]}",
+      "latency_ms": 5936,
       "tokens": 744
     },
     {
@@ -348,7 +503,16 @@
         "SOP-FD-002@v1",
         "SOP-FD-002@v1"
       ],
-      "latency_ms": 5820,
+      "retrieved": [
+        "SOP-FD-002@v1#01",
+        "SOP-FD-002@v1#00",
+        "SOP-FD-002@v1#04",
+        "SOP-FD-002@v1#02",
+        "POL-PR-001@v1#01",
+        "CTR-SUP-002@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"2%\", \"citations\": [1, 2]}",
+      "latency_ms": 5981,
       "tokens": 698
     },
     {
@@ -366,7 +530,16 @@
       "cited": [
         "SOP-FS-006@v1"
       ],
-      "latency_ms": 7058,
+      "retrieved": [
+        "SOP-FS-006@v1#01",
+        "SOP-FS-006@v1#00",
+        "SOP-FS-006@v1#03",
+        "SOP-FS-001@v2#03",
+        "SOP-FS-001@v2#01",
+        "SOP-FS-006@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"within 2 hours\", \"citations\": [1]}",
+      "latency_ms": 6471,
       "tokens": 753
     },
     {
@@ -384,7 +557,16 @@
       "cited": [
         "SOP-FS-003@v1"
       ],
-      "latency_ms": 5884,
+      "retrieved": [
+        "SOP-FS-003@v1#01",
+        "SOP-FS-003@v1#04",
+        "SOP-FS-003@v1#02",
+        "SOP-FS-003@v1#00",
+        "SOP-FS-003@v1#03",
+        "SOP-FS-005@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"9\", \"citations\": [1]}",
+      "latency_ms": 5715,
       "tokens": 696
     },
     {
@@ -402,7 +584,16 @@
       "cited": [
         "SOP-FD-001@v1"
       ],
-      "latency_ms": 5408,
+      "retrieved": [
+        "SOP-FD-001@v1#04",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#03",
+        "SOP-FD-001@v1#02",
+        "POL-LOY-001@v1#00",
+        "POL-LOY-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$45\", \"citations\": [3]}",
+      "latency_ms": 5250,
       "tokens": 688
     },
     {
@@ -421,7 +612,16 @@
         "SOP-FD-001@v1",
         "SOP-FD-001@v1"
       ],
-      "latency_ms": 4259,
+      "retrieved": [
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "SOP-FD-001@v1#01",
+        "SOP-FD-001@v1#00",
+        "SOP-FD-001@v1#04",
+        "MEMO-2026-014@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"3:00 pm, 11:00 am\", \"citations\": [3, 5]}",
+      "latency_ms": 4293,
       "tokens": 741
     },
     {
@@ -439,7 +639,16 @@
       "cited": [
         "SOP-FD-002@v1"
       ],
-      "latency_ms": 7468,
+      "retrieved": [
+        "SOP-FD-002@v1#02",
+        "SOP-FD-002@v1#03",
+        "SOP-FD-002@v1#00",
+        "SOP-FD-002@v1#01",
+        "SOP-FD-002@v1#04",
+        "POL-IT-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Fogline pays for the first night and for transport to the partner hotel. The guest also receives a $50 credit for a future stay.\", \"citations\": [1, 1, 1, 1, 1]}",
+      "latency_ms": 7410,
       "tokens": 746
     },
     {
@@ -457,7 +666,16 @@
       "cited": [
         "SOP-FS-001@v2"
       ],
-      "latency_ms": 6277,
+      "retrieved": [
+        "SOP-FS-001@v2#01",
+        "SOP-FS-001@v2#02",
+        "SOP-FS-001@v2#03",
+        "SOP-HK-002@v1#01",
+        "SOP-FS-001@v2#00",
+        "SOP-FS-006@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"41°F (5°C)\", \"citations\": [1]}",
+      "latency_ms": 6390,
       "tokens": 748
     },
     {
@@ -476,7 +694,16 @@
         "CTR-SUP-001@v1",
         "CTR-SUP-002@v1"
       ],
-      "latency_ms": 8666,
+      "retrieved": [
+        "CTR-SUP-001@v1#02",
+        "CTR-SUP-002@v1#00",
+        "CTR-SUP-002@v1#02",
+        "POL-FIN-001@v1#03",
+        "CTR-SUP-002@v1#04",
+        "SOP-FS-002@v1#04"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The payment terms for the seafood supplier are based on the supplier's weekly price list, reviewed quarterly. For the linen supplier, Fogline Hospitality Group receives a 5% credit on the monthly invoice if the monthly fill rate falls below 98%.\", \"citations\": [1, 3]}",
+      "latency_ms": 8766,
       "tokens": 787
     },
     {
@@ -495,7 +722,16 @@
         "POL-LOY-001@v1",
         "POL-LOY-001@v1"
       ],
-      "latency_ms": 6499,
+      "retrieved": [
+        "POL-LOY-001@v1#01",
+        "POL-LOY-001@v1#04",
+        "POL-CX-001@v2#01",
+        "POL-CX-002@v1#01",
+        "SOP-FD-002@v1#02",
+        "POL-CX-001@v2#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"10 points per dollar spent on rooms, 20,000 points for a free night\", \"citations\": [1, 2]}",
+      "latency_ms": 6564,
       "tokens": 741
     },
     {
@@ -513,7 +749,16 @@
       "cited": [
         "POL-CX-003@v1"
       ],
-      "latency_ms": 6834,
+      "retrieved": [
+        "POL-CX-003@v1#02",
+        "POL-CX-003@v1#01",
+        "POL-CX-003@v1#04",
+        "POL-CX-003@v1#00",
+        "POL-CX-003@v1#03",
+        "SOP-FS-001@v2#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The customer must report the spoiled perishable item within 48 hours of delivery with a photo, and receives a refund.\", \"citations\": [1]}",
+      "latency_ms": 6892,
       "tokens": 766
     },
     {
@@ -532,7 +777,16 @@
         "SOP-FD-003@v1",
         "SOP-FD-003@v1"
       ],
-      "latency_ms": 6414,
+      "retrieved": [
+        "SOP-FD-003@v1#03",
+        "SOP-FD-003@v1#04",
+        "SOP-FD-003@v1#02",
+        "SOP-FD-003@v1#01",
+        "SOP-FD-002@v1#02",
+        "SOP-FD-003@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"The general manager approves compensation of $200. The complaint must be logged within 2 hours.\", \"citations\": [1, 4]}",
+      "latency_ms": 6438,
       "tokens": 716
     },
     {
@@ -550,7 +804,16 @@
       "cited": [
         "POL-CX-001@v2"
       ],
-      "latency_ms": 5466,
+      "retrieved": [
+        "POL-CX-001@v2#01",
+        "POL-CX-001@v2#03",
+        "POL-CX-001@v2#02",
+        "POL-CX-002@v1#02",
+        "POL-CX-002@v1#03",
+        "SOP-FD-001@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"48\", \"citations\": [1]}",
+      "latency_ms": 5705,
       "tokens": 699
     },
     {
@@ -568,7 +831,16 @@
       "cited": [
         "POL-CX-001@v2"
       ],
-      "latency_ms": 5272,
+      "retrieved": [
+        "POL-CX-001@v2#03",
+        "SOP-FD-002@v1#00",
+        "POL-CX-002@v1#03",
+        "POL-CX-002@v1#01",
+        "SOP-HK-001@v3#03",
+        "SOP-FD-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"8\", \"citations\": [1]}",
+      "latency_ms": 5600,
       "tokens": 706
     },
     {
@@ -586,7 +858,16 @@
       "cited": [
         "POL-CX-001@v2"
       ],
-      "latency_ms": 4817,
+      "retrieved": [
+        "POL-CX-001@v2#03",
+        "POL-CX-001@v2#01",
+        "POL-CX-002@v1#02",
+        "POL-CX-002@v1#03",
+        "POL-CX-001@v2#02",
+        "POL-CX-001@v2#04"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"14\", \"citations\": [1]}",
+      "latency_ms": 4880,
       "tokens": 679
     },
     {
@@ -604,24 +885,44 @@
       "cited": [
         "SOP-HK-001@v3"
       ],
-      "latency_ms": 6366,
+      "retrieved": [
+        "SOP-HK-001@v3#02",
+        "CTR-SUP-002@v1#01",
+        "SOP-HK-001@v3#03",
+        "SOP-HK-001@v3#01",
+        "CTR-SUP-002@v1#04",
+        "CTR-SUP-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"every third night, or sooner if the guest asks\", \"citations\": [1]}",
+      "latency_ms": 6516,
       "tokens": 740
     },
     {
       "id": "v05",
       "category": "versioned",
       "answerable": true,
-      "passed": false,
-      "answered": false,
-      "facts_ok": false,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
       "forbidden": [],
-      "citation_ok": false,
+      "citation_ok": true,
       "retrieval_rank": 1,
-      "abstain_reason": "invalid_output",
-      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
-      "cited": [],
-      "latency_ms": 6849,
-      "tokens": 1441
+      "abstain_reason": null,
+      "answer": "35",
+      "cited": [
+        "SOP-HK-001@v3"
+      ],
+      "retrieved": [
+        "SOP-HK-001@v3#01",
+        "SOP-HK-001@v3#03",
+        "SOP-HK-001@v3#04",
+        "POL-CX-002@v1#03",
+        "SOP-MT-001@v1#01",
+        "SOP-HK-001@v3#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": 35, \"citations\": [1]}",
+      "latency_ms": 5325,
+      "tokens": 693
     },
     {
       "id": "v06",
@@ -638,7 +939,16 @@
       "cited": [
         "SOP-HK-001@v3"
       ],
-      "latency_ms": 5229,
+      "retrieved": [
+        "SOP-HK-001@v3#03",
+        "SOP-HK-001@v3#04",
+        "SOP-HK-001@v3#02",
+        "SOP-HK-001@v3#01",
+        "SOP-HK-002@v1#01",
+        "SOP-HK-001@v3#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"20%\", \"citations\": [1]}",
+      "latency_ms": 5239,
       "tokens": 686
     },
     {
@@ -656,7 +966,16 @@
       "cited": [
         "SOP-FS-001@v2"
       ],
-      "latency_ms": 5791,
+      "retrieved": [
+        "SOP-FS-001@v2#02",
+        "SOP-FS-001@v2#03",
+        "SOP-MT-001@v1#01",
+        "SOP-FD-003@v1#03",
+        "SOP-HK-002@v1#01",
+        "SOP-MT-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"every 4 hours\", \"citations\": [1]}",
+      "latency_ms": 6031,
       "tokens": 744
     },
     {
@@ -674,7 +993,16 @@
       "cited": [
         "SOP-FS-001@v2"
       ],
-      "latency_ms": 6453,
+      "retrieved": [
+        "SOP-FS-001@v2#03",
+        "SOP-FS-001@v2#01",
+        "SOP-FS-006@v1#01",
+        "SOP-FS-006@v1#03",
+        "SOP-FS-002@v1#02",
+        "SOP-HK-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"2 hours\", \"citations\": [1]}",
+      "latency_ms": 6529,
       "tokens": 804
     },
     {
@@ -692,7 +1020,16 @@
       "cited": [
         "POL-CX-001@v1"
       ],
-      "latency_ms": 6036,
+      "retrieved": [
+        "POL-CX-001@v1#01",
+        "POL-CX-001@v1#03",
+        "POL-CX-001@v1#02",
+        "SOP-FD-001@v1#03",
+        "SOP-FD-002@v1#00",
+        "SOP-FD-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"24\", \"citations\": [1]}",
+      "latency_ms": 6106,
       "tokens": 730
     },
     {
@@ -710,7 +1047,16 @@
       "cited": [
         "SOP-HK-001@v2"
       ],
-      "latency_ms": 5496,
+      "retrieved": [
+        "SOP-HK-001@v2#02",
+        "SOP-HK-001@v2#01",
+        "SOP-HK-001@v2#03",
+        "SOP-HK-001@v2#00",
+        "SOP-MT-001@v1#03",
+        "SOP-FS-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"daily\", \"citations\": [1]}",
+      "latency_ms": 5640,
       "tokens": 688
     },
     {
@@ -728,7 +1074,16 @@
       "cited": [
         "SOP-HK-001@v2"
       ],
-      "latency_ms": 5080,
+      "retrieved": [
+        "SOP-HK-001@v2#01",
+        "SOP-HK-001@v2#03",
+        "SOP-MT-001@v1#01",
+        "SOP-HK-001@v2#02",
+        "SOP-HK-001@v2#00",
+        "SOP-FS-004@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"30\", \"citations\": [2]}",
+      "latency_ms": 5222,
       "tokens": 690
     },
     {
@@ -746,7 +1101,16 @@
       "cited": [
         "SOP-FS-001@v1"
       ],
-      "latency_ms": 5701,
+      "retrieved": [
+        "SOP-FS-001@v1#03",
+        "SOP-FS-001@v1#02",
+        "SOP-MT-001@v1#01",
+        "SOP-MT-001@v1#02",
+        "SOP-FD-002@v1#04",
+        "SOP-FD-003@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"twice per shift\", \"citations\": [2]}",
+      "latency_ms": 5934,
       "tokens": 701
     },
     {
@@ -765,7 +1129,16 @@
         "CTR-SUP-004@v1",
         "CTR-SUP-004@v1"
       ],
-      "latency_ms": 6124,
+      "retrieved": [
+        "CTR-SUP-004@v1#00",
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-003@v1#01",
+        "CTR-SUP-004@v1#01",
+        "SOP-FS-002@v1#02",
+        "CTR-SUP-004@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Green Valley Produce\", \"citations\": [1, 4]}",
+      "latency_ms": 6260,
       "tokens": 729
     },
     {
@@ -785,7 +1158,16 @@
         "CTR-SUP-005@v1",
         "CTR-SUP-005@v1"
       ],
-      "latency_ms": 5901,
+      "retrieved": [
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-003@v1#01",
+        "SOP-FS-005@v1#00",
+        "CTR-SUP-005@v1#00",
+        "CTR-SUP-005@v1#04",
+        "CTR-SUP-005@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Sonoma Fields Produce Cooperative\", \"citations\": [4, 5, 6]}",
+      "latency_ms": 6095,
       "tokens": 730
     },
     {
@@ -803,7 +1185,16 @@
       "cited": [
         "MEMO-2026-014@v1"
       ],
-      "latency_ms": 5779,
+      "retrieved": [
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#03",
+        "SOP-FD-001@v1#01",
+        "SOP-HK-001@v3#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"4:00 pm\", \"citations\": [1]}",
+      "latency_ms": 5956,
       "tokens": 762
     },
     {
@@ -821,7 +1212,16 @@
       "cited": [
         "SOP-FD-001@v1"
       ],
-      "latency_ms": 5179,
+      "retrieved": [
+        "SOP-FD-001@v1#01",
+        "SOP-HK-001@v3#00",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "POL-CX-001@v2#00",
+        "SOP-FD-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"12:00 pm\", \"citations\": [3]}",
+      "latency_ms": 6147,
       "tokens": 639
     },
     {
@@ -842,7 +1242,16 @@
         "MEMO-2026-021@v1",
         "MEMO-2026-021@v1"
       ],
-      "latency_ms": 6598,
+      "retrieved": [
+        "MEMO-2026-021@v1#00",
+        "MEMO-2026-021@v1#01",
+        "MEMO-2026-021@v1#03",
+        "MEMO-2026-021@v1#02",
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Monday, Wednesday, and Friday\", \"citations\": [1, 2, 3, 4]}",
+      "latency_ms": 6495,
       "tokens": 736
     },
     {
@@ -860,7 +1269,16 @@
       "cited": [
         "CTR-SUP-001@v1"
       ],
-      "latency_ms": 6005,
+      "retrieved": [
+        "SOP-FS-002@v1#00",
+        "CTR-SUP-001@v1#00",
+        "POL-CX-002@v1#00",
+        "SOP-FS-002@v1#03",
+        "CTR-SUP-001@v1#01",
+        "CTR-SUP-001@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Tuesday, Thursday, and Saturday\", \"citations\": [5]}",
+      "latency_ms": 6092,
       "tokens": 705
     },
     {
@@ -876,7 +1294,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 5591,
+      "retrieved": [
+        "MEMO-2026-014@v1#03",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#02"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 5738,
       "tokens": 765
     },
     {
@@ -894,7 +1321,16 @@
       "cited": [
         "SOP-FS-002@v1"
       ],
-      "latency_ms": 5622,
+      "retrieved": [
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#00",
+        "MEMO-2026-021@v1#01",
+        "MEMO-2026-021@v1#03",
+        "SOP-FS-002@v1#01",
+        "SOP-FS-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"6:00 to 8:00 am\", \"citations\": [5]}",
+      "latency_ms": 6194,
       "tokens": 704
     },
     {
@@ -910,7 +1346,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 5477,
+      "retrieved": [
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "SOP-HK-001@v3#00",
+        "SOP-FD-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 5886,
       "tokens": 789
     },
     {
@@ -926,7 +1371,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 6041,
+      "retrieved": [
+        "CTR-SUP-002@v1#00",
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#02",
+        "SOP-HK-001@v3#02",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 6332,
       "tokens": 808
     },
     {
@@ -942,7 +1396,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 4704,
+      "retrieved": [
+        "POL-LOY-001@v1#02",
+        "POL-CX-002@v1#00",
+        "POL-LOY-001@v1#01",
+        "POL-LOY-001@v1#03",
+        "SOP-FS-003@v1#00",
+        "POL-HR-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 4850,
       "tokens": 650
     },
     {
@@ -960,7 +1423,16 @@
       "cited": [
         "SOP-FD-003@v1"
       ],
-      "latency_ms": 6286,
+      "retrieved": [
+        "SOP-FD-003@v1#01",
+        "SOP-HK-001@v3#03",
+        "POL-HR-001@v1#02",
+        "SOP-FD-002@v1#02",
+        "POL-CX-002@v1#01",
+        "POL-HR-002@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$75/hour\", \"citations\": [1]}",
+      "latency_ms": 6089,
       "tokens": 757
     },
     {
@@ -976,7 +1448,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 4503,
+      "retrieved": [
+        "POL-CX-002@v1#00",
+        "MEMO-2026-021@v1#01",
+        "SOP-FS-002@v1#00",
+        "SOP-FS-003@v1#04",
+        "SOP-FS-003@v1#00",
+        "MEMO-2026-021@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 4776,
       "tokens": 643
     },
     {
@@ -992,7 +1473,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 6165,
+      "retrieved": [
+        "CTR-SUP-002@v1#04",
+        "CTR-SUP-002@v1#02",
+        "SOP-HK-001@v3#02",
+        "CTR-SUP-002@v1#01",
+        "CTR-SUP-002@v1#00",
+        "CTR-SUP-005@v1#04"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 6173,
       "tokens": 754
     },
     {
@@ -1008,7 +1498,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 5293,
+      "retrieved": [
+        "SOP-FD-002@v1#03",
+        "SOP-HK-001@v3#00",
+        "POL-CX-001@v2#00",
+        "MEMO-2026-014@v1#02",
+        "SOP-FD-002@v1#02",
+        "SOP-HK-001@v3#02"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 5444,
       "tokens": 712
     },
     {
@@ -1024,7 +1523,16 @@
       "abstain_reason": "model_declined",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 3126,
+      "retrieved": [
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#00",
+        "MEMO-2026-021@v1#01",
+        "POL-HR-002@v1#00",
+        "MEMO-2026-021@v1#03",
+        "SOP-FS-002@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 5475,
       "tokens": 683
     },
     {
@@ -1042,7 +1550,16 @@
       "cited": [
         "SOP-FD-001@v1"
       ],
-      "latency_ms": 4947,
+      "retrieved": [
+        "SOP-FD-001@v1#03",
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "SOP-FD-001@v1#00",
+        "SOP-FD-001@v1#01",
+        "SOP-FD-001@v1#05"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"$45\", \"citations\": [1]}",
+      "latency_ms": 6647,
       "tokens": 673
     },
     {
@@ -1060,7 +1577,16 @@
       "cited": [
         "POL-CX-001@v2"
       ],
-      "latency_ms": 4277,
+      "retrieved": [
+        "POL-CX-001@v2#01",
+        "POL-CX-001@v2#03",
+        "POL-CX-002@v1#02",
+        "POL-CX-001@v2#02",
+        "POL-CX-001@v2#04",
+        "SOP-FD-001@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"2\", \"citations\": [1]}",
+      "latency_ms": 4473,
       "tokens": 702
     },
     {
@@ -1076,7 +1602,16 @@
       "abstain_reason": "uncited",
       "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
       "cited": [],
-      "latency_ms": 4111,
+      "retrieved": [
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#01",
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#02",
+        "SOP-HK-001@v3#00",
+        "POL-CX-001@v2#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Yes\", \"citations\": []}",
+      "latency_ms": 4456,
       "tokens": 774
     },
     {
@@ -1094,7 +1629,16 @@
       "cited": [
         "SOP-HK-002@v1"
       ],
-      "latency_ms": 4488,
+      "retrieved": [
+        "SOP-HK-002@v1#02",
+        "SOP-HK-002@v1#01",
+        "SOP-HK-002@v1#00",
+        "SOP-HK-002@v1#04",
+        "POL-IT-001@v1#03",
+        "SOP-HK-002@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"180 days\", \"citations\": [1]}",
+      "latency_ms": 5219,
       "tokens": 702
     }
   ]

@@ -1,7 +1,7 @@
 {
   "run_date": "2026-11-11",
   "kind": "retrieval",
-  "fingerprint": "cd412d7fda0d",
+  "fingerprint": "fd5ad4a8b8be",
   "modes": {
     "bm25": {
       "cases": 51,

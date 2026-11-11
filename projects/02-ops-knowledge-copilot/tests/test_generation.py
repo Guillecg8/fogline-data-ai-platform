@@ -118,3 +118,15 @@ def test_chat_client_speaks_the_openai_protocol():
     assert seen["body"]["model"] == "tiny"
     assert seen["body"]["temperature"] == 0
     assert result == LLMReply(text="hello", prompt_tokens=7, completion_tokens=3)
+
+
+def test_numeric_answers_are_accepted_exactly_as_written():
+    output = parse_output('{"answerable": true, "answer": 9.80, "citations": [1]}')
+    assert output is not None
+    assert output.answer == "9.80"
+    assert output.citations == [1]
+
+
+def test_raw_model_output_is_kept_for_debugging(retriever):
+    answer = answer_question(QUESTION, retriever, FakeLLM("nope", "still nope"), as_of=TODAY)
+    assert answer.raw_output == "still nope"
