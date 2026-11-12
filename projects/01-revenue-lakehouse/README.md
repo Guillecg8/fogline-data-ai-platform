@@ -84,3 +84,27 @@ restaurant_daily: gold matches the truth on all 730 venue-days
 
 Both gold tables are exported to `data/exports/`, which is exactly what the Ops Knowledge Copilot
 reads (`uv run poe mcp-lakehouse`), so the copilot no longer needs its synthetic KPI sample.
+
+## Step 5: incremental Silver, measured
+
+`silver` now processes only the Bronze files it has not seen (tracked in `ops/silver_state_<source>`),
+MERGEs the new events by key, and recomputes only the reservations/checks they touch with the same SQL
+as the full rebuild. `--full` rebuilds from scratch. Tests assert that incremental and full rebuild
+produce identical tables across five waves, including late events, duplicates and a rebuild in the middle.
+
+```powershell
+uv run poe lh-benchmark   # writes BENCHMARK.md for your machine
+```
+
+Indicative numbers (2-CPU sandbox, both sources, one new daily batch added to N days of history):
+
+| History | Full rebuild | Incremental | Speed-up |
+|---|---|---|---|
+| 30 days | 0.19 s | 0.24 s | 0.8x |
+| 90 days | 0.24 s | 0.27 s | 0.9x |
+| 180 days | 0.35 s | 0.30 s | 1.1x |
+| 360 days | 0.54 s | 0.33 s | 1.6x |
+
+With little history the incremental run is slightly slower (the MERGE has a fixed cost); it breaks even around 180 days and the gap widens from there.
+Profiling shows the remaining incremental time is mostly the Delta MERGE itself, so partitioning Bronze would not help yet.
+Your own numbers will differ; commit the `BENCHMARK.md` generated on your machine.

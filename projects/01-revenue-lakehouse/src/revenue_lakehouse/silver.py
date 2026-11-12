@@ -16,7 +16,8 @@ The restaurant POS source has its own silver tables (``pos_check_revisions``, ``
 ``pos_rejected_rows``), built the same way: the latest *revision* of each check wins, and its
 business day is computed in the restaurant's own time zone, with the day ending at 04:00.
 
-    uv run poe lh-silver
+    uv run poe lh-silver          # incremental: only the batches that are new
+    uv run poe lh-silver --full   # rebuild everything from bronze
 """
 
 import argparse
@@ -25,10 +26,11 @@ from pathlib import Path
 
 import duckdb
 
-from revenue_lakehouse.bronze import bronze_path
+from revenue_lakehouse.bronze import bronze_path, loaded_batches
 from revenue_lakehouse.delta_io import read_arrow, write
 from revenue_lakehouse.paths import DATA_DIR
-from revenue_lakehouse.sources import POS
+from revenue_lakehouse.silver_state import record_processed
+from revenue_lakehouse.sources import PMS, POS, Source
 
 PARSED = """
 create temp table parsed as
@@ -158,6 +160,14 @@ def silver_path(data_dir: Path, name: str) -> Path:
     return data_dir / "silver" / name
 
 
+def remember_everything(data_dir: Path, source: Source) -> None:
+    """After a full rebuild, the incremental update continues from here."""
+    batches = loaded_batches(data_dir, source)
+    record_processed(
+        data_dir, source, sorted((name, info["sha"]) for name, info in batches.items()), True
+    )
+
+
 def build_silver(data_dir: Path = DATA_DIR) -> SilverReport:
     bronze = read_arrow(bronze_path(data_dir))
     if bronze is None:
@@ -173,6 +183,8 @@ def build_silver(data_dir: Path = DATA_DIR) -> SilverReport:
 
     for name in ("reservation_events", "reservations", "rejected_rows"):
         write(silver_path(data_dir, name), con.table(name).to_arrow_table(), mode="overwrite")
+
+    remember_everything(data_dir, PMS)
 
     def count(sql: str) -> int:
         return con.execute(sql).fetchall()[0][0]
@@ -204,6 +216,8 @@ def build_silver_pos(data_dir: Path = DATA_DIR) -> PosSilverReport:
     for name in ("pos_check_revisions", "pos_checks", "pos_rejected_rows"):
         write(silver_path(data_dir, name), con.table(name).to_arrow_table(), mode="overwrite")
 
+    remember_everything(data_dir, POS)
+
     def count(sql: str) -> int:
         return con.execute(sql).fetchall()[0][0]
 
@@ -220,20 +234,32 @@ def build_silver_pos(data_dir: Path = DATA_DIR) -> PosSilverReport:
 
 
 def main() -> None:
+    from revenue_lakehouse.silver_incremental import update_silver, update_silver_pos
+
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
+    parser.add_argument("--full", action="store_true", help="rebuild everything from bronze")
     args = parser.parse_args()
-    report = build_silver(args.data_dir)
-    print(
-        f"{report.events} events ({report.duplicates_removed} duplicates removed), "
-        f"{report.reservations} reservations ({report.cancelled} cancelled), "
-        f"{report.rejected} rejected rows"
-    )
-    pos = build_silver_pos(args.data_dir)
-    print(
-        f"{pos.revisions} POS check revisions ({pos.duplicates_removed} duplicates removed), "
-        f"{pos.checks} checks ({pos.voided} voided), {pos.rejected} rejected rows"
-    )
+
+    if args.full:
+        report = build_silver(args.data_dir)
+        print(
+            f"{report.events} events ({report.duplicates_removed} duplicates removed), "
+            f"{report.reservations} reservations ({report.cancelled} cancelled), "
+            f"{report.rejected} rejected rows"
+        )
+        pos = build_silver_pos(args.data_dir)
+        print(
+            f"{pos.revisions} POS check revisions ({pos.duplicates_removed} duplicates removed), "
+            f"{pos.checks} checks ({pos.voided} voided), {pos.rejected} rejected rows"
+        )
+        return
+    for update in (update_silver, update_silver_pos):
+        r = update(args.data_dir)
+        print(
+            f"{r.source}: {r.batches} new batches, {r.rows} rows, {r.touched} records touched, "
+            f"{r.rejected} rejected ({r.seconds:.2f} s)"
+        )
 
 
 if __name__ == "__main__":

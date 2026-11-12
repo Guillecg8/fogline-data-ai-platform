@@ -43,6 +43,7 @@ lh-ingest = "python -m revenue_lakehouse.bronze"
 lh-silver = "python -m revenue_lakehouse.silver"
 lh-gold = "python -m revenue_lakehouse.gold"
 lh-verify = "python -m revenue_lakehouse.verify"
+lh-benchmark = "python -m revenue_lakehouse.benchmark"
 lh-all = ["lh-generate", "lh-ingest", "lh-silver", "lh-gold", "lh-verify"]
 
 [tool.poe.tasks.mcp-lakehouse]
