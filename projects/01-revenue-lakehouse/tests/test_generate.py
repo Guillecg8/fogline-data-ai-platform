@@ -60,7 +60,7 @@ def test_another_seed_gives_different_data(out, tmp_path):
 
 
 def test_the_schema_changes_when_the_generator_says_it_does(landing):
-    reports = check_all(landing)
+    reports = check_all(landing, version=1)
     for day, report in reports.items():
         when = date.fromisoformat(day)
         expected = (
@@ -117,3 +117,7 @@ def test_occupancy_is_realistic(out):
         )
         assert 0.6 < rate < 0.85, (venue, rate)
     assert json.loads((out / "truth" / "defects.json").read_text())["reservations"] > 5000
+
+
+def test_contract_version_2_accepts_every_batch(landing):
+    assert {r.status for r in check_all(landing, version=2).values()} == {"ok"}

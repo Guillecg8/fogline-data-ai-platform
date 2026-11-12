@@ -8,7 +8,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from revenue_lakehouse.contract import BatchReport, compare_batch, load_contract
+from revenue_lakehouse.contract import LATEST_CONTRACT, BatchReport, compare_batch, load_contract
 from revenue_lakehouse.generate import FILE_PREFIX
 from revenue_lakehouse.paths import DATA_DIR
 
@@ -18,8 +18,8 @@ def read_batch(path: Path) -> list[dict]:
         return [json.loads(line) for line in handle if line.strip()]
 
 
-def check_all(landing: Path) -> dict[str, BatchReport]:
-    contract = load_contract()
+def check_all(landing: Path, version: int = LATEST_CONTRACT) -> dict[str, BatchReport]:
+    contract = load_contract(version)
     files = sorted(landing.glob(f"{FILE_PREFIX}*.jsonl"))
     if not files:
         raise SystemExit(f"no batches in {landing}: run uv run poe lh-generate first")
@@ -32,8 +32,9 @@ def check_all(landing: Path) -> dict[str, BatchReport]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--landing", type=Path, default=DATA_DIR / "landing" / "pms")
+    parser.add_argument("--contract", type=int, default=LATEST_CONTRACT)
     args = parser.parse_args()
-    reports = check_all(args.landing)
+    reports = check_all(args.landing, args.contract)
 
     counts = Counter(report.status for report in reports.values())
     print(f"{len(reports)} batches: " + ", ".join(f"{n} {s}" for s, n in sorted(counts.items())))

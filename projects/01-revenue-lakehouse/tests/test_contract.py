@@ -2,7 +2,8 @@ import pytest
 
 from revenue_lakehouse.contract import compare_batch, load_contract
 
-CONTRACT = load_contract()
+CONTRACT = load_contract(1)
+CONTRACT_V2 = load_contract(2)
 
 ROW = {
     "event_id": "EVT-0000001",
@@ -86,3 +87,37 @@ def test_an_empty_batch_is_not_valid_evidence_of_anything():
     report = compare_batch(CONTRACT, [])
     assert report.rows == 0
     assert report.status == "breaking"  # every required column is missing
+
+
+def renamed(rows):
+    for row in rows:
+        row["rate_amount"] = f"{row.pop('nightly_rate'):.2f}"
+    return rows
+
+
+def test_version_2_accepts_the_renamed_column_and_the_loyalty_tier():
+    rows = renamed(batch(loyalty_tier="gold"))
+    assert compare_batch(CONTRACT_V2, rows).status == "ok"
+    assert compare_batch(CONTRACT_V2, batch()).status == "ok"  # the old shape still works
+
+
+def test_version_2_still_needs_one_of_the_two_rate_columns():
+    rows = batch()
+    for row in rows:
+        del row["nightly_rate"]
+    report = compare_batch(CONTRACT_V2, rows)
+    assert report.status == "breaking"
+    assert report.missing == ["nightly_rate|rate_amount"]
+
+
+def test_version_2_rejects_a_rate_that_is_not_a_decimal_string():
+    rows = renamed(batch())
+    rows[0]["rate_amount"] = "two hundred"
+    report = compare_batch(CONTRACT_V2, rows)
+    assert report.status == "ok" and report.bad_rows == {0: ["rate_amount:type"]}
+
+
+def test_a_row_with_neither_rate_column_is_a_bad_row_in_version_2():
+    rows = batch()
+    del rows[0]["nightly_rate"]
+    assert compare_batch(CONTRACT_V2, rows).bad_rows == {0: ["one_of:nightly_rate|rate_amount"]}

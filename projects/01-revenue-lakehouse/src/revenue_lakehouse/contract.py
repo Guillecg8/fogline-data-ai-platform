@@ -5,6 +5,7 @@ batch with its contract tells us whether it can go on (``ok``), can go on with a
 (``compatible``: new columns) or must be stopped (``breaking``).
 """
 
+import re
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
@@ -18,12 +19,15 @@ from revenue_lakehouse.paths import CONTRACTS_DIR
 Status = Literal["ok", "compatible", "breaking"]
 # A column is "retyped" when at least this share of its values has the wrong type.
 RETYPED_SHARE = 0.5
+LATEST_CONTRACT = 2
+CONTRACT_FILES = {1: "pms_reservation_events.yaml", 2: "pms_reservation_events_v2.yaml"}
+DECIMAL = re.compile(r"\d+(\.\d+)?")
 
 
 class ColumnSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    type: Literal["string", "integer", "number", "date", "timestamp"]
+    type: Literal["string", "integer", "number", "decimal_string", "date", "timestamp"]
     required: bool = True
     allowed: list[str] | None = None
 
@@ -36,6 +40,8 @@ class Contract(BaseModel):
     format: Literal["jsonl"]
     primary_key: list[str]
     columns: dict[str, ColumnSpec]
+    # groups of columns where at least one must be present (e.g. a renamed column during a move)
+    one_of: list[list[str]] = []
 
 
 @dataclass
@@ -60,11 +66,12 @@ class BatchReport:
         return "; ".join(parts) or "-"
 
 
-def load_contract(
-    name: str = "pms_reservation_events", directory: Path = CONTRACTS_DIR
-) -> Contract:
-    text = (directory / f"{name}.yaml").read_text(encoding="utf-8")
-    return Contract.model_validate(yaml.safe_load(text))
+def load_contract(version: int = LATEST_CONTRACT, directory: Path = CONTRACTS_DIR) -> Contract:
+    text = (directory / CONTRACT_FILES[version]).read_text(encoding="utf-8")
+    contract = Contract.model_validate(yaml.safe_load(text))
+    if contract.version != version:
+        raise ValueError(f"{CONTRACT_FILES[version]} declares version {contract.version}")
+    return contract
 
 
 def _is_date(value: str) -> bool:
@@ -91,6 +98,8 @@ def has_type(value: Any, kind: str) -> bool:
         return isinstance(value, int) and not isinstance(value, bool)
     if kind == "number":
         return isinstance(value, int | float) and not isinstance(value, bool)
+    if kind == "decimal_string":
+        return isinstance(value, str) and DECIMAL.fullmatch(value) is not None
     if kind == "date":
         return isinstance(value, str) and _is_date(value)
     if kind == "timestamp":
@@ -110,6 +119,9 @@ def check_row(contract: Contract, row: dict[str, Any]) -> list[str]:
             reasons.append(f"{name}:type")
         elif spec.allowed is not None and value not in spec.allowed:
             reasons.append(f"{name}:value")
+    for group in contract.one_of:
+        if all(row.get(name) is None for name in group):
+            reasons.append("one_of:" + "|".join(group))
     return reasons
 
 
@@ -118,6 +130,7 @@ def compare_batch(contract: Contract, rows: list[dict[str, Any]]) -> BatchReport
     missing = sorted(
         name for name, spec in contract.columns.items() if spec.required and name not in present
     )
+    missing += ["|".join(group) for group in contract.one_of if not present & set(group)]
     added = sorted(present - set(contract.columns))
 
     retyped = []

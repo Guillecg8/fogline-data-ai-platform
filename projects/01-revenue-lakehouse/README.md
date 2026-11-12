@@ -19,3 +19,46 @@ Work in progress. Medallion lakehouse that turns hotel reservation events into t
 | `nightly_rate` renamed to `rate_amount` (string), from 2026-06-15 | breaking | Quarantine the batch before silver |
 
 `uv run poe lh-contracts` checks every batch against `contracts/pms_reservation_events.yaml`.
+
+## Step 2: bronze, with a ledger and a quarantine you can replay
+
+`uv run poe lh-ingest` loads the batches into Delta tables:
+
+- `bronze/pms_reservation_events`: every accepted line, untouched (`_payload`), plus load metadata
+  (file, hash, line number, load time, contract version, row-level errors). Because the raw line is
+  kept, a schema change at the source cannot break this layer.
+- `ops/batch_ledger`: one entry per decision about a batch (loaded, or quarantined and why).
+- It is idempotent (a second run loads nothing), a loaded file that changes is an error, and if a
+  run stops between the two writes the next run repairs the ledger.
+
+The demo of what a data contract is for:
+
+```powershell
+uv run poe lh-ingest --contract 1   # 283 batches loaded, 139 quarantined (nightly_rate is gone)
+uv run poe lh-ingest                # contract 2 published: the 139 are replayed and loaded
+```
+
+## Step 3: silver, gold, and a proof that the numbers are right
+
+```powershell
+uv run poe lh-all   # generate, ingest, silver, gold, verify
+```
+
+- **Silver** (`lh-silver`): parses the raw lines, removes duplicates, converts both spellings of the
+  rate to one decimal, and keeps the latest state of each reservation *by event time*, so a late
+  event never overwrites something newer. Invalid lines go to `silver/rejected_rows` with the reason.
+- **Gold** (`lh-gold`): `hotel_daily`, one row per hotel per day, checked against
+  `contracts/gold_kpis.yaml` (columns, types and every row check) before it is published. If the
+  check fails, nothing is written.
+- **Verify** (`lh-verify`): because the data is synthetic, the generator also writes what the KPIs
+  really were. Gold must match on every hotel-day:
+
+```
+gold matches the truth on all 730 hotel-days
+```
+
+The same check shows what a quarantined batch costs: with contract v1 only, gold has a visible
+hole from mid-June and `lh-verify` fails.
+
+The code avoids `pyarrow.parquet` and `pyarrow.dataset`, which some locked-down Windows machines
+block (a test runs the whole pipeline with both disabled).

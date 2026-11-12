@@ -1,0 +1,28 @@
+# Version 2 of the PMS export contract, published after the vendor release of 2026-06-15.
+#
+# What changed since version 1 (see docs/decisions/0002 when it is written):
+#   - nightly_rate may now arrive as rate_amount, a decimal string ("289.50"): at least one of
+#     the two must be present;
+#   - loyalty_tier, which version 1 reported as a compatible new column, is adopted.
+source: pms_reservation_events
+version: 2
+format: jsonl
+primary_key: [event_id]
+
+columns:
+  event_id: { type: string }
+  reservation_id: { type: string }
+  event_type: { type: string, allowed: [created, modified, cancelled] }
+  event_ts: { type: timestamp }
+  venue: { type: string, allowed: [fogline-marina, fogline-mission] }
+  room_type: { type: string, allowed: [standard, deluxe, suite] }
+  check_in: { type: date }
+  check_out: { type: date }
+  guests: { type: integer }
+  nightly_rate: { type: number, required: false }
+  rate_amount: { type: decimal_string, required: false }
+  channel: { type: string, allowed: [direct, ota, corporate] }
+  loyalty_tier: { type: string, required: false, allowed: [none, silver, gold] }
+
+one_of:
+  - [nightly_rate, rate_amount]
