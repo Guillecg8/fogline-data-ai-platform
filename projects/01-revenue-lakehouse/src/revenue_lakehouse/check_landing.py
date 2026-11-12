@@ -8,7 +8,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from revenue_lakehouse.contract import LATEST_CONTRACT, BatchReport, compare_batch, load_contract
+from revenue_lakehouse.contract import BatchReport, compare_batch, load_contract
 from revenue_lakehouse.generate import FILE_PREFIX
 from revenue_lakehouse.paths import DATA_DIR
 
@@ -18,7 +18,7 @@ def read_batch(path: Path) -> list[dict]:
         return [json.loads(line) for line in handle if line.strip()]
 
 
-def check_all(landing: Path, version: int = LATEST_CONTRACT) -> dict[str, BatchReport]:
+def check_all(landing: Path, version: int | None = None) -> dict[str, BatchReport]:
     contract = load_contract(version)
     files = sorted(landing.glob(f"{FILE_PREFIX}*.jsonl"))
     if not files:
@@ -32,7 +32,7 @@ def check_all(landing: Path, version: int = LATEST_CONTRACT) -> dict[str, BatchR
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--landing", type=Path, default=DATA_DIR / "landing" / "pms")
-    parser.add_argument("--contract", type=int, default=LATEST_CONTRACT)
+    parser.add_argument("--contract", type=int, default=None)
     args = parser.parse_args()
     reports = check_all(args.landing, args.contract)
 

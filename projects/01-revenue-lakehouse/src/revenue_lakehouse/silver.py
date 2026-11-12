@@ -12,6 +12,10 @@ measured against this version.)
 - ``silver/rejected_rows``: bronze lines flagged as invalid, with the reason. They never reach
   the tables above.
 
+The restaurant POS source has its own silver tables (``pos_check_revisions``, ``pos_checks``,
+``pos_rejected_rows``), built the same way: the latest *revision* of each check wins, and its
+business day is computed in the restaurant's own time zone, with the day ending at 04:00.
+
     uv run poe lh-silver
 """
 
@@ -24,6 +28,7 @@ import duckdb
 from revenue_lakehouse.bronze import bronze_path
 from revenue_lakehouse.delta_io import read_arrow, write
 from revenue_lakehouse.paths import DATA_DIR
+from revenue_lakehouse.sources import POS
 
 PARSED = """
 create temp table parsed as
@@ -80,6 +85,65 @@ order by _source_file, _line_no
 """
 
 
+POS_PARSED = """
+create temp table pos_parsed as
+select
+    json_extract_string(_payload, '$.check_id') as check_id,
+    cast(json_extract_string(_payload, '$.revision') as integer) as revision,
+    json_extract_string(_payload, '$.venue') as venue,
+    cast(json_extract_string(_payload, '$.opened_at') as timestamptz) as opened_at,
+    cast(json_extract_string(_payload, '$.closed_at') as timestamptz) as closed_at,
+    cast(json_extract_string(_payload, '$.covers') as integer) as covers,
+    cast(cast(json_extract(_payload, '$.net_amount') as varchar) as decimal(10, 2)) as net_amount,
+    cast(cast(json_extract(_payload, '$.tip') as varchar) as decimal(10, 2)) as tip,
+    json_extract_string(_payload, '$.status') as status,
+    json_extract_string(_payload, '$.channel') as channel,
+    json_extract_string(_payload, '$.server_id') as server_id,
+    _source_file,
+    _line_no,
+    _ingested_at
+from bronze
+where _row_errors is null
+"""
+
+POS_REVISIONS = """
+select * from pos_parsed
+qualify row_number() over (
+    partition by check_id, revision order by _ingested_at, _source_file, _line_no
+) = 1
+order by closed_at, check_id, revision
+"""
+
+# The business day is the local date of the closing time minus four hours. Taking the UTC date
+# instead would put every dinner after 16:00 in the wrong day.
+POS_CHECKS = """
+select
+    check_id, venue, opened_at, closed_at,
+    cast((closed_at at time zone 'America/Los_Angeles') - interval 4 hour as date) as business_date,
+    covers, net_amount, tip, status, channel, server_id, revision,
+    count(*) over (partition by check_id) as revision_count
+from pos_check_revisions
+qualify row_number() over (partition by check_id order by revision desc) = 1
+order by check_id
+"""
+
+POS_REJECTED = """
+select _source_file, _line_no, _ingested_at, _row_errors, _payload
+from bronze where _row_errors is not null
+order by _source_file, _line_no
+"""
+
+
+@dataclass
+class PosSilverReport:
+    parsed: int
+    revisions: int
+    duplicates_removed: int
+    checks: int
+    voided: int
+    rejected: int
+
+
 @dataclass
 class SilverReport:
     parsed: int
@@ -124,6 +188,37 @@ def build_silver(data_dir: Path = DATA_DIR) -> SilverReport:
     )
 
 
+def build_silver_pos(data_dir: Path = DATA_DIR) -> PosSilverReport:
+    bronze = read_arrow(bronze_path(data_dir, POS))
+    if bronze is None:
+        raise SystemExit("POS bronze is empty: run uv run poe lh-ingest first")
+
+    con = duckdb.connect()
+    con.execute("set TimeZone = 'UTC'")
+    con.register("bronze", bronze)
+    con.execute(POS_PARSED)
+    con.execute(f"create temp table pos_check_revisions as {POS_REVISIONS}")
+    con.execute(f"create temp table pos_checks as {POS_CHECKS}")
+    con.execute(f"create temp table pos_rejected_rows as {POS_REJECTED}")
+
+    for name in ("pos_check_revisions", "pos_checks", "pos_rejected_rows"):
+        write(silver_path(data_dir, name), con.table(name).to_arrow_table(), mode="overwrite")
+
+    def count(sql: str) -> int:
+        return con.execute(sql).fetchall()[0][0]
+
+    parsed = count("select count(*) from pos_parsed")
+    revisions = count("select count(*) from pos_check_revisions")
+    return PosSilverReport(
+        parsed=parsed,
+        revisions=revisions,
+        duplicates_removed=parsed - revisions,
+        checks=count("select count(*) from pos_checks"),
+        voided=count("select count(*) from pos_checks where status = 'void'"),
+        rejected=count("select count(*) from pos_rejected_rows"),
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
@@ -133,6 +228,11 @@ def main() -> None:
         f"{report.events} events ({report.duplicates_removed} duplicates removed), "
         f"{report.reservations} reservations ({report.cancelled} cancelled), "
         f"{report.rejected} rejected rows"
+    )
+    pos = build_silver_pos(args.data_dir)
+    print(
+        f"{pos.revisions} POS check revisions ({pos.duplicates_removed} duplicates removed), "
+        f"{pos.checks} checks ({pos.voided} voided), {pos.rejected} rejected rows"
     )
 
 

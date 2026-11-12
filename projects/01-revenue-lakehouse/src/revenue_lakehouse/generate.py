@@ -25,6 +25,7 @@ from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 from revenue_lakehouse.paths import DATA_DIR, REFERENCE_DIR
+from revenue_lakehouse.sources import PMS
 
 START, END = date(2025, 11, 1), date(2026, 10, 31)  # nights covered by the KPIs
 WARMUP_DAYS = 7  # arrivals before START, so the first KPI days are not artificially empty
@@ -43,7 +44,7 @@ TARGET_OCCUPANCY = 0.74
 CANCEL_RATE, MODIFY_RATE = 0.12, 0.08
 LATE_RATE, DUPLICATE_RATE = 0.03, 0.015
 
-FILE_PREFIX = "pms_reservation_events_"
+FILE_PREFIX = PMS.file_prefix
 
 
 @dataclass
@@ -301,10 +302,19 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=DATA_DIR)
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
+    from revenue_lakehouse.generate_pos import generate_pos  # imports this module: avoid a cycle
+
     summary = generate(args.out, args.seed)
     print(
-        f"{summary.reservations} reservations, {summary.events} events in {summary.batches} "
-        f"batches ({summary.late} late, {summary.duplicates} duplicated)\nwritten to {args.out}"
+        f"PMS: {summary.reservations} reservations, {summary.events} events in {summary.batches} "
+        f"batches ({summary.late} late, {summary.duplicates} duplicated)"
+    )
+    pos = generate_pos(args.out, args.seed)
+    print(
+        f"POS: {pos['checks']} checks, {pos['rows']} rows in {pos['batches']} batches "
+        f"({pos['after_midnight']} after midnight, {pos['adjusted']} adjusted, "
+        f"{pos['voided']} voided, {pos['late']} late, {pos['duplicates']} duplicated)\n"
+        f"written to {args.out}"
     )
 
 

@@ -22,10 +22,10 @@ from pathlib import Path
 
 import pyarrow as pa
 
-from revenue_lakehouse.contract import LATEST_CONTRACT, compare_batch, load_contract
+from revenue_lakehouse.contract import compare_batch, load_contract
 from revenue_lakehouse.delta_io import read_rows, write
-from revenue_lakehouse.generate import FILE_PREFIX
 from revenue_lakehouse.paths import DATA_DIR
+from revenue_lakehouse.sources import PMS, SOURCES, Source
 
 BRONZE_SCHEMA = pa.schema(
     [
@@ -71,18 +71,18 @@ class IngestReport:
     bad_rows: int = 0
 
 
-def bronze_path(data_dir: Path) -> Path:
-    return data_dir / "bronze" / "pms_reservation_events"
+def bronze_path(data_dir: Path, source: Source = PMS) -> Path:
+    return data_dir / "bronze" / source.name
 
 
-def ledger_path(data_dir: Path) -> Path:
-    return data_dir / "ops" / "batch_ledger"
+def ledger_path(data_dir: Path, source: Source = PMS) -> Path:
+    return data_dir / "ops" / f"batch_ledger_{source.name}"
 
 
-def loaded_batches(data_dir: Path) -> dict[str, dict]:
+def loaded_batches(data_dir: Path, source: Source = PMS) -> dict[str, dict]:
     """File name -> sha, rows and contract version, taken from bronze itself."""
     rows = read_rows(
-        bronze_path(data_dir),
+        bronze_path(data_dir, source),
         "select _source_file, _file_sha256, max(_contract_version) as contract_version, "
         "count(*) as n from t group by _source_file, _file_sha256",
     )
@@ -96,10 +96,10 @@ def loaded_batches(data_dir: Path) -> dict[str, dict]:
     }
 
 
-def last_ledger_entries(data_dir: Path) -> tuple[dict[str, dict], int]:
+def last_ledger_entries(data_dir: Path, source: Source = PMS) -> tuple[dict[str, dict], int]:
     entries: dict[str, dict] = {}
     last = 0
-    for row in sorted(read_rows(ledger_path(data_dir)), key=lambda r: r["seq"]):
+    for row in sorted(read_rows(ledger_path(data_dir, source)), key=lambda r: r["seq"]):
         entries[row["source_file"]] = row
         last = row["seq"]
     return entries, last
@@ -122,8 +122,12 @@ def parse_lines(raw: bytes) -> tuple[list[str], dict[int, dict], dict[int, str]]
     return lines, objects, errors
 
 
-def ledger_row(seq: int, name: str, sha: str, now: datetime, **values) -> dict:
-    batch = date.fromisoformat(name.removeprefix(FILE_PREFIX).removesuffix(".jsonl"))
+def batch_day(name: str, source: Source) -> date:
+    return date.fromisoformat(name.removeprefix(source.file_prefix).removesuffix(".jsonl"))
+
+
+def ledger_row(seq: int, name: str, sha: str, now: datetime, source: Source, **values) -> dict:
+    batch = batch_day(name, source)
     return {
         "seq": seq,
         "source_file": name,
@@ -140,19 +144,20 @@ def ledger_row(seq: int, name: str, sha: str, now: datetime, **values) -> dict:
 def ingest(
     landing: Path,
     data_dir: Path = DATA_DIR,
-    contract_version: int = LATEST_CONTRACT,
+    contract_version: int | None = None,
     now: datetime | None = None,
+    source: Source = PMS,
 ) -> IngestReport:
-    contract = load_contract(contract_version)
+    contract = load_contract(contract_version, source)
     now = (now or datetime.now(UTC)).replace(microsecond=0)
-    report = IngestReport(contract_version)
+    report = IngestReport(contract.version)
 
-    loaded = loaded_batches(data_dir)
-    ledger, seq = last_ledger_entries(data_dir)
+    loaded = loaded_batches(data_dir, source)
+    ledger, seq = last_ledger_entries(data_dir, source)
     bronze_rows: list[dict] = []
     new_entries: list[dict] = []
 
-    for path in sorted(landing.glob(f"{FILE_PREFIX}*.jsonl")):
+    for path in sorted(landing.glob(f"{source.file_prefix}*.jsonl")):
         name = path.name
         raw = path.read_bytes()
         sha = hashlib.sha256(raw).hexdigest()
@@ -170,6 +175,7 @@ def ingest(
                         name,
                         sha,
                         now,
+                        source,
                         rows=loaded[name]["rows"],
                         status="repaired",
                         action="loaded",
@@ -202,6 +208,7 @@ def ingest(
                     name,
                     sha,
                     now,
+                    source,
                     rows=len(lines),
                     status="breaking",
                     action="quarantined",
@@ -214,7 +221,7 @@ def ingest(
         indexes = list(objects)
         for position, reasons in batch.bad_rows.items():
             errors[indexes[position]] = ",".join(reasons)
-        batch_date = date.fromisoformat(name.removeprefix(FILE_PREFIX).removesuffix(".jsonl"))
+        batch_date = batch_day(name, source)
         for index, line in enumerate(lines):
             bronze_rows.append(
                 {
@@ -234,6 +241,7 @@ def ingest(
                 name,
                 sha,
                 now,
+                source,
                 rows=len(lines),
                 bad_rows=len(errors),
                 status=batch.status,
@@ -248,30 +256,38 @@ def ingest(
 
     # bronze first, ledger second: if we stop in between, the next run repairs the ledger
     if bronze_rows:
-        write(bronze_path(data_dir), pa.Table.from_pylist(bronze_rows, schema=BRONZE_SCHEMA))
+        write(
+            bronze_path(data_dir, source), pa.Table.from_pylist(bronze_rows, schema=BRONZE_SCHEMA)
+        )
     if new_entries:
-        write(ledger_path(data_dir), pa.Table.from_pylist(new_entries, schema=LEDGER_SCHEMA))
+        write(
+            ledger_path(data_dir, source), pa.Table.from_pylist(new_entries, schema=LEDGER_SCHEMA)
+        )
     return report
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("--landing", type=Path, default=DATA_DIR / "landing" / "pms")
+    parser.add_argument("--landing-root", type=Path, default=DATA_DIR / "landing")
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
-    parser.add_argument("--contract", type=int, default=LATEST_CONTRACT)
+    parser.add_argument("--contract", type=int, help="PMS contract version (default: the latest)")
     args = parser.parse_args()
-    if not args.landing.exists():
-        raise SystemExit(f"{args.landing} not found: run uv run poe lh-generate first")
 
-    report = ingest(args.landing, args.data_dir, args.contract)
-    print(
-        f"contract v{report.contract_version}: {len(report.loaded)} batches loaded "
-        f"({report.rows} rows, {report.bad_rows} bad rows), {len(report.quarantined)} quarantined, "
-        f"{len(report.skipped)} skipped, {len(report.repaired)} repaired"
-    )
-    for reason in sorted(set(report.quarantined.values())):
-        names = [name for name, why in report.quarantined.items() if why == reason]
-        print(f"  quarantined {len(names)} batches ({names[0]} ...): {reason}")
+    for source in SOURCES:
+        landing = args.landing_root / source.landing_dir
+        if not landing.exists():
+            raise SystemExit(f"{landing} not found: run uv run poe lh-generate first")
+        version = args.contract if source is PMS else None
+        report = ingest(landing, args.data_dir, version, source=source)
+        print(
+            f"{source.name} contract v{report.contract_version}: {len(report.loaded)} batches "
+            f"loaded ({report.rows} rows, {report.bad_rows} bad rows), "
+            f"{len(report.quarantined)} quarantined, {len(report.skipped)} skipped, "
+            f"{len(report.repaired)} repaired"
+        )
+        for reason in sorted(set(report.quarantined.values())):
+            names = [name for name, why in report.quarantined.items() if why == reason]
+            print(f"  quarantined {len(names)} batches ({names[0]} ...): {reason}")
 
 
 if __name__ == "__main__":

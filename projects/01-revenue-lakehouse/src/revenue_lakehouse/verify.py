@@ -1,6 +1,6 @@
 """Compare gold with the truth the generator wrote. Only possible because the data is synthetic.
 
-This is the proof that the pipeline is correct: every day and every hotel must match.
+This is the proof that the pipeline is correct: every day and every venue must match.
 
     uv run poe lh-verify
 """
@@ -15,25 +15,19 @@ import duckdb
 from revenue_lakehouse.delta_io import read_arrow
 from revenue_lakehouse.paths import DATA_DIR
 
-MISMATCHES = """
-select
-    coalesce(g.date, t.date) as date,
-    coalesce(g.venue, t.venue) as venue,
-    g.rooms_available as gold_available, t.rooms_available as truth_available,
-    g.rooms_sold as gold_sold, t.rooms_sold as truth_sold,
-    g.room_revenue as gold_revenue, t.room_revenue as truth_revenue
-from gold g
-full outer join truth t on g.date = t.date and g.venue = t.venue
-where g.date is null or t.date is null
-    or g.rooms_available != t.rooms_available
-    or g.rooms_sold != t.rooms_sold
-    or abs(g.room_revenue - t.room_revenue) > 0.005
-order by 1, 2
-"""
+# table -> (column types in the truth csv, the measures that must match)
+TABLES = {
+    "hotel_daily": (
+        {"rooms_available": "INTEGER", "rooms_sold": "INTEGER", "room_revenue": "DOUBLE"},
+        ["rooms_available", "rooms_sold", "room_revenue"],
+    ),
+    "restaurant_daily": ({"covers": "INTEGER", "revenue": "DOUBLE"}, ["covers", "revenue"]),
+}
 
 
 @dataclass
 class VerifyReport:
+    table: str
     rows: int
     mismatches: list[dict]
 
@@ -42,37 +36,57 @@ class VerifyReport:
         return not self.mismatches
 
 
-def verify(data_dir: Path = DATA_DIR) -> VerifyReport:
-    gold = read_arrow(data_dir / "gold" / "hotel_daily")
-    truth_file = data_dir / "truth" / "hotel_daily.csv"
+def mismatch_query(measures: list[str]) -> str:
+    shown = ", ".join(f"g.{m} as gold_{m}, t.{m} as truth_{m}" for m in measures)
+    differs = " or ".join(f"abs(g.{m} - t.{m}) > 0.005" for m in measures)
+    return f"""
+        select coalesce(g.date, t.date) as date, coalesce(g.venue, t.venue) as venue, {shown}
+        from gold g
+        full outer join truth t on g.date = t.date and g.venue = t.venue
+        where g.date is null or t.date is null or {differs}
+        order by 1, 2
+    """
+
+
+def verify(data_dir: Path = DATA_DIR, table: str = "hotel_daily") -> VerifyReport:
+    types, measures = TABLES[table]
+    gold = read_arrow(data_dir / "gold" / table)
+    truth_file = data_dir / "truth" / f"{table}.csv"
     if gold is None or not truth_file.exists():
         raise SystemExit("nothing to verify: run uv run poe lh-generate and the pipeline first")
     con = duckdb.connect()
     con.register("gold", gold)
+    columns = {"date": "DATE", "venue": "VARCHAR", **types}
     con.execute(
         "create temp table truth as select * from read_csv(?, header = true, columns = "
-        "{'date': 'DATE', 'venue': 'VARCHAR', 'rooms_available': 'INTEGER', "
-        "'rooms_sold': 'INTEGER', 'room_revenue': 'DOUBLE'})",
+        + repr(columns)
+        + ")",
         [truth_file.as_posix()],
     )
-    cursor = con.execute(MISMATCHES)
+    cursor = con.execute(mismatch_query(measures))
     names = [column[0] for column in cursor.description]
     mismatches = [dict(zip(names, row, strict=True)) for row in cursor.fetchall()]
-    return VerifyReport(con.execute("select count(*) from truth").fetchall()[0][0], mismatches)
+    return VerifyReport(
+        table, con.execute("select count(*) from truth").fetchall()[0][0], mismatches
+    )
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
     args = parser.parse_args()
-    report = verify(args.data_dir)
-    if report.ok:
-        print(f"gold matches the truth on all {report.rows} hotel-days")
-        return
-    print(f"gold differs from the truth on {len(report.mismatches)} of {report.rows} hotel-days")
-    for row in report.mismatches[:5]:
-        print(f"  {row['date']} {row['venue']}: {row}")
-    sys.exit(1)
+    failed = False
+    for table in TABLES:
+        report = verify(args.data_dir, table)
+        if report.ok:
+            print(f"{table}: gold matches the truth on all {report.rows} venue-days")
+            continue
+        failed = True
+        print(f"{table}: gold differs from the truth on {len(report.mismatches)} of {report.rows}")
+        for row in report.mismatches[:5]:
+            print(f"  {row}")
+    if failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

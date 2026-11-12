@@ -1,0 +1,21 @@
+# Data contract for the restaurant point-of-sale (POS) export.
+# One JSON object per line; each line is one *revision* of a check (a bill). A check is exported
+# when it closes and again if it is later adjusted or voided: the highest revision is the truth.
+# Timestamps carry the restaurant's local UTC offset (America/Los_Angeles), so they change by an
+# hour twice a year. net_amount excludes tax and tip.
+source: pos_checks
+version: 1
+format: jsonl
+primary_key: [check_id, revision]
+
+columns:
+  check_id: { type: string }
+  revision: { type: integer }
+  venue: { type: string, allowed: [saltgrass, lumen] }
+  opened_at: { type: timestamp }
+  closed_at: { type: timestamp }
+  covers: { type: integer }
+  net_amount: { type: number }
+  tip: { type: number }
+  status: { type: string, allowed: [closed, void] }
+  channel: { type: string, allowed: [dine_in, takeout] }

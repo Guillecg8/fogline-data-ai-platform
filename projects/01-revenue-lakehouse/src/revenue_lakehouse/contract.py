@@ -15,12 +15,12 @@ import yaml
 from pydantic import BaseModel, ConfigDict
 
 from revenue_lakehouse.paths import CONTRACTS_DIR
+from revenue_lakehouse.sources import PMS, Source
 
 Status = Literal["ok", "compatible", "breaking"]
 # A column is "retyped" when at least this share of its values has the wrong type.
 RETYPED_SHARE = 0.5
-LATEST_CONTRACT = 2
-CONTRACT_FILES = {1: "pms_reservation_events.yaml", 2: "pms_reservation_events_v2.yaml"}
+LATEST_CONTRACT = PMS.latest  # of the first source, kept for the PMS-only helpers
 DECIMAL = re.compile(r"\d+(\.\d+)?")
 
 
@@ -66,11 +66,16 @@ class BatchReport:
         return "; ".join(parts) or "-"
 
 
-def load_contract(version: int = LATEST_CONTRACT, directory: Path = CONTRACTS_DIR) -> Contract:
-    text = (directory / CONTRACT_FILES[version]).read_text(encoding="utf-8")
+def load_contract(
+    version: int | None = None, source: Source = PMS, directory: Path = CONTRACTS_DIR
+) -> Contract:
+    version = source.latest if version is None else version
+    text = (directory / source.contracts[version]).read_text(encoding="utf-8")
     contract = Contract.model_validate(yaml.safe_load(text))
-    if contract.version != version:
-        raise ValueError(f"{CONTRACT_FILES[version]} declares version {contract.version}")
+    if (contract.source, contract.version) != (source.name, version):
+        raise ValueError(
+            f"{source.contracts[version]} declares {contract.source} v{contract.version}"
+        )
     return contract
 
 

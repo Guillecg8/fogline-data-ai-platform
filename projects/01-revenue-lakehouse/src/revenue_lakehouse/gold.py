@@ -41,6 +41,24 @@ order by d.date, c.venue
 """
 
 
+RESTAURANT_DAILY = """
+select
+    cast(d.date as date) as date,
+    v.venue as venue,
+    cast(coalesce(sum(c.covers), 0) as integer) as covers,
+    cast(round(coalesce(sum(c.net_amount), 0), 2) as double) as revenue
+from (
+    select cast(day as date) as date
+    from generate_series(date '{start}', date '{end}', interval 1 day) as t(day)
+) d
+cross join venues v
+left join pos_checks c
+    on c.venue = v.venue and c.business_date = d.date and c.status = 'closed'
+group by d.date, v.venue
+order by d.date, v.venue
+"""
+
+
 class ContractViolation(RuntimeError):
     """The table does not match what its consumers were promised."""
 
@@ -107,17 +125,54 @@ def build_gold(
     return GoldReport(rows, date_from, date_to, exported)
 
 
+def build_gold_restaurants(
+    data_dir: Path = DATA_DIR, date_from: date = REPORT_FROM, date_to: date = REPORT_TO
+) -> GoldReport:
+    checks = read_arrow(silver_path(data_dir, "pos_checks"))
+    if checks is None:
+        raise SystemExit("POS silver is empty: run uv run poe lh-silver first")
+
+    con = duckdb.connect()
+    con.execute("set TimeZone = 'UTC'")
+    con.register("pos_checks", checks)
+    con.execute(
+        "create temp table venues as select * from read_csv(?, header = true, "
+        "columns = {'venue': 'VARCHAR'})",
+        [(REFERENCE_DIR / "restaurants.csv").as_posix()],
+    )
+    query = RESTAURANT_DAILY.format(start=date_from.isoformat(), end=date_to.isoformat())
+    con.execute(f"create temp table restaurant_daily as {query}")
+
+    problems = contract_violations(
+        con, "restaurant_daily", load_gold_contract()["restaurant_daily"]
+    )
+    if problems:
+        raise ContractViolation("restaurant_daily not published: " + "; ".join(problems))
+
+    write(
+        data_dir / "gold" / "restaurant_daily",
+        con.table("restaurant_daily").to_arrow_table(),
+        "overwrite",
+    )
+    exported = data_dir / "exports" / "restaurant_daily.csv"
+    exported.parent.mkdir(parents=True, exist_ok=True)
+    con.execute("copy restaurant_daily to ? (header, delimiter ',')", [exported.as_posix()])
+    rows = con.execute("select count(*) from restaurant_daily").fetchall()[0][0]
+    return GoldReport(rows, date_from, date_to, exported)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
     parser.add_argument("--from", dest="date_from", type=date.fromisoformat, default=REPORT_FROM)
     parser.add_argument("--to", dest="date_to", type=date.fromisoformat, default=REPORT_TO)
     args = parser.parse_args()
-    report = build_gold(args.data_dir, args.date_from, args.date_to)
-    print(
-        f"hotel_daily: {report.rows} rows from {report.date_from} to {report.date_to}, "
-        f"contract checked, exported to {report.exported}"
-    )
+    for name, build in (("hotel_daily", build_gold), ("restaurant_daily", build_gold_restaurants)):
+        report = build(args.data_dir, args.date_from, args.date_to)
+        print(
+            f"{name}: {report.rows} rows from {report.date_from} to {report.date_to}, "
+            f"contract checked, exported to {report.exported}"
+        )
 
 
 if __name__ == "__main__":

@@ -62,3 +62,25 @@ hole from mid-June and `lh-verify` fails.
 
 The code avoids `pyarrow.parquet` and `pyarrow.dataset`, which some locked-down Windows machines
 block (a test runs the whole pipeline with both disabled).
+
+## Step 4: a second source (restaurant POS) through the same framework
+
+`pos_checks` is the restaurant point-of-sale export. Bronze, the batch ledger, the contract check and
+the quarantine are the same code as for the PMS: a source is an entry in `sources.py` plus a contract
+file. What is new is in silver and gold, because restaurant data has its own traps:
+
+| Trap injected | What goes wrong if ignored | How it is handled |
+|---|---|---|
+| ~1,100 checks close after midnight | They land on the wrong day | The service day ends at 04:00 local time |
+| Timestamps in local time, with a UTC offset that changes with daylight saving | Cutting days at UTC midnight misplaces every evening check (over 10,000 here) | The day is computed in `America/Los_Angeles` |
+| ~5,000 corrected and ~1,600 voided checks | Revenue is overstated | The highest revision of each check wins; voids count for nothing |
+| ~1.5% duplicated, ~3% late rows | Double counting | Deduplicated by `(check_id, revision)`; order comes from the revision, not the arrival |
+| A day with no sales | The day disappears from the table | Gold has a row of zeros |
+
+```
+hotel_daily: gold matches the truth on all 730 venue-days
+restaurant_daily: gold matches the truth on all 730 venue-days
+```
+
+Both gold tables are exported to `data/exports/`, which is exactly what the Ops Knowledge Copilot
+reads (`uv run poe mcp-lakehouse`), so the copilot no longer needs its synthetic KPI sample.
