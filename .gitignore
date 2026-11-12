@@ -8,4 +8,4 @@ data/
 !data/sample/
 chroma/
 *.duckdb
-.DS_Store
+.DS_Storeprojects/01-revenue-lakehouse/data/

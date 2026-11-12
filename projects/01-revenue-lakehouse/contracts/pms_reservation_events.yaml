@@ -1,0 +1,25 @@
+# Data contract for the property management system (PMS) export.
+# One JSON object per line; every line is a full snapshot of a reservation at the moment of
+# the event. Events are append-only and may arrive late or twice.
+#
+# Compatibility rules enforced by revenue_lakehouse.contract:
+#   - a new column is compatible: it is reported and ignored until the contract adopts it;
+#   - a missing required column, or a column whose values change type, is breaking: the whole
+#     batch goes to quarantine and never reaches silver.
+source: pms_reservation_events
+version: 1
+format: jsonl
+primary_key: [event_id]
+
+columns:
+  event_id: { type: string }
+  reservation_id: { type: string }
+  event_type: { type: string, allowed: [created, modified, cancelled] }
+  event_ts: { type: timestamp }
+  venue: { type: string, allowed: [fogline-marina, fogline-mission] }
+  room_type: { type: string, allowed: [standard, deluxe, suite] }
+  check_in: { type: date }
+  check_out: { type: date }
+  guests: { type: integer }
+  nightly_rate: { type: number }
+  channel: { type: string, allowed: [direct, ota, corporate] }
