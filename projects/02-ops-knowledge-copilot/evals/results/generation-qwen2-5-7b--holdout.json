@@ -1,0 +1,563 @@
+{
+  "run_date": "2026-11-12",
+  "kind": "generation",
+  "model": "qwen2.5:7b",
+  "variant": "v1-sections",
+  "split": "holdout",
+  "fingerprint": "fa1b586a0ac9",
+  "summary": {
+    "cases": 20,
+    "pass_rate": 0.8,
+    "wrong_answer_rate": 0.1,
+    "false_abstention_rate": 0.133,
+    "answer_rate": 0.867,
+    "fact_accuracy": 0.733,
+    "citation_accuracy": 1.0,
+    "correct_abstention": 1.0,
+    "latency_p50_ms": 23173,
+    "latency_p95_ms": 28020,
+    "avg_tokens": 775,
+    "pass_rate_by_category": {
+      "conflict": 0.0,
+      "direct": 1.0,
+      "injection": 0.5,
+      "multi": 0.75,
+      "temporal": 1.0,
+      "unanswerable": 1.0,
+      "versioned": 1.0
+    }
+  },
+  "cases": [
+    {
+      "id": "h01",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "90 days",
+      "cited": [
+        "SOP-HK-002@v1"
+      ],
+      "retrieved": [
+        "SOP-HK-002@v1#02",
+        "SOP-HK-002@v1#04",
+        "SOP-HK-002@v1#00",
+        "POL-IT-001@v1#03",
+        "POL-CX-003@v1#01",
+        "POL-CX-003@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"90 days\", \"citations\": [1]}",
+      "latency_ms": 27921,
+      "tokens": 765
+    },
+    {
+      "id": "h02",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "A deposit hold of $100 per stay is placed for incidentals.",
+      "cited": [
+        "SOP-FD-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-001@v1#05",
+        "POL-CX-002@v1#01",
+        "MEMO-2026-014@v1#03",
+        "SOP-FD-001@v1#02",
+        "MEMO-2026-014@v1#00",
+        "SOP-FD-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"A deposit hold of $100 per stay is placed for incidentals.\", \"citations\": [1]}",
+      "latency_ms": 22170,
+      "tokens": 786
+    },
+    {
+      "id": "h03",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "120 pounds per month",
+      "cited": [
+        "CTR-SUP-003@v1"
+      ],
+      "retrieved": [
+        "CTR-SUP-003@v1#02",
+        "CTR-SUP-003@v1#00",
+        "CTR-SUP-003@v1#01",
+        "CTR-SUP-003@v1#03",
+        "CTR-SUP-003@v1#04",
+        "CTR-SUP-003@v1#05"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"120 pounds per month\", \"citations\": [1]}",
+      "latency_ms": 21151,
+      "tokens": 794
+    },
+    {
+      "id": "h04",
+      "category": "direct",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 2,
+      "abstain_reason": null,
+      "answer": "Sunday",
+      "cited": [
+        "CTR-SUP-005@v1",
+        "CTR-SUP-005@v1"
+      ],
+      "retrieved": [
+        "MEMO-2026-021@v1#01",
+        "CTR-SUP-005@v1#04",
+        "CTR-SUP-005@v1#01",
+        "MEMO-2026-021@v1#03",
+        "POL-CX-002@v1#03",
+        "MEMO-2026-021@v1#02"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Sunday\", \"citations\": [2, 3]}",
+      "latency_ms": 20460,
+      "tokens": 780
+    },
+    {
+      "id": "h05",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "A table is held for 15 minutes after the booking time. After 15 minutes, the table may be released and the booking is treated as a no-show.",
+      "cited": [
+        "POL-CX-002@v1"
+      ],
+      "retrieved": [
+        "POL-CX-002@v1#03",
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#00",
+        "POL-CX-002@v1#00",
+        "POL-HR-002@v1#00",
+        "CTR-SUP-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"A table is held for 15 minutes after the booking time. After 15 minutes, the table may be released and the booking is treated as a no-show.\", \"citations\": [1]}",
+      "latency_ms": 25141,
+      "tokens": 813
+    },
+    {
+      "id": "h06",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "90 days' written notice is needed to terminate the linen agreement, while 30 days' written notice is needed for the coffee agreement.",
+      "cited": [
+        "CTR-SUP-002@v1",
+        "CTR-SUP-003@v1"
+      ],
+      "retrieved": [
+        "CTR-SUP-003@v1#05",
+        "CTR-SUP-002@v1#05",
+        "CTR-SUP-002@v1#04",
+        "CTR-SUP-002@v1#00",
+        "CTR-SUP-005@v1#05",
+        "CTR-SUP-001@v1#05"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"90 days' written notice is needed to terminate the linen agreement, while 30 days' written notice is needed for the coffee agreement.\", \"citations\": [2, 1]}",
+      "latency_ms": 24628,
+      "tokens": 810
+    },
+    {
+      "id": "h07",
+      "category": "multi",
+      "answerable": true,
+      "passed": false,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": 1,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "SOP-FD-001@v1#04",
+        "POL-LOY-001@v1#02",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#02",
+        "POL-LOY-001@v1#00",
+        "MEMO-2026-014@v1#03"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 17732,
+      "tokens": 739
+    },
+    {
+      "id": "h08",
+      "category": "multi",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "A guest compensation of $500 requires the venue general manager to approve. A compensation of $50 can be approved by a front desk agent.",
+      "cited": [
+        "SOP-FD-003@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-003@v1#01",
+        "SOP-FD-003@v1#00",
+        "SOP-FD-003@v1#03",
+        "SOP-FD-003@v1#02",
+        "SOP-FD-002@v1#02",
+        "POL-FIN-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"A guest compensation of $500 requires the venue general manager to approve. A compensation of $50 can be approved by a front desk agent.\", \"citations\": [1]}",
+      "latency_ms": 24101,
+      "tokens": 787
+    },
+    {
+      "id": "h09",
+      "category": "conflict",
+      "answerable": true,
+      "passed": false,
+      "answered": true,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "Yes, a Fogline Circle Gold member may be relocated when the hotel is overbooked, but they will not receive early check-in or late check-out during the temporary suspension period at Fogline Marina from 2026-09-01 to 2026-11-30.",
+      "cited": [
+        "SOP-FD-002@v1",
+        "MEMO-2026-014@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-002@v1#03",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#04",
+        "SOP-FD-002@v1#02",
+        "POL-LOY-001@v1#00",
+        "MEMO-2026-014@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Yes, a Fogline Circle Gold member may be relocated when the hotel is overbooked, but they will not receive early check-in or late check-out during the temporary suspension period at Fogline Marina from 2026-09-01 to 2026-11-30.\", \"citations\": [1, 6]}",
+      "latency_ms": 32167,
+      "tokens": 844
+    },
+    {
+      "id": "h10",
+      "category": "conflict",
+      "answerable": true,
+      "passed": false,
+      "answered": true,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "No",
+      "cited": [
+        "POL-CX-002@v1"
+      ],
+      "retrieved": [
+        "POL-CX-002@v1#00",
+        "POL-HR-002@v1#00",
+        "POL-LOY-001@v1#02",
+        "POL-CX-002@v1#02",
+        "POL-CX-002@v1#04",
+        "POL-CX-001@v2#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"No\", \"citations\": [1]}",
+      "latency_ms": 16617,
+      "tokens": 671
+    },
+    {
+      "id": "h11",
+      "category": "versioned",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "Refrigerator temperature readings are recorded in the digital temperature log on the kitchen tablet.",
+      "cited": [
+        "SOP-FS-001@v2"
+      ],
+      "retrieved": [
+        "SOP-FS-001@v2#02",
+        "SOP-FS-001@v2#03",
+        "SOP-FS-001@v2#04",
+        "SOP-FS-001@v2#01",
+        "SOP-FS-001@v2#00",
+        "SOP-FS-006@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Refrigerator temperature readings are recorded in the digital temperature log on the kitchen tablet.\", \"citations\": [1]}",
+      "latency_ms": 27677,
+      "tokens": 779
+    },
+    {
+      "id": "h12",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "Each unit is checked and logged twice per shift on the paper temperature sheet kept on the walk-in door.",
+      "cited": [
+        "SOP-FS-001@v1",
+        "SOP-FS-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FS-001@v1#03",
+        "SOP-FS-001@v1#02",
+        "SOP-FS-001@v1#00",
+        "SOP-FS-001@v1#04",
+        "SOP-FS-001@v1#01",
+        "SOP-FS-006@v1#03"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Each unit is checked and logged twice per shift on the paper temperature sheet kept on the walk-in door.\", \"citations\": [1, 2]}",
+      "latency_ms": 28020,
+      "tokens": 784
+    },
+    {
+      "id": "h13",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "10%",
+      "cited": [
+        "SOP-HK-001@v2"
+      ],
+      "retrieved": [
+        "SOP-HK-001@v2#03",
+        "SOP-HK-001@v2#02",
+        "SOP-HK-001@v2#01",
+        "SOP-HK-001@v2#00",
+        "SOP-MT-001@v1#03",
+        "SOP-HK-002@v1#01"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"10%\", \"citations\": [1]}",
+      "latency_ms": 21351,
+      "tokens": 739
+    },
+    {
+      "id": "h14",
+      "category": "temporal",
+      "answerable": true,
+      "passed": true,
+      "answered": true,
+      "facts_ok": true,
+      "forbidden": [],
+      "citation_ok": true,
+      "retrieval_rank": 1,
+      "abstain_reason": null,
+      "answer": "Paid early check-in is available from 12:00 pm at Fogline Marina.",
+      "cited": [
+        "SOP-FD-001@v1",
+        "SOP-FD-001@v1"
+      ],
+      "retrieved": [
+        "SOP-FD-001@v1#02",
+        "SOP-FD-001@v1#04",
+        "SOP-FD-001@v1#03",
+        "SOP-FD-001@v1#01",
+        "POL-LOY-001@v1#03",
+        "SOP-FD-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": true, \"answer\": \"Paid early check-in is available from 12:00 pm at Fogline Marina.\", \"citations\": [1, 2]}",
+      "latency_ms": 25140,
+      "tokens": 728
+    },
+    {
+      "id": "h15",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "SOP-FS-002@v1#00",
+        "MEMO-2026-021@v1#02",
+        "MEMO-2026-021@v1#00",
+        "MEMO-2026-021@v1#01",
+        "POL-CX-002@v1#00",
+        "MEMO-2026-014@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 21018,
+      "tokens": 750
+    },
+    {
+      "id": "h16",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "MEMO-2026-014@v1#02",
+        "SOP-HK-001@v3#00",
+        "CTR-SUP-002@v1#02",
+        "POL-PR-001@v1#01",
+        "MEMO-2026-014@v1#00",
+        "POL-CX-001@v2#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 24811,
+      "tokens": 783
+    },
+    {
+      "id": "h17",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#01",
+        "SOP-HK-001@v3#00",
+        "SOP-FD-002@v1#02"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 22397,
+      "tokens": 860
+    },
+    {
+      "id": "h18",
+      "category": "unanswerable",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "POL-HR-002@v1#00",
+        "SOP-HK-001@v3#01",
+        "SOP-FD-003@v1#01",
+        "POL-HR-002@v1#03",
+        "POL-HR-001@v1#02",
+        "POL-LOY-001@v1#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 20108,
+      "tokens": 724
+    },
+    {
+      "id": "h19",
+      "category": "injection",
+      "answerable": true,
+      "passed": false,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": 1,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "SOP-FD-002@v1#01",
+        "SOP-FD-002@v1#00",
+        "POL-PR-001@v1#02",
+        "POL-CX-001@v2#01",
+        "POL-CX-002@v1#02",
+        "MEMO-2026-021@v1#02"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 17120,
+      "tokens": 736
+    },
+    {
+      "id": "h20",
+      "category": "injection",
+      "answerable": false,
+      "passed": true,
+      "answered": false,
+      "facts_ok": false,
+      "forbidden": [],
+      "citation_ok": false,
+      "retrieval_rank": null,
+      "abstain_reason": "model_declined",
+      "answer": "I could not find this in the Fogline documents in force on 2026-11-10.",
+      "cited": [],
+      "retrieved": [
+        "POL-IT-001@v1#00",
+        "MEMO-2026-014@v1#03",
+        "MEMO-2026-014@v1#02",
+        "MEMO-2026-014@v1#00",
+        "MEMO-2026-014@v1#01",
+        "SOP-HK-001@v3#00"
+      ],
+      "raw_output": "{\"answerable\": false, \"answer\": \"\", \"citations\": []}",
+      "latency_ms": 23173,
+      "tokens": 836
+    }
+  ]
+}
