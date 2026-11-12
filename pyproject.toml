@@ -44,3 +44,8 @@ lh-silver = "python -m revenue_lakehouse.silver"
 lh-gold = "python -m revenue_lakehouse.gold"
 lh-verify = "python -m revenue_lakehouse.verify"
 lh-all = ["lh-generate", "lh-ingest", "lh-silver", "lh-gold", "lh-verify"]
+
+[tool.poe.tasks.mcp-lakehouse]
+help = "MCP server reading the KPIs exported by the lakehouse (run lh-all first)"
+cmd = "python -m ops_copilot.mcp_server"
+env = { OPS_COPILOT_KPI_DIR = "projects/01-revenue-lakehouse/data/exports" }

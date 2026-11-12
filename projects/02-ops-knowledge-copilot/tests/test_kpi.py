@@ -64,3 +64,47 @@ def test_range_without_data_returns_no_rows():
 def test_requests_outside_the_allowed_set_are_rejected(metric, venue, start, end, message):
     with pytest.raises(kpi.KpiError, match=message):
         kpi.query_kpi(metric, venue, date.fromisoformat(start), date.fromisoformat(end))
+
+
+# ------------------------------------------------------------ data exported by the lakehouse
+
+HOTEL_HEADER = "date,venue,rooms_available,rooms_sold,room_revenue"
+
+
+def export(folder, header=HOTEL_HEADER):
+    folder.mkdir(exist_ok=True)
+    (folder / "hotel_daily.csv").write_text(
+        f"{header}\n2026-10-01,fogline-marina,40,30,9000.0\n2026-10-02,fogline-marina,40,20,5000.0\n",
+        encoding="utf-8",
+    )
+
+
+def test_a_table_exported_by_the_lakehouse_replaces_the_sample(tmp_path, monkeypatch):
+    export(tmp_path)
+    monkeypatch.setenv(kpi.KPI_DIR_VARIABLE, str(tmp_path))
+    result = kpi.query_kpi(
+        "occupancy", "fogline-marina", date(2026, 10, 1), date(2026, 10, 2), "total"
+    )
+    assert result["rows"] == [{"period": "total", "value": 0.625}]  # 50 of 80 room-nights
+    assert result["source"].startswith(kpi.LAKEHOUSE_SOURCE)
+
+
+def test_tables_the_lakehouse_does_not_export_yet_still_come_from_the_sample(tmp_path, monkeypatch):
+    export(tmp_path)
+    monkeypatch.setenv(kpi.KPI_DIR_VARIABLE, str(tmp_path))
+    result = kpi.query_kpi("covers", "lumen", date(2026, 1, 1), date(2026, 1, 31), "total")
+    assert result["source"].startswith(kpi.SAMPLE_SOURCE)
+    assert result["rows"]
+
+
+def test_an_export_that_breaks_the_contract_is_refused(tmp_path, monkeypatch):
+    export(tmp_path, header="date,venue,rooms_available,rooms_sold,revenue")
+    monkeypatch.setenv(kpi.KPI_DIR_VARIABLE, str(tmp_path))
+    with pytest.raises(kpi.KpiError, match="does not follow the contract"):
+        kpi.query_kpi("occupancy", "fogline-marina", date(2026, 10, 1), date(2026, 10, 2))
+
+
+def test_without_the_variable_the_sample_is_used(monkeypatch):
+    monkeypatch.delenv(kpi.KPI_DIR_VARIABLE, raising=False)
+    result = kpi.query_kpi("adr", "fogline-mission", date(2026, 1, 1), date(2026, 1, 31), "total")
+    assert result["source"].startswith(kpi.SAMPLE_SOURCE)

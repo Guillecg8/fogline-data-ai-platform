@@ -5,8 +5,10 @@ only from the constants in this file; every value that comes from the caller is 
 bound parameter. There is no way to send SQL through this module.
 """
 
+import os
 from dataclasses import dataclass
 from datetime import date
+from pathlib import Path
 from typing import Literal
 
 import duckdb
@@ -17,6 +19,9 @@ from ops_copilot.paths import PROJECT_DIR
 SAMPLES_DIR = PROJECT_DIR / "samples"
 CONTRACT_FILE = PROJECT_DIR.parents[1] / "contracts" / "gold_kpis.yaml"
 MAX_RANGE_DAYS = 366
+KPI_DIR_VARIABLE = "OPS_COPILOT_KPI_DIR"  # folder with the CSV files exported by the lakehouse
+SAMPLE_SOURCE = "synthetic sample"
+LAKEHOUSE_SOURCE = "revenue-lakehouse gold"
 
 Granularity = Literal["day", "week", "month", "total"]
 
@@ -82,12 +87,35 @@ def load_contract() -> dict:
     return yaml.safe_load(CONTRACT_FILE.read_text(encoding="utf-8"))
 
 
+def table_source(table: str) -> tuple[Path, str]:
+    """The file that holds a table and where it comes from.
+
+    A table exported by the lakehouse (folder named in OPS_COPILOT_KPI_DIR) wins; a table the
+    lakehouse does not produce yet falls back to the synthetic sample.
+    """
+    folder = os.environ.get(KPI_DIR_VARIABLE)
+    if folder:
+        exported = Path(folder) / f"{table}.csv"
+        if exported.exists():
+            return exported, LAKEHOUSE_SOURCE
+    return SAMPLES_DIR / f"{table}.csv", SAMPLE_SOURCE
+
+
+def _check_header(path: Path, table: str, columns: list[str]) -> None:
+    with path.open(encoding="utf-8") as handle:
+        header = handle.readline().strip().split(",")
+    if header != columns:
+        raise KpiError(f"{path.name} does not follow the contract for {table}: columns {header}")
+
+
 def _connect() -> duckdb.DuckDBPyConnection:
     """In-memory database with one view per contract table, typed as the contract says."""
     connection = duckdb.connect(":memory:")
     for table, spec in load_contract()["tables"].items():
-        path = (SAMPLES_DIR / f"{table}.csv").as_posix()
-        relation = connection.read_csv(path, header=True, columns=spec["columns"])
+        path, source = table_source(table)
+        if source == LAKEHOUSE_SOURCE:
+            _check_header(path, table, list(spec["columns"]))
+        relation = connection.read_csv(path.as_posix(), header=True, columns=spec["columns"])
         relation.create_view(table)
     return connection
 
@@ -152,5 +180,5 @@ def query_kpi(
         "end_date": end_date.isoformat(),
         "granularity": granularity,
         "rows": rows,
-        "source": "synthetic sample following contracts/gold_kpis.yaml",
+        "source": f"{table_source(spec.table)[1]} following contracts/gold_kpis.yaml",
     }

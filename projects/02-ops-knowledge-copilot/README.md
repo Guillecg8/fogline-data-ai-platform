@@ -81,6 +81,14 @@ uv run poe check        # lint, format, tests
 
 Re-run the evals (about an hour on CPU): `uv run poe eval-all`, then `uv run poe eval-report`.
 
+## KPIs from the lakehouse
+
+By default the KPI tools read a synthetic sample. Point `OPS_COPILOT_KPI_DIR` at the folder that
+[project 01](../01-revenue-lakehouse/README.md) exports and they read the real gold tables instead
+(`uv run poe lh-all`, then `uv run poe mcp-lakehouse`). The CSV header is checked against
+`contracts/gold_kpis.yaml` before it is used, every answer says where its numbers came from, and
+a table the lakehouse does not produce yet still falls back to the sample.
+
 ## Use it from an MCP client
 
 Verified with the official [MCP Inspector](https://github.com/modelcontextprotocol/inspector)

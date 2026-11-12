@@ -23,6 +23,17 @@ uv run poe ingest
 uv run poe search "check-in time"
 ```
 
+## KPIs from the lakehouse
+
+Run `uv run poe lh-all` once, then start the server with the lakehouse data:
+
+```powershell
+$env:OPS_COPILOT_KPI_DIR = "$PWD\projects\01-revenue-lakehouse\data\exports"
+npx @modelcontextprotocol/inspector uv run python -m ops_copilot.mcp_server
+```
+
+`query_kpi` now answers with `source: revenue-lakehouse gold ...`.
+
 ## VS Code (GitHub Copilot agent mode, untested)
 
 The repo already includes `.vscode/mcp.json`. Open the repo folder in VS Code, open

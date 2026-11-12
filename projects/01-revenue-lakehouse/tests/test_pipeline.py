@@ -1,3 +1,4 @@
+import csv
 import json
 import shutil
 import subprocess
@@ -191,3 +192,24 @@ def test_the_gold_check_catches_a_table_that_breaks_the_contract():
     problems = contract_violations(con, "hotel_daily", load_gold_contract()["hotel_daily"])
     assert any("rooms_sold BETWEEN 0 AND rooms_available" in p for p in problems)
     assert any("room_revenue is DECIMAL" in p for p in problems)
+
+
+def test_the_copilot_can_read_what_the_lakehouse_exports(built, monkeypatch):
+    """Consumer contract test: project 02 reads our export and gets the true occupancy."""
+    kpi = pytest.importorskip("ops_copilot.kpi")
+    out, _ = built
+    monkeypatch.setenv(kpi.KPI_DIR_VARIABLE, str(out / "exports"))
+
+    result = kpi.query_kpi(
+        "occupancy", "fogline-marina", date(2025, 11, 1), date(2026, 10, 31), "total"
+    )
+    truth = [
+        row
+        for row in csv.DictReader((out / "truth" / "hotel_daily.csv").open(encoding="utf-8"))
+        if row["venue"] == "fogline-marina"
+    ]
+    expected = sum(int(r["rooms_sold"]) for r in truth) / sum(
+        int(r["rooms_available"]) for r in truth
+    )
+    assert result["source"].startswith(kpi.LAKEHOUSE_SOURCE)
+    assert result["rows"] == [{"period": "total", "value": round(expected, 4)}]
