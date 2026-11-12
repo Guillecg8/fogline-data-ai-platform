@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "fogline-ops-copilot": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "--directory", "${workspaceFolder}", "python", "-m", "ops_copilot.mcp_server"]
+    }
+  }
+}
