@@ -3,7 +3,7 @@
 The provider is chosen with environment variables, so the code never changes:
 
     OPS_COPILOT_LLM_BASE_URL   default http://localhost:11434/v1  (Ollama on this machine)
-    OPS_COPILOT_LLM_MODEL      default llama3.2:3b
+    OPS_COPILOT_LLM_MODEL      default qwen2.5:7b  (see docs/decisions/0001)
     OPS_COPILOT_LLM_API_KEY    default "ollama" (Ollama ignores it)
 """
 
@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 
 import httpx
 
+DEFAULT_MODEL = "qwen2.5:7b"
 Message = dict[str, str]
 
 
@@ -39,7 +40,7 @@ class ChatClient:
         self.base_url = base_url or os.environ.get(
             "OPS_COPILOT_LLM_BASE_URL", "http://localhost:11434/v1"
         )
-        self.model = model or os.environ.get("OPS_COPILOT_LLM_MODEL", "llama3.2:3b")
+        self.model = model or os.environ.get("OPS_COPILOT_LLM_MODEL", DEFAULT_MODEL)
         api_key = api_key or os.environ.get("OPS_COPILOT_LLM_API_KEY", "ollama")
         is_local = urlparse(self.base_url).hostname in {"localhost", "127.0.0.1"}
         self._http = httpx.Client(
