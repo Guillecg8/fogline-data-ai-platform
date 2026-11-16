@@ -74,3 +74,32 @@ Decided after code review of the baselines and model code, and **before any back
 - **Clipping.** The model's output is clipped to the valid range of its target: occupancy to
   `[0, 1]`, covers to `>= 0`. The clip applies to the model output only; baselines are never
   clipped (they are averages of observed values and are already in range).
+
+## Amendment 2 (2026-11-16): restaurant floor reference
+
+Decided before any backtest was run.
+
+- **What it is.** For restaurants only, the report shows a **reference** WAPE next to the
+  methods: the generator's mean covers for each target day, `expected_covers(venue, day)`, times
+  `(1 - VOID_RATE)`. It reads the generator, not the data, so no method could produce it; it
+  shows how much error is irreducible day-to-day noise. It is not a forecast and not a baseline.
+- **Why `(1 - VOID_RATE)`.** The correction comes from the generator's mechanism, not from a
+  measured gap: Gold counts only closed checks, and each check is voided with probability
+  `VOID_RATE` independently of its covers, so expected Gold covers are `(1 - VOID_RATE)` times
+  the target. Fitting the reference to the bias measured on one seed would tune it to that seed.
+- **Known residual bias.** The generator seats parties until the day's target is reached, so the
+  last party overshoots it; we expect actual minus reference to be roughly +1 to +2 covers a
+  day. The report prints the measured bias per restaurant next to the reference WAPE.
+- **Hotels.** No reference: a hotel equivalent would need a Monte Carlo of the booking process.
+
+## Amendment 3 (2026-11-16): two pre-declared slices
+
+Decided before any backtest was run. The report adds exactly these two slices and nothing else;
+no other slicing will be added after seeing results.
+
+- **By horizon bucket.** For each series, WAPE of the model and of that series' best baseline
+  (chosen on the full backtest, as for the headline lift) on days 1-7 and on days 8-14 of the
+  horizon. Descriptive only, no confidence interval.
+- **Saltgrass Sunday closure.** Covers WAPE (per restaurant and pooled) with all origins and
+  without the origins whose 14-day horizon reaches 2026-10-04 or later. The excluded origins are
+  computed from the dates in the code. The headline numbers keep all origins.
