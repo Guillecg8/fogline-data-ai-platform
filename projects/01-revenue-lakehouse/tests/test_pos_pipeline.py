@@ -10,7 +10,7 @@ from revenue_lakehouse.bronze import ingest, ledger_path
 from revenue_lakehouse.check_landing import read_batch
 from revenue_lakehouse.contract import compare_batch, load_contract
 from revenue_lakehouse.delta_io import read_arrow, read_rows
-from revenue_lakehouse.generate_pos import generate_pos
+from revenue_lakehouse.generate_pos import expected_covers, generate_pos
 from revenue_lakehouse.gold import build_gold_restaurants
 from revenue_lakehouse.silver import build_silver_pos, silver_path
 from revenue_lakehouse.sources import POS
@@ -32,6 +32,23 @@ def built(tmp_path_factory):
     out = tmp_path_factory.mktemp("pos")
     summary = generate_pos(out, seed=42)
     return out, summary, run_pos(out)
+
+
+def test_served_covers_track_the_expected_covers_within_a_few_percent(built):
+    out, _, _ = built
+    with (out / "truth" / "restaurant_daily.csv").open(encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    assert len(rows) == 730
+    for venue in ("lumen", "saltgrass"):
+        served = [int(row["covers"]) for row in rows if row["venue"] == venue]
+        expected = [
+            expected_covers(venue, date.fromisoformat(row["date"]))
+            for row in rows
+            if row["venue"] == venue
+        ]
+        assert abs(sum(served) / sum(expected) - 1) < 0.03  # voids pull it down, overshoot up
+    assert expected_covers("saltgrass", date(2026, 10, 4)) == 0.0  # closed on Sundays from then
+    assert expected_covers("saltgrass", date(2026, 9, 27)) > 0.0
 
 
 def test_gold_matches_the_truth_on_every_restaurant_day(built):

@@ -87,15 +87,31 @@ def business_date_of(moment: datetime) -> date:
     return (moment.replace(tzinfo=None) - DAY_STARTS_AT).date()
 
 
+def is_open(venue: str, day: date) -> bool:
+    return not (venue == "saltgrass" and day.weekday() == 6 and day >= SATURDAY_SUNDAY_CLOSED_FROM)
+
+
+def expected_covers(venue: str, day: date) -> float:
+    """Covers the generator aims for before its daily noise: the mean of that day's target.
+
+    Pure (no random draws), so a forecast backtest can use it as an oracle. It is not the
+    expected value of the truth: the last party overshoots the target (up) and voided checks
+    do not count (down, about ``VOID_RATE``).
+    """
+    if not is_open(venue, day):
+        return 0.0
+    weekend = 1.25 if day.weekday() in (4, 5) else 1.0
+    return RESTAURANTS[venue]["covers"] * weekend * (0.9 + 0.1 * season(day))
+
+
 def build_checks(rng: random.Random) -> list[Check]:
     checks = []
     day = START
     while day <= END:
-        weekend = 1.25 if day.weekday() in (4, 5) else 1.0
         for venue, spec in RESTAURANTS.items():
-            if venue == "saltgrass" and day.weekday() == 6 and day >= SATURDAY_SUNDAY_CLOSED_FROM:
+            if not is_open(venue, day):
                 continue
-            target = spec["covers"] * weekend * (0.9 + 0.1 * season(day)) * rng.gauss(1.0, 0.1)
+            target = expected_covers(venue, day) * rng.gauss(1.0, 0.1)
             served = 0
             while served < target:
                 covers = rng.choices(*spec["parties"])[0]
