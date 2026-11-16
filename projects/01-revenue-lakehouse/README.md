@@ -108,3 +108,34 @@ Indicative numbers (2-CPU sandbox, both sources, one new daily batch added to N 
 With little history the incremental run is slightly slower (the MERGE has a fixed cost); it breaks even around 180 days and the gap widens from there.
 Profiling shows the remaining incremental time is mostly the Delta MERGE itself, so partitioning Bronze would not help yet.
 Your own numbers will differ; commit the `BENCHMARK.md` generated on your machine.
+
+## Step 6: demand forecasting, evaluated honestly
+
+**Finding: LightGBM does not beat a 4-week same-weekday mean on this data.** On hotel occupancy it
+is worse; on restaurant covers it ties.
+
+| Target | Best baseline WAPE | Model WAPE | Lift vs best baseline [95% CI] | Origins model wins |
+|---|---|---|---|---|
+| Hotel occupancy (pooled) | 11.54% | 12.54% | -8.7% [-17.0%, -1.7%] | 33% |
+| Restaurant covers (pooled) | 8.86% | 8.80% | +0.6% [-3.7%, +5.1%] | 48% |
+
+- Hotels: the model is also worse on both hotels in both horizon buckets (days 1-7 and 8-14).
+  On Marina alone the interval, [-17.2%, +1.2%], contains zero.
+- Restaurants: the best baseline is already close to the floor. The generator's own mean
+  (a reference no forecast could use) scores 7.43% WAPE pooled: about 1.4 points of apparent
+  headroom; the reference is not a strict bound (its measured bias is -2.55 and +2.11
+  covers/day). The model takes none of it measurably.
+- The design and the expected outcome ("the model may tie or lose") were written in
+  [ADR 0002](../../docs/decisions/0002-demand-forecast-backtest.md) before any backtest ran.
+  The bootstrap block sizes were changed before running but recorded only afterwards (see the ADR).
+  Hyperparameters were not tuned after seeing the results. The next experiment is new information
+  (rooms on the books), not tuning.
+- Caveat: the data is synthetic and simple, so a same-weekday mean is near-optimal by construction.
+  33 overlapping weekly origins over one year.
+
+Full tables, per-venue numbers and the two pre-declared slices: [BACKTEST.md](BACKTEST.md).
+
+```bash
+uv run poe lh-all        # build Gold first
+uv run poe lh-backtest   # writes BACKTEST.md and backtest_results.json
+```
