@@ -5,9 +5,9 @@ hospitality and retail operator in San Francisco. Three projects, one platform.
 
 | # | Project | What it proves | Status |
 |---|---------|----------------|--------|
-| 01 | Revenue Lakehouse | Medallion pipelines, data contracts, forecasting | Planned |
-| 02 | [Ops Knowledge Copilot](projects/02-ops-knowledge-copilot) | RAG + MCP with evals in CI | In progress |
-| 03 | Agentic Commerce Gateway | Agent-ready catalog with spend policies | Planned |
+| 01 | [Revenue Lakehouse](projects/01-revenue-lakehouse) | Contract-checked Bronze/Silver/Gold on Delta Lake + DuckDB over two sources (PMS, POS), quarantine and replay, incremental Silver with a [measured benchmark](projects/01-revenue-lakehouse/BENCHMARK.md), Gold verified against generator ground truth | In progress |
+| 02 | [Ops Knowledge Copilot](projects/02-ops-knowledge-copilot) | Hybrid retrieval, grounded answers with citations, MCP server, held-out [evals](projects/02-ops-knowledge-copilot/evals/REPORT.md), CI quality gates | Done |
+| 03 | Agentic Commerce Gateway | Agent-ready catalog with spend policies | Not started |
 
 ## Quickstart
 
