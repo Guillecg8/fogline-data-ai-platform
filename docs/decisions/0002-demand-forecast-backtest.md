@@ -61,3 +61,16 @@ dropping from 62 to 40 rooms on 2026-09-01), and that knowledge shaped the choic
   it, so it will appear as error.
 - New dependencies in `revenue-lakehouse`: `lightgbm` and `numpy`, the latter declared because the
   code imports it.
+
+## Amendment (2026-11-16): residual target and output clipping
+
+Decided after code review of the baselines and model code, and **before any backtest was run.**
+
+- **Residual target.** The model now learns `y[s' + h] - mean4_same_weekday` (baseline (b) for
+  that row) and adds baseline (b) back at prediction time. The features are unchanged. Reason:
+  regression trees are piecewise constant, so predicting a noisy, slowly moving level directly
+  is a poor approximation of it; the baseline carries the level and the trees only have to learn
+  a correction. If there is nothing to learn, the model falls back to baseline (b).
+- **Clipping.** The model's output is clipped to the valid range of its target: occupancy to
+  `[0, 1]`, covers to `>= 0`. The clip applies to the model output only; baselines are never
+  clipped (they are averages of observed values and are already in range).
