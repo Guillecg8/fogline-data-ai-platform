@@ -11,6 +11,8 @@ hospitality and retail operator in San Francisco. Three projects, one platform.
 
 ## Quickstart
 
+Developed and tested on Python 3.12 (pinned in `.python-version`).
+
     uv sync --all-packages
     uv run poe check
 
