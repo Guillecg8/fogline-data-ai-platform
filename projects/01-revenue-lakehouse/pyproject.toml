@@ -6,6 +6,8 @@ requires-python = ">=3.12"
 dependencies = [
     "deltalake>=1.0",
     "duckdb>=1.4",
+    "lightgbm>=4.7.0",
+    "numpy>=2.5.4",
     "pyarrow>=20",
     "pydantic>=2.7",
     "pyyaml>=6",
