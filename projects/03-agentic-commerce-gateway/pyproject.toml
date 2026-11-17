@@ -3,7 +3,9 @@ name = "commerce-gateway"
 version = "0.1.0"
 description = "Agent-facing commerce gateway with spend limits, human approval and an audit trail"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pyyaml>=6",
+]
 
 [build-system]
 requires = ["hatchling"]

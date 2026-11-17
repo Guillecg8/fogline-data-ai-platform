@@ -28,7 +28,7 @@ Constraints that shape every decision:
 |---|---|---|
 | `projects/01-revenue-lakehouse` | in progress | Bronze/Silver/Gold lakehouse (DuckDB + Delta Lake) over two hostile synthetic sources (PMS reservations, restaurant POS), data contracts, quarantine and replay, incremental Silver, Gold KPIs verified against generator ground truth |
 | `projects/02-ops-knowledge-copilot` | done | RAG copilot: hybrid retrieval (BM25 + ChromaDB, RRF, `as_of` validity), grounded answers with citations, MCP server, held-out evals, CI quality gates |
-| `projects/03-agentic-commerce-gateway` | in progress (A0: workspace member, trust-boundary ADR) | Agent-facing gateway that makes the Fogline Pantry store purchasable by agents: deterministic policy (spend cap, categories, approval threshold, price locks, stock), out-of-band human approval, hash-chained audit, 8 MCP tools, simulated payment only; 25 agent tasks, adversarial evals, recorded demo |
+| `projects/03-agentic-commerce-gateway` | in progress (A3: models, store, audit, policy; no MCP server yet) | Agent-facing gateway that makes the Fogline Pantry store purchasable by agents: deterministic policy (spend cap, categories, approval threshold, price locks, stock), out-of-band human approval, hash-chained audit, 8 MCP tools, simulated payment only; 25 agent tasks, adversarial evals, recorded demo |
 
 Planned next for P1: demand forecasting (seasonal baseline vs LightGBM, walk-forward backtesting,
 MLflow), then Databricks Free Edition deployment. P2 reads P1's Gold exports through the
