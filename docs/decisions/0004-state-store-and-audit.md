@@ -23,8 +23,9 @@ deterministic with an injected clock.
 
 ### Storage: one SQLite file, stdlib `sqlite3`
 
-- One SQLite database file per deployment, path from `COMMERCE_GATEWAY_DB` (default under
-  `data/`, which is git-ignored). Tests and each eval task use their own temporary file, so tasks
+- One SQLite database file per deployment, path from `COMMERCE_GATEWAY_DB` (keep it under
+  `data/`, which is git-ignored; ADR 0005 makes the variable required, with no default, for both
+  entry points). Tests and each eval task use their own temporary file, so tasks
   never share a session.
 - Every table is `STRICT`. That rejects lossy values in an `INTEGER` column (`12.5`, text), but
   it is not a float guard: SQLite stores `2.0` as the integer `2`. The real guards are upstream:
@@ -140,6 +141,10 @@ All three use the same store module; the CLI does not import the MCP layer.
     stderr (`commerce_gateway: double fault; a failed tool call could not be recorded`), never the
     exception text. Both transactions were rolled back, so no state changed and the call is not
     counted. `call()` never raises.
+- **Outside the gateway:** calls rejected at the transport by the SDK before they reach the
+  gateway (a `tools/call` whose params are not well formed, such as non-object `arguments` or a
+  non-string `name`) are outside the gateway's accounting (see
+  [ADR 0005](0005-mcp-tool-contract.md)); the eval harness must count them separately.
 - Structural backstops in the schema, in case code is wrong: `UNIQUE(session_id, quote_hash)` on
   checkouts (idempotency), a partial unique index allowing at most one `pending_approval`
   checkout per session, a partial unique index allowing at most one open session per database
@@ -273,6 +278,13 @@ fixed `reason` plus a closed vocabulary describing the rejected value: `field` (
 `sha256` (for strings only, over UTF-8 with surrogates passed through). A rejected query, even one
 megabyte long, therefore leaves only its hash and length; no text, float, NaN or huge integer can
 reach a payload.
+
+*Amendment (A4 step 0):* a **state-dependent** rejection (an unknown SKU, a line not in the cart,
+a quantity above the quantity in the cart) concerns arguments that already passed validation. Its
+row additionally stores the call's `sku` and `quantity` as values, because they are fixed-format
+(the SKU pattern, an integer from 1 to `MAX_QUANTITY_PER_CALL`) and cannot carry free text. The
+constructor refuses any other key and any value outside that pattern or range. Every other
+rejected value is still described only by the vocabulary above.
 
 **Sanitisation.** Every piece of untrusted text the gateway emits (the stored query text, product
 text returned to the agent, product names shown to the approver) has the Unicode categories `Cc`
