@@ -52,7 +52,7 @@ def test_new_mandate_supersedes_the_session(make_env, make_mandate, clock, sessi
     env.call("add_to_cart", sku="FP-0001", quantity=1)
     new_mandate = make_mandate(session_label="test-2")
     start = start_session(env.store, new_mandate, clock, new_session_id=session_ids)
-    assert start.event == "session_opened" and start.session_id != env.session_id
+    assert start.event == "session_superseded" and start.session_id != env.session_id
     assert _open_sessions(env.store.conn) == [start.session_id]
     superseded, opened = _events(env.store.conn)[-2:]
     assert superseded == (
@@ -95,7 +95,7 @@ def test_supersedes_once_the_pending_checkout_has_expired(
     start = start_session(
         env.store, make_mandate(session_label="test-2"), clock, new_session_id=session_ids
     )
-    assert start.event == "session_opened"
+    assert start.event == "session_superseded"
     assert env.scalar("SELECT status FROM checkouts") == "expired"
     events = [event for event, _, _ in _events(env.store.conn)[-3:]]
     assert events == ["checkout_expired", "session_superseded", "session_opened"]

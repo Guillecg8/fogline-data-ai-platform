@@ -28,8 +28,31 @@ _INT_LIMITS = {
 MANDATE_KEYS = frozenset({"version", "session_label", "allowed_categories", *_INT_LIMITS})
 
 
+ROOT = "(root)"  # path of a problem with the document itself, or with a key that is not known
+
+
+@dataclass(frozen=True)
+class Problem:
+    """One reason a mandate is invalid: a field path and a fixed reason, never the value."""
+
+    path: str
+    reason: str
+
+    def __str__(self) -> str:
+        return f"{self.path}: {self.reason}"
+
+
 class MandateError(ValueError):
-    """The mandate file or content is invalid."""
+    """The mandate file or content is invalid. Its message never quotes a rejected value."""
+
+    def __init__(self, *problems: Problem) -> None:
+        super().__init__("; ".join(map(str, problems)))
+        self.problems = problems
+
+
+def _key_path(key: object) -> str:
+    """A known key is its own path; an unknown key is file content, so it is not echoed."""
+    return key if key in MANDATE_KEYS else ROOT
 
 
 class _StrictLoader(yaml.SafeLoader):
@@ -37,16 +60,63 @@ class _StrictLoader(yaml.SafeLoader):
 
     def construct_mapping(self, node: yaml.Node, deep: bool = False) -> dict:
         if not isinstance(node, yaml.MappingNode):
-            raise MandateError("expected a mapping")
+            raise MandateError(Problem(ROOT, "the mandate must be a mapping"))
         seen = set()
         for key_node, _ in node.value:
             if key_node.tag == "tag:yaml.org,2002:merge":
-                raise MandateError("merge keys are not allowed")
+                raise MandateError(Problem(ROOT, "merge keys are not allowed"))
             key = self.construct_object(key_node, deep=True)
             if key in seen:
-                raise MandateError(f"duplicate key: {key!r}")
+                raise MandateError(Problem(_key_path(key), "duplicate key"))
             seen.add(key)
         return super().construct_mapping(node, deep=deep)
+
+
+def _value_problems(values: dict[str, object], sequence_type: type) -> list[Problem]:
+    """Check the value of every known key present in `values`. Missing keys are not checked."""
+    problems: list[Problem] = []
+    if "session_label" in values:
+        label = values["session_label"]
+        if type(label) is not str or not SESSION_LABEL_PATTERN.fullmatch(label):
+            reason = "must be 1-64 characters of A-Z a-z 0-9 . _ -"
+            problems.append(Problem("session_label", reason))
+    valid_ints: dict[str, int] = {}
+    for key, (low, high) in _INT_LIMITS.items():
+        if key not in values:
+            continue
+        value = values[key]
+        if type(value) is not int:
+            problems.append(Problem(key, "must be an integer"))
+        elif not low <= value <= high:
+            problems.append(Problem(key, f"must be between {low} and {high}"))
+        else:
+            valid_ints[key] = value
+    threshold = valid_ints.get("approval_threshold_cents")
+    budget = valid_ints.get("budget_cents")
+    if threshold is not None and budget is not None and threshold > budget:
+        problems.append(Problem("approval_threshold_cents", "must not exceed budget_cents"))
+    if "allowed_categories" in values:
+        problems += _category_problems(values["allowed_categories"], sequence_type)
+    return problems
+
+
+def _category_problems(categories: object, sequence_type: type) -> list[Problem]:
+    if type(categories) is not sequence_type or not categories:
+        return [Problem("allowed_categories", "must be a non-empty list")]
+    problems: list[Problem] = []
+    for index, category in enumerate(categories):
+        path = f"allowed_categories[{index}]"
+        if type(category) is not str:
+            problems.append(Problem(path, "must be a string"))
+        elif category == UNKNOWN_CATEGORY or category not in KNOWN_CATEGORIES:
+            problems.append(Problem(path, "not an allowable category"))
+    if problems:
+        return problems
+    if len(set(categories)) != len(categories):
+        problems.append(Problem("allowed_categories", "has duplicates"))
+    elif sequence_type is tuple and list(categories) != sorted(categories):
+        problems.append(Problem("allowed_categories", "must be sorted"))
+    return problems
 
 
 @dataclass(frozen=True)
@@ -62,29 +132,10 @@ class Mandate:
     tool_call_budget: int
 
     def __post_init__(self) -> None:
-        label = self.session_label
-        if type(label) is not str or not SESSION_LABEL_PATTERN.fullmatch(label):
-            raise MandateError("session_label must be 1-64 characters of A-Z a-z 0-9 . _ -")
-        for key, (low, high) in _INT_LIMITS.items():
-            value = getattr(self, key)
-            if type(value) is not int:
-                raise MandateError(f"{key} must be an integer")
-            if not low <= value <= high:
-                raise MandateError(f"{key} must be between {low} and {high}")
-        if self.approval_threshold_cents > self.budget_cents:
-            raise MandateError("approval_threshold_cents must not exceed budget_cents")
-        categories = self.allowed_categories
-        if type(categories) is not tuple or not categories:
-            raise MandateError("allowed_categories must be a non-empty list")
-        for category in categories:
-            if type(category) is not str:
-                raise MandateError("every allowed category must be a string")
-            if category == UNKNOWN_CATEGORY or category not in KNOWN_CATEGORIES:
-                raise MandateError(f"not an allowable category: {category!r}")
-        if len(set(categories)) != len(categories):
-            raise MandateError("allowed_categories has duplicates")
-        if list(categories) != sorted(categories):
-            raise MandateError("allowed_categories must be sorted")
+        values = {key: getattr(self, key) for key in MANDATE_KEYS if key != "version"}
+        problems = _value_problems(values, tuple)
+        if problems:
+            raise MandateError(*problems)
 
     @property
     def price_lock_ttl_ms(self) -> int:
@@ -109,31 +160,33 @@ class Mandate:
 
 
 def mandate_from_content(content: object) -> Mandate:
-    """Check the structure of parsed content (YAML or a stored snapshot) and build a `Mandate`."""
+    """Check parsed content (YAML or a stored snapshot) and build a `Mandate`.
+
+    Every problem found is reported at once, each as a field path and a fixed reason.
+    """
     if not isinstance(content, dict):
-        raise MandateError("the mandate must be a mapping")
-    keys = set(content)
-    if keys != MANDATE_KEYS:
-        unknown, missing = sorted(map(str, keys - MANDATE_KEYS)), sorted(MANDATE_KEYS - keys)
-        raise MandateError(f"unknown keys {unknown}, missing keys {missing}")
-    if type(content["version"]) is not int or content["version"] != MANDATE_VERSION:
-        raise MandateError(f"version must be {MANDATE_VERSION}")
-    categories = content["allowed_categories"]
-    if type(categories) is not list or not categories:
-        raise MandateError("allowed_categories must be a non-empty list")
-    if not all(type(category) is str for category in categories):
-        raise MandateError("every allowed category must be a string")
-    if len(set(categories)) != len(categories):
-        raise MandateError("allowed_categories has duplicates")
+        raise MandateError(Problem(ROOT, "the mandate must be a mapping"))
+    problems = [Problem(ROOT, "unknown key") for key in content if key not in MANDATE_KEYS]
+    problems += [Problem(key, "missing key") for key in sorted(MANDATE_KEYS - set(content))]
+    if "version" in content and (
+        type(content["version"]) is not int or content["version"] != MANDATE_VERSION
+    ):
+        problems.append(Problem("version", f"must be {MANDATE_VERSION}"))
+    problems += _value_problems(content, list)
+    if problems:
+        raise MandateError(*problems)
     fields = {key: value for key, value in content.items() if key != "version"}
-    return Mandate(**{**fields, "allowed_categories": tuple(sorted(categories))})
+    return Mandate(**{**fields, "allowed_categories": tuple(sorted(fields["allowed_categories"]))})
 
 
 def parse_mandate(text: str) -> Mandate:
     try:
         content = yaml.load(text, Loader=_StrictLoader)  # a SafeLoader subclass
     except yaml.YAMLError as exc:
-        raise MandateError(f"invalid YAML: {exc}") from exc
+        # The parser's message quotes the document, so only the line number is kept.
+        mark = getattr(exc, "problem_mark", None)
+        path = f"line {mark.line + 1}" if mark is not None else ROOT
+        raise MandateError(Problem(path, "invalid YAML")) from None
     return mandate_from_content(content)
 
 

@@ -121,7 +121,7 @@ class TestUntrustedText:
         result = env.call("search_products", query="twine")
         [product] = result.data["results"]
         assert product["sku"] == "FP-0030"
-        text = product["untrusted_product_text"]
+        text = product["untrusted_text"]
         assert "‮" not in text["description"] and "\u0007" not in text["description"]
         assert set(product) == {
             "sku",
@@ -129,7 +129,7 @@ class TestUntrustedText:
             "unit_price_cents",
             "price_version",
             "stock",
-            "untrusted_product_text",
+            "untrusted_text",
         }
 
     def test_search_is_audited_as_hash_plus_capped_text(self, make_env):
@@ -401,6 +401,51 @@ class TestStoreErrorsCountOnce:
         )
         assert env.scalar("SELECT cart_revision FROM sessions") == before
 
+    @pytest.mark.parametrize(
+        ("tool", "arguments", "field"),
+        [
+            ("add_to_cart", {"sku": "FP-9999", "quantity": 3}, "sku"),
+            ("get_product", {"sku": "FP-9999"}, "sku"),
+            ("remove_from_cart", {"sku": "FP-0002", "quantity": 1}, "sku"),
+            ("remove_from_cart", {"sku": "FP-0001", "quantity": 2}, "quantity"),
+        ],
+    )
+    def test_state_dependent_rejection_stores_the_validated_values(
+        self, make_env, tool, arguments, field
+    ):
+        env = make_env()
+        env.call("add_to_cart", sku="FP-0001", quantity=1)
+        env.gateway.call(tool, arguments)
+        payload = _agent_rows(env)[-1].payload
+        assert {key: payload[key] for key in arguments} == arguments
+        assert payload["field"] == field
+        assert set(payload) == {
+            "reason",
+            "field",
+            "expected",
+            "received",
+            "length",
+            "sha256",
+            *arguments,
+        }
+
+    @pytest.mark.parametrize(
+        "validated",
+        [
+            {"sku": "drop table"},
+            {"sku": "FP-0001x"},
+            {"quantity": 0},
+            {"quantity": 100},
+            {"quantity": 2.0},
+            {"quantity": True},
+            {"query": "salt"},
+        ],
+    )
+    def test_only_validated_values_can_be_stored(self, validated):
+        rejected = RejectedValue.of("sku", "known_sku", "FP-9999")
+        with pytest.raises(ValueError):
+            InvalidArguments("unknown sku", rejected, validated)
+
 
 class TestCheckoutStatus:
     def _status(self, env):
@@ -551,6 +596,25 @@ class TestHandlerSavepoint:
         assert not env.store.conn.in_transaction
 
 
+class TestValidationBug:
+    def test_an_unexpected_validation_error_is_counted_once_as_internal_error(
+        self, make_env, monkeypatch
+    ):
+        env = make_env()
+
+        def broken(tool, arguments):
+            raise RuntimeError("secret FP-0001 detail")
+
+        monkeypatch.setattr(gateway, "validate_arguments", broken)
+        result = env.call("view_cart")
+        assert (result.error, result.outcome) == ("internal_error", "error")
+        assert "secret" not in json.dumps(result.as_dict())
+        assert env.calls_used() == 1
+        [row] = _agent_rows(env)
+        assert (row.event, row.tool, row.allowed) == ("internal_error", "view_cart", False)
+        assert "secret" not in json.dumps(row.payload)
+
+
 class TestDoubleFault:
     def test_failure_while_recording_a_failure(self, make_env, monkeypatch, capsys):
         env = make_env()
@@ -615,7 +679,32 @@ class TestOutcome:
         [pending] = approval.list_pending(env.store, env.clock)
         approval.reject(env.store, env.clock, pending.checkout_id, pending.quote_hash)
         rejected = env.call("request_checkout")
-        assert (rejected.outcome, rejected.data["checkout"]["status"]) == ("ok", "rejected")
+        assert (rejected.allowed, rejected.outcome, rejected.rule_id) == (True, "rejected", None)
+        assert rejected.data["checkout"]["status"] == "rejected"
+        assert _agent_rows(env)[-1].payload["status"] == "rejected"
+
+    def test_repeat_on_an_expired_checkout(self, make_env, clock):
+        env = make_env()
+        env.call("add_to_cart", sku="FP-0020", quantity=1)
+        env.call("request_checkout")
+        clock.advance(TTL)
+        expired = env.call("request_checkout")
+        assert (expired.allowed, expired.outcome, expired.rule_id) == (True, "expired", None)
+        assert env.call("get_checkout_status").outcome == "ok"
+
+    def test_repeat_on_a_denied_cart_is_denied_again(self, make_env):
+        env = make_env(budget_cents=6_000, approval_threshold_cents=5_000)
+        env.call("add_to_cart", sku="FP-0020", quantity=1)
+        first, again = env.call("request_checkout"), env.call("request_checkout")
+        assert (first.outcome, first.rule_id) == ("denied", "spend_cap")
+        assert (again.outcome, again.rule_id) == (first.outcome, first.rule_id)
+
+    def test_repeat_on_a_pending_checkout_is_pending_again(self, make_env):
+        env = make_env()
+        env.call("add_to_cart", sku="FP-0020", quantity=1)
+        first, again = env.call("request_checkout"), env.call("request_checkout")
+        assert first.outcome == again.outcome == "pending_approval"
+        assert first.data["checkout"] == again.data["checkout"]
 
     @pytest.mark.parametrize(
         "kwargs",

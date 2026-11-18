@@ -44,7 +44,7 @@ from commerce_gateway.tools import (
     SEARCH_MAX_RESULTS,
     TOOL_NAMES,
     InvalidArguments,
-    RejectedValue,
+    state_rejection,
     validate_arguments,
 )
 from commerce_gateway.untrusted import query_audit_fields, sanitize
@@ -75,11 +75,17 @@ INGREDIENTS_MAX_CHARS = 500
 
 
 class Outcome(StrEnum):
-    """What one tool call did. `ok` covers read-only tools and cart changes."""
+    """What one tool call did. `ok` covers read-only tools and cart changes.
+
+    `request_checkout` answers with the checkout's status (completed, pending_approval, rejected,
+    expired), or denied when a rule refused it and no checkout exists.
+    """
 
     OK = "ok"
     COMPLETED = "completed"
     PENDING_APPROVAL = "pending_approval"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
     DENIED = "denied"
     ERROR = "error"
 
@@ -161,7 +167,7 @@ def _product_view(fact: ProductFacts, texts: tuple[str, str, str], detail: bool)
         "unit_price_cents": fact.unit_price_cents,
         "price_version": fact.price_version,
         "stock": fact.stock,
-        "untrusted_product_text": untrusted,
+        "untrusted_text": untrusted,
     }
 
 
@@ -218,22 +224,22 @@ def _search_products(
     return _Outcome(_ok({"results": results}), record)
 
 
-def _one_fact(conn: sqlite3.Connection, sku: str, now_ms: int) -> ProductFacts:
-    facts = product_facts(conn, (sku,), now_ms)
+def _one_fact(conn: sqlite3.Connection, args: dict, now_ms: int) -> ProductFacts:
+    facts = product_facts(conn, (args["sku"],), now_ms)
     if not facts:
-        raise InvalidArguments("unknown sku", RejectedValue.of("sku", "known_sku", sku))
+        raise state_rejection("unknown sku", "sku", "known_sku", args)
     return facts[0]
 
 
 def _get_product(conn: sqlite3.Connection, session: Session, now_ms: int, args: dict) -> _Outcome:
-    fact = _one_fact(conn, args["sku"], now_ms)
+    fact = _one_fact(conn, args, now_ms)
     view = _product_view(fact, product_texts(conn)[fact.sku], detail=True)
     return _Outcome(_ok({"product": view}), {"sku": fact.sku})
 
 
 def _add_to_cart(conn: sqlite3.Connection, session: Session, now_ms: int, args: dict) -> _Outcome:
     sku, quantity = args["sku"], args["quantity"]
-    fact = _one_fact(conn, sku, now_ms)
+    fact = _one_fact(conn, args, now_ms)
     sid = session.session_id
     quantity_after = orders.cart_quantity(conn, sid, sku) + quantity
     frozen = orders.pending_checkout(conn, sid) is not None
@@ -265,11 +271,10 @@ def _remove_from_cart(
         return _Outcome(_from_decision(decision), record)
     in_cart = orders.cart_quantity(conn, sid, sku)
     if in_cart == 0:
-        rejected = RejectedValue.of("sku", "sku_in_cart", sku)
-        raise InvalidArguments("sku is not in the cart", rejected)
+        raise state_rejection("sku is not in the cart", "sku", "sku_in_cart", args)
     if quantity > in_cart:
-        rejected = RejectedValue.of("quantity", "quantity_in_cart", quantity)
-        raise InvalidArguments("quantity exceeds the quantity in the cart", rejected)
+        reason = "quantity exceeds the quantity in the cart"
+        raise state_rejection(reason, "quantity", "quantity_in_cart", args)
     orders.reduce_cart_line(conn, sid, sku, quantity)
     return _Outcome(_from_decision(decision, {"cart": _cart_view(conn, sid, now_ms)}), record)
 
@@ -280,13 +285,15 @@ def _view_cart(conn: sqlite3.Connection, session: Session, now_ms: int, args: di
 
 
 def _existing_checkout(existing: orders.Checkout) -> ToolResult:
-    """The idempotent answer to an unchanged cart: the checkout it already produced."""
+    """The idempotent answer to an unchanged cart: the checkout it already produced.
+
+    The outcome is the checkout's current status. The call itself is not a denial, so it is
+    allowed; a rule that rejected the checkout at finalisation is in `data.checkout.rule_id`.
+    """
     data = {"checkout": existing.view()}
-    if existing.status == orders.COMPLETED:
-        return ToolResult(True, Outcome.COMPLETED, data=data)
     if existing.status == orders.PENDING_APPROVAL:
         return ToolResult(True, Outcome.PENDING_APPROVAL, rule_id="approval_required", data=data)
-    return _ok(data)
+    return ToolResult(True, Outcome(existing.status), data=data)
 
 
 def _request_checkout(
@@ -372,6 +379,11 @@ class Gateway:
             args = validate_arguments(tool, arguments)
         except InvalidArguments as exc:
             return self._record_failure(tool_name, INVALID_ARGUMENTS, exc.reason, exc.audit)
+        except Exception:
+            # A bug in validation, not a malformed call: count and audit it once as internal_error.
+            return self._record_failure(
+                tool_name, INTERNAL_ERROR, ERROR_REASONS[INTERNAL_ERROR], {}
+            )
         try:
             with self._store.transaction() as conn:
                 return self._run(conn, tool_name, args)

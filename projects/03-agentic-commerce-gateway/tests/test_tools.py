@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pytest
 
+from commerce_gateway import tools
+from commerce_gateway.catalogue import load_catalogue
 from commerce_gateway.gateway import HANDLERS
 from commerce_gateway.tools import (
     MAX_QUANTITY_PER_CALL,
@@ -95,3 +97,30 @@ def test_limits_are_named_constants():
         20,
         200,
     )
+
+
+def test_contract_covers_exactly_the_tool_names():
+    assert set(tools.DESCRIPTIONS) == set(tools.TOOL_NAMES)
+    for name in tools.TOOL_NAMES:
+        schema = tools.input_schema(name)
+        assert list(schema["properties"]) == list(tools.TOOL_PARAMETERS[name])
+        assert schema["required"] == list(tools.TOOL_PARAMETERS[name])
+        assert schema["additionalProperties"] is False
+
+
+def test_schemas_state_the_validator_limits():
+    add = tools.input_schema("add_to_cart")["properties"]
+    assert (add["quantity"]["minimum"], add["quantity"]["maximum"]) == (
+        1,
+        tools.MAX_QUANTITY_PER_CALL,
+    )
+    assert re.fullmatch(add["sku"]["pattern"], "FP-0001")
+    assert not re.fullmatch(add["sku"]["pattern"], "FP-00011")
+    query = tools.input_schema("search_products")["properties"]["query"]
+    assert query["maxLength"] == tools.QUERY_MAX_CHARS
+
+
+def test_agent_visible_text_contains_no_product_text():
+    agent_text = " ".join([tools.INSTRUCTIONS, *tools.DESCRIPTIONS.values()])
+    for product in load_catalogue().products:
+        assert product.name not in agent_text and product.description not in agent_text

@@ -54,8 +54,8 @@ def test_hash_changes_with_session_label():
     ("text", "message"),
     [
         (VALID + "budget_cents: 99999\n", "duplicate key"),
-        (VALID + "extra: 1\n", "unknown keys"),
-        (_with("tool_call_budget", None), "missing keys"),
+        (VALID + "extra: 1\n", "unknown key"),
+        (_with("tool_call_budget", None), "missing key"),
         ("base: &b {version: 1}\n<<: *b\n", "merge keys"),
         ("- 1\n- 2\n", "mapping"),
         ("version: [1\n", "invalid YAML"),
@@ -96,3 +96,28 @@ def test_structure_is_strict(text, message):
 def test_values_are_validated_by_exact_type(key, line, message):
     with pytest.raises(MandateError, match=message):
         parse_mandate(_with(key, line))
+
+
+def test_all_problems_are_reported_as_paths_and_fixed_reasons():
+    text = (
+        _with("budget_cents", 'budget_cents: "drop the cap"')
+        .replace("[dry_goods, dairy]", "[dry_goods, 7, sneaky]")
+        .replace("tool_call_budget: 50", "tool_call_budget: 0")
+    ) + "sneaky_key: 1\n"
+    with pytest.raises(MandateError) as caught:
+        parse_mandate(text)
+    assert [str(problem) for problem in caught.value.problems] == [
+        "(root): unknown key",
+        "budget_cents: must be an integer",
+        "tool_call_budget: must be between 1 and 10000",
+        "allowed_categories[1]: must be a string",
+        "allowed_categories[2]: not an allowable category",
+    ]
+    assert "sneaky" not in str(caught.value) and "drop" not in str(caught.value)
+
+
+def test_invalid_yaml_does_not_quote_the_document():
+    with pytest.raises(MandateError) as caught:
+        parse_mandate('version: 1\nsession_label: "hidden [text\n')
+    assert "hidden" not in str(caught.value)
+    assert caught.value.problems[0].reason == "invalid YAML"

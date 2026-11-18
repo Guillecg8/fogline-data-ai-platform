@@ -170,4 +170,4 @@ def start_session(
             event=SESSION_OPENED,
             payload={"session_id": new_id, "mandate_hash": mandate.content_hash},
         )
-        return SessionStart(new_id, SESSION_OPENED)
+        return SessionStart(new_id, SESSION_OPENED if current is None else SESSION_SUPERSEDED)

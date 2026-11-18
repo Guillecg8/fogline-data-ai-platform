@@ -662,11 +662,15 @@ name = "commerce-gateway"
 version = "0.1.0"
 source = { editable = "projects/03-agentic-commerce-gateway" }
 dependencies = [
+    { name = "mcp" },
     { name = "pyyaml" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pyyaml", specifier = ">=6" }]
+requires-dist = [
+    { name = "mcp", specifier = ">=2.3,<2.4" },
+    { name = "pyyaml", specifier = ">=6" },
+]
 
 [[package]]
 name = "cryptography"
