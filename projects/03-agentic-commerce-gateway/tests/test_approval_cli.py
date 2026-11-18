@@ -5,6 +5,7 @@ The CLI always uses the system clock. Tests control time only through the sessio
 checkout created far in the future and a floor set to its expiry make "at expiry" exact.
 """
 
+import datetime
 import os
 import re
 import subprocess
@@ -13,9 +14,13 @@ from pathlib import Path
 
 import pytest
 
-from commerce_gateway import approval, audit
+from commerce_gateway import approval, audit, orders
+from commerce_gateway.canonical import canonical_text
 from commerce_gateway.clock import SystemClock
 from commerce_gateway.mandate import load_mandate
+from commerce_gateway.models import LockedLine
+from commerce_gateway.sessions import start_session
+from commerce_gateway.store import StoreError
 
 FAR_FUTURE_MS = 4_102_444_800_000  # 2100-01-01T00:00:00Z, always after the real clock
 TIMEOUT_S = 60
@@ -127,7 +132,11 @@ def test_list_shows_structured_fields_and_marked_truncated_names(make_env, clock
         f"  total_cents {2 * 6900 + 1350}",
         lines[3],
     ]
-    assert re.fullmatch(r"  expires_at_ms [0-9]+", lines[3])
+    match = re.fullmatch(r"  expires_at_ms ([0-9]+) \((\S+), seconds_left ([0-9]+)\)", lines[3])
+    expires_ms = int(match.group(1))
+    expected_iso = datetime.datetime.fromtimestamp(expires_ms // 1000, tz=datetime.UTC)
+    assert match.group(2) == f"{expected_iso:%Y-%m-%dT%H:%M:%S}.{expires_ms % 1000:03d}Z"
+    assert 1700 <= int(match.group(3)) <= 1800
     assert lines[4] == (
         "  line FP-0020 kitchen_supplies quantity 2 unit_price_cents 6900 line_total_cents 13800"
     )
@@ -231,3 +240,120 @@ class TestCheckMandate:
             approval.EXIT_REFUSED,
             "(file): cannot be read as UTF-8 text\n",
         )
+
+
+def _decision(result) -> tuple[int, str, str]:
+    fields = _fields(result.stdout)
+    return result.returncode, fields["rule_id"], fields["status"]
+
+
+def test_stock_gone_before_approval_rejects_with_out_of_stock(pending, db_path):
+    conn = pending.store.conn
+    conn.execute("UPDATE products SET stock = 0 WHERE sku = 'FP-0020'")
+    stock_before = conn.execute("SELECT sku, stock FROM products ORDER BY sku").fetchall()
+    result = cli("approve", "1", pending.checkout["quote_hash"], db=db_path)
+    assert _decision(result) == (approval.EXIT_REFUSED, "out_of_stock", "rejected")
+    assert conn.execute("SELECT sku, stock FROM products ORDER BY sku").fetchall() == stock_before
+    assert pending.scalar("SELECT count(*) FROM checkouts WHERE status = 'completed'") == 0
+
+
+def _insert_completed(env, total_cents: int) -> None:
+    """A completed order the policy did not see when the pending one was quoted."""
+    line = LockedLine("FP-0001", 1, total_cents, 1, FAR_FUTURE_MS + 1)
+    quote = orders.Quote(env.session_id, 999, (line,))
+    env.store.conn.execute(
+        "INSERT INTO checkouts (session_id, cart_revision, quote_hash, quote, total_cents,"
+        " expires_at_ms, status, needed_approval, created_at_ms, decided_at_ms, decided_by)"
+        " VALUES (?, 999, ?, ?, ?, ?, 'completed', 0, ?, ?, 'gateway')",
+        (
+            env.session_id,
+            quote.quote_hash,
+            canonical_text(quote.content()),
+            total_cents,
+            quote.expires_at_ms,
+            FAR_FUTURE_MS,
+            FAR_FUTURE_MS,
+        ),
+    )
+
+
+@pytest.mark.parametrize(
+    ("other_cents", "expected"),
+    [
+        (20_000 - 15_150, (approval.EXIT_OK, "none", "completed")),
+        (20_000 - 15_150 + 1, (approval.EXIT_REFUSED, "spend_cap", "rejected")),
+    ],
+    ids=["exactly-at-cap", "one-cent-over"],
+)
+def test_approval_can_never_exceed_the_cap(pending, db_path, other_cents, expected):
+    _insert_completed(pending, other_cents)
+    result = cli("approve", "1", pending.checkout["quote_hash"], db=db_path)
+    assert _decision(result) == expected
+    spent = pending.scalar("SELECT sum(total_cents) FROM checkouts WHERE status = 'completed'")
+    assert spent <= pending.mandate.budget_cents
+
+
+def test_a_checkout_of_a_superseded_session_is_never_decided(
+    pending, db_path, make_mandate, clock, session_ids
+):
+    conn = pending.store.conn
+    conn.execute("UPDATE sessions SET closed_at_ms = last_seen_ms")
+    start_session(pending.store, make_mandate(session_label="test-2"), clock, session_ids)
+
+    def state():
+        return [
+            conn.execute(f"SELECT * FROM {table} ORDER BY 1").fetchall()
+            for table in ("checkouts", "products", "cart_lines")
+        ] + [conn.execute("SELECT session_id, last_seen_ms FROM sessions ORDER BY 1").fetchall()]
+
+    before = state()
+    for command in ("approve", "reject"):
+        result = cli(command, "1", pending.checkout["quote_hash"], db=db_path)
+        assert _decision(result) == (approval.EXIT_REFUSED, "quote_mismatch", "pending_approval")
+    assert state() == before
+    last = audit.read_rows(conn)[-1]
+    assert (last.session_id, last.actor, last.allowed, last.rule_id) == (
+        pending.session_id,
+        "approver",
+        False,
+        "quote_mismatch",
+    )
+    assert audit.verify(conn).ok
+
+
+def test_no_session_has_its_own_line(open_store, db_path):
+    open_store()  # a gateway database with no session yet
+    result = cli("approve", "1", "0" * 64, db=db_path)
+    assert (result.returncode, result.stderr) == (
+        approval.EXIT_STORE,
+        approval.LINE_NO_SESSION + "\n",
+    )
+
+
+class TestInProcessFailures:
+    """Failures that cannot be provoked from outside; `main` is called in-process."""
+
+    @pytest.fixture
+    def db_env(self, make_env, db_path, monkeypatch):
+        make_env()
+        monkeypatch.setenv(approval.DB_ENV, str(db_path))
+
+    def _boom(self, exc: Exception):
+        def raise_(*args, **kwargs):
+            raise exc
+
+        return raise_
+
+    def test_unexpected_exception_exits_5_with_one_fixed_line(self, db_env, monkeypatch, capsys):
+        secret = "secret-7f3a FP-0001 /home/user/path"
+        monkeypatch.setattr(approval, "list_pending", self._boom(RuntimeError(secret)))
+        assert approval.main(["list"]) == approval.EXIT_INTERNAL == 5
+        out, err = capsys.readouterr()
+        assert (out, err) == ("", approval.LINE_INTERNAL + "\n")
+        assert approval.EXIT_INTERNAL != approval.EXIT_REFUSED
+
+    def test_other_store_errors_have_their_own_line(self, db_env, monkeypatch, capsys):
+        monkeypatch.setattr(approval, "list_pending", self._boom(StoreError("secret detail")))
+        assert approval.main(["list"]) == approval.EXIT_STORE
+        assert capsys.readouterr().err == approval.LINE_STORE + "\n"
+        assert approval.LINE_STORE != approval.LINE_NO_SESSION

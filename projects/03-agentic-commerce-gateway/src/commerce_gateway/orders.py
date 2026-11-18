@@ -11,6 +11,7 @@ from dataclasses import dataclass
 
 from commerce_gateway import audit
 from commerce_gateway.canonical import canonical_hash, canonical_text
+from commerce_gateway.clock import seconds_left
 from commerce_gateway.mandate import Mandate
 from commerce_gateway.models import LockedLine, require_int
 from commerce_gateway.policy import ALLOW, NEEDS_APPROVAL, Decision, RequestCheckout, evaluate
@@ -95,7 +96,8 @@ class Checkout:
         require_int("total_cents", self.total_cents)
         require_int("expires_at_ms", self.expires_at_ms)
 
-    def view(self) -> dict[str, object]:
+    def view(self, now_ms: int) -> dict[str, object]:
+        """What the agent sees. `seconds_left` is from the transaction's effective time."""
         return {
             "checkout_id": self.checkout_id,
             "status": self.status,
@@ -103,6 +105,7 @@ class Checkout:
             "cart_revision": self.cart_revision,
             "total_cents": self.total_cents,
             "expires_at_ms": self.expires_at_ms,
+            "seconds_left": seconds_left(self.expires_at_ms, now_ms),
             "rule_id": self.decision_rule_id,
         }
 

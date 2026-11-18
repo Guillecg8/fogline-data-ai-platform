@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 
 from commerce_gateway import audit, orders
-from commerce_gateway.clock import Clock
+from commerce_gateway.clock import Clock, seconds_left
 from commerce_gateway.models import LockedLine, ProductFacts
 from commerce_gateway.policy import (
     AddToCart,
@@ -63,6 +63,13 @@ ERROR_REASONS = {
     STORE_BUSY: "store busy; try again",
     STORE_INTEGRITY: "store integrity check failed; the gateway refuses to act",
     CART_EMPTY: "the cart is empty",
+}
+
+# Fixed text for outcomes that need an action from the agent. Any other allowed call has no reason.
+STATE_REASONS = {
+    "pending_approval": "a human must decide; use get_checkout_status; do not retry",
+    "rejected": "this checkout was rejected; change the cart to try again",
+    "expired": "the quote expired; add the lines again to re-lock their price",
 }
 
 TOOL_CALL_EVENT = "tool_call"
@@ -108,6 +115,10 @@ class ToolResult:
             consistent = self.allowed and self.error is None and self.rule_id == "approval_required"
         else:
             consistent = self.allowed and self.error is None and self.rule_id is None
+        if self.outcome in (Outcome.ERROR, Outcome.DENIED):
+            consistent = consistent and self.reason is not None
+        else:
+            consistent = consistent and self.reason == STATE_REASONS.get(str(self.outcome))
         if not consistent:
             raise ValueError(f"inconsistent tool result for outcome {self.outcome}")
 
@@ -126,18 +137,24 @@ def _ok(data: dict) -> ToolResult:
     return ToolResult(True, Outcome.OK, data=data)
 
 
+def _allowed(outcome: Outcome, data: dict) -> ToolResult:
+    """An allowed result: a reason only for states that need an agent action."""
+    rule_id = "approval_required" if outcome is Outcome.PENDING_APPROVAL else None
+    return ToolResult(True, outcome, rule_id, None, STATE_REASONS.get(str(outcome)), data)
+
+
 def _from_decision(
     decision: Decision, data: dict | None = None, success: Outcome = Outcome.OK
 ) -> ToolResult:
-    """`allowed` is false only for a denial; a needs-approval decision is allowed with its rule."""
+    """`allowed` is false only for a denial; a needs-approval decision is allowed with its rule.
+
+    A denial carries the policy's fixed reason and no data.
+    """
     if decision.verdict is Verdict.DENIED:
-        outcome = Outcome.DENIED
-    elif decision.verdict is Verdict.NEEDS_APPROVAL:
-        outcome = Outcome.PENDING_APPROVAL
-    else:
-        outcome = success
-    allowed = not decision.denied
-    return ToolResult(allowed, outcome, decision.rule_id, None, decision.reason, data or {})
+        return ToolResult(False, Outcome.DENIED, decision.rule_id, None, decision.reason, {})
+    if decision.verdict is Verdict.NEEDS_APPROVAL:
+        return _allowed(Outcome.PENDING_APPROVAL, data or {})
+    return _allowed(success, data or {})
 
 
 def _error(code: str, reason: str | None = None) -> ToolResult:
@@ -183,6 +200,7 @@ def _cart_view(conn: sqlite3.Connection, session_id: str, now_ms: int) -> dict:
                 "unit_price_cents": line.unit_price_cents,
                 "price_version": line.price_version,
                 "lock_expires_at_ms": line.lock_expires_at_ms,
+                "seconds_left": seconds_left(line.lock_expires_at_ms, now_ms),
                 "line_total_cents": line.line_total_cents,
                 "stale": now_ms >= line.lock_expires_at_ms,
             }
@@ -284,16 +302,13 @@ def _view_cart(conn: sqlite3.Connection, session: Session, now_ms: int, args: di
     return _Outcome(_ok({"cart": cart}), {})
 
 
-def _existing_checkout(existing: orders.Checkout) -> ToolResult:
+def _existing_checkout(existing: orders.Checkout, now_ms: int) -> ToolResult:
     """The idempotent answer to an unchanged cart: the checkout it already produced.
 
     The outcome is the checkout's current status. The call itself is not a denial, so it is
     allowed; a rule that rejected the checkout at finalisation is in `data.checkout.rule_id`.
     """
-    data = {"checkout": existing.view()}
-    if existing.status == orders.PENDING_APPROVAL:
-        return ToolResult(True, Outcome.PENDING_APPROVAL, rule_id="approval_required", data=data)
-    return ToolResult(True, Outcome(existing.status), data=data)
+    return _allowed(Outcome(existing.status), {"checkout": existing.view(now_ms)})
 
 
 def _request_checkout(
@@ -312,7 +327,7 @@ def _request_checkout(
             "status": existing.status,
             "idempotent": True,
         }
-        return _Outcome(_existing_checkout(existing), record)
+        return _Outcome(_existing_checkout(existing, now_ms), record)
     decision, checkout = orders.place_quote(conn, session.mandate, quote, now_ms)
     record = {
         "checkout_id": checkout.checkout_id if checkout else None,
@@ -321,11 +336,7 @@ def _request_checkout(
         "total_cents": quote.total_cents,
         "idempotent": False,
     }
-    data = {
-        "checkout": checkout.view() if checkout else None,
-        "quote_hash": quote.quote_hash,
-        "total_cents": quote.total_cents,
-    }
+    data = {"checkout": checkout.view(now_ms)} if checkout else {}
     return _Outcome(_from_decision(decision, data, success=Outcome.COMPLETED), record)
 
 
@@ -338,7 +349,7 @@ def _get_checkout_status(
         return _Outcome(_ok({"checkout": None}), {"checkout_id": None})
     # Any cart change raises the revision, so an equal revision means the same lines.
     matches = latest.cart_revision == orders.cart_revision(conn, sid)
-    view = {**latest.view(), "matches_current_cart": matches}
+    view = {**latest.view(now_ms), "matches_current_cart": matches}
     record = {"checkout_id": latest.checkout_id, "matches_current_cart": matches}
     return _Outcome(_ok({"checkout": view}), record)
 

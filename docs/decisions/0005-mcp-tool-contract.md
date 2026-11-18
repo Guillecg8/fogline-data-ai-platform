@@ -43,6 +43,11 @@ read in `.venv/lib/python3.12/site-packages`, shows:
   per-request envelope. `CallToolRequestParams` has the same `name` and `arguments` types in both.
 - SDK loggers are named `mcp.*`. With no handler configured, Python's last-resort handler would
   print their warnings, including exception text, to stderr.
+- **An exception raised in a request handler reaches the client.** In the handshake era,
+  `JSONRPCDispatcher` answers with `ErrorData(code=0, message=str(exception))`, so the exception
+  text goes on the wire. In the 2026-07-28 era, `modern_error_data` sends a generic
+  `"Internal server error"`. In both, a pydantic `ValidationError` is mapped by
+  `handler_exception_to_error_data` to its own message, which quotes the offending input.
 
 ## Decision
 
@@ -136,7 +141,25 @@ Every `tools/call` that reaches the handler returns a `CallToolResult` with:
   | `store_integrity` | stored mandate no longer matches its hash | no |
 
 - `reason` is fixed text written by the gateway, never product text, an exception message or an
-  argument value.
+  argument value. It is `null` when a call is allowed without comment (`ok`, `completed`). It is
+  set for `denied` (the policy's reason), for `error`, and for the three states that need an
+  action from the agent:
+
+  | `outcome` | `reason` |
+  |---|---|
+  | `pending_approval` | `a human must decide; use get_checkout_status; do not retry` |
+  | `rejected` | `this checkout was rejected; change the cart to try again` |
+  | `expired` | `the quote expired; add the lines again to re-lock their price` |
+
+  `ToolResult` refuses to be built with any other combination, so the rule cannot drift.
+- **A checkout appears always and only in `data.checkout`**: new, idempotent, completed, pending,
+  rejected or expired. `quote_hash` and `total_cents` are fields of that object, not of `data`. A
+  denied `request_checkout` created no checkout, so its `data` is `{}`, like every denial.
+- **Every expiry the agent sees has `seconds_left` next to it**: `lock_expires_at_ms` on each
+  `view_cart` line and `expires_at_ms` on a checkout. It is
+  `max(0, (expires_at_ms - now) // 1000)`, where `now` is the transaction's effective time
+  (ADR 0004), so it is `0` from the instant the boundary is reached and never negative. The
+  millisecond field is kept: it is what the quote hash and the audit trail use.
 - `data` holds structured fields only (SKUs, categories, integer cents, quantities, times in epoch
   milliseconds, hashes, revisions). **Product text appears in exactly one field name,
   `untrusted_text`** (`{name, description}` in search results, plus `ingredients` in
@@ -148,8 +171,29 @@ Every `tools/call` that reaches the handler returns a `CallToolResult` with:
 `invalid_arguments` and `internal_error`, is a tool result: the call was counted and audited, and
 the model should see the answer and correct itself. JSON-RPC errors come only from the SDK, for
 requests that never reach the handler: the malformed-params gap above, an unknown method, or a
-call before initialisation. `on_call_tool` cannot raise, because `Gateway.call` never raises and
-building the result uses only already-validated JSON values.
+call before initialisation.
+
+**`on_call_tool` never raises.** `Gateway.call` never raises, but converting its result into a
+`CallToolResult` could (a bug, or a pydantic error on an unexpected value), and the SDK would then
+send the exception text to the client (see above). So `on_call_tool` catches any `Exception`
+raised after `Gateway.call` and returns a constant `internal_error` result, built once at import
+from literals so that returning it cannot fail. The call was already counted and audited by the
+gateway; the audit row records the gateway's decision, while the agent received `internal_error`.
+A test makes `to_call_result` raise with a secret string and checks, in both protocol eras, that
+the response is the fixed result and the secret appears nowhere in it.
+
+**Examples**, captured from a real server over stdio with `mandates/example.yaml` (`expired` from
+a mandate with a 2-second price lock):
+
+```json
+{"allowed":true,"outcome":"ok","rule_id":null,"error":null,"reason":null,"data":{"cart":{"cart_revision":0,"frozen":false,"lines":[],"total_cents":0}}}
+{"allowed":true,"outcome":"completed","rule_id":null,"error":null,"reason":null,"data":{"checkout":{"checkout_id":1,"status":"completed","quote_hash":"3943720a1809a15ab1cb79a6cafae748c691157bf2cef40fd0df6e5cd176cc7e","cart_revision":1,"total_cents":1300,"expires_at_ms":1794990246267,"seconds_left":1799,"rule_id":null}}}
+{"allowed":true,"outcome":"pending_approval","rule_id":"approval_required","error":null,"reason":"a human must decide; use get_checkout_status; do not retry","data":{"checkout":{"checkout_id":2,"status":"pending_approval","quote_hash":"ca7e0f1487f4462e0edae9cac717d65afe60e7c328b9a34f22699956e21acb5c","cart_revision":3,"total_cents":13800,"expires_at_ms":1794990246269,"seconds_left":1799,"rule_id":null}}}
+{"allowed":true,"outcome":"rejected","rule_id":null,"error":null,"reason":"this checkout was rejected; change the cart to try again","data":{"checkout":{"checkout_id":2,"status":"rejected","quote_hash":"ca7e0f1487f4462e0edae9cac717d65afe60e7c328b9a34f22699956e21acb5c","cart_revision":3,"total_cents":13800,"expires_at_ms":1794990246269,"seconds_left":1799,"rule_id":null}}}
+{"allowed":true,"outcome":"expired","rule_id":null,"error":null,"reason":"the quote expired; add the lines again to re-lock their price","data":{"checkout":{"checkout_id":1,"status":"expired","quote_hash":"6bca8e9bb11029db7d145f0a73b464ac3258c82792202afb94fc14d662d79642","cart_revision":1,"total_cents":13800,"expires_at_ms":1794988449342,"seconds_left":0,"rule_id":null}}}
+{"allowed":false,"outcome":"denied","rule_id":"category_not_allowed","error":null,"reason":"product category is not allowed by the mandate","data":{}}
+{"allowed":false,"outcome":"error","rule_id":null,"error":"invalid_arguments","reason":"quantity must be an integer from 1 to 99","data":{}}
+```
 
 No `outputSchema` is declared in this phase. One schema per tool would duplicate the `data` shapes
 for little benefit, and the SDK client skips output validation on `isError` results anyway.
@@ -225,7 +269,7 @@ functions gains a `main()`; it still does not import the MCP layer). It reads on
 
 | Command | Does |
 |---|---|
-| `list` | the pending checkout, after lazy expiry: id, quote hash, total, expiry, and per line SKU, category, quantity, unit price, line total, and the name as `[untrusted] "<at most 60 chars>"` |
+| `list` | the pending checkout, after lazy expiry: id, quote hash, total, expiry as `expires_at_ms` followed by the UTC ISO 8601 time and `seconds_left` (from the listing's effective time), and per line SKU, category, quantity, unit price, line total, and the name as `[untrusted] "<at most 60 chars>"` |
 | `approve <checkout_id> <quote_hash>` | approve that exact quote; prints the resulting status or the `rule_id`, then the audit head |
 | `reject <checkout_id> <quote_hash>` | reject it; prints the status or `quote_mismatch`, then the audit head |
 | `audit-head` | prints `<seq> <row_hash>` |
@@ -238,11 +282,23 @@ that is not in the schema (an unknown key's name is file content, so it is not e
 `line N` for a YAML syntax error (the parser's message quotes the document, so only the line is
 kept). The server's refusal line stays fixed; this command is where the human sees the detail.
 
-The CLI never creates a database: a missing file is refused (exit 3). Exit codes: 0 success, 1 a
-decision was refused (`quote_mismatch`, a rule at finalisation), verification failed or the
-mandate is invalid, 2 usage error, 3 the store refused (integrity, busy, cannot open). Output is
-structured fields and the marked untrusted name only (quoted and ASCII-escaped, so it cannot pose
-as CLI output and prints on any console encoding); errors are fixed lines.
+`approve` and `reject` decide only checkouts of the **open** session. A checkout that belongs to a
+closed (superseded) session is refused with the same fixed outcome as a quote mismatch
+(`quote_mismatch`, exit 1): no state table changes, not even `last_seen_ms` or lazy expiry, and
+only the refused decision is appended to the audit trail, as every decision is.
+
+The CLI never creates a database: a missing file is refused (exit 3). Exit codes:
+
+| Exit | Meaning |
+|---|---|
+| 0 | success |
+| 1 | a decision was refused (`quote_mismatch`, a rule at finalisation), verification failed or the mandate is invalid |
+| 2 | usage error, or `COMMERCE_GATEWAY_DB` is not set |
+| 3 | the store refused: cannot open, integrity, busy, no session to decide in, or another store error, each with its own fixed line |
+| 5 | an unexpected exception: one fixed line (`commerce_gateway approval: internal error`), no traceback and no exception text |
+
+Output is structured fields and the marked untrusted name only (quoted and ASCII-escaped, so it
+cannot pose as CLI output and prints on any console encoding); errors are fixed lines on stderr.
 
 ### Dependency and pin
 

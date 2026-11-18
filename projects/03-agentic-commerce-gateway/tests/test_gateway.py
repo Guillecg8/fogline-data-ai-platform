@@ -720,3 +720,82 @@ class TestOutcome:
         kwargs["outcome"] = gateway.Outcome(kwargs["outcome"])
         with pytest.raises(ValueError):
             gateway.ToolResult(**kwargs)
+
+
+class TestResponseShape:
+    """ADR 0005: reason only where the agent must act; a checkout only in data.checkout."""
+
+    def test_allowed_calls_without_comment_have_no_reason(self, make_env):
+        env = make_env()
+        assert env.call("view_cart").reason is None
+        assert env.call("add_to_cart", sku="FP-0001", quantity=1).reason is None
+        completed = env.call("request_checkout")
+        assert (completed.outcome, completed.reason) == ("completed", None)
+        assert env.call("get_checkout_status").reason is None
+
+    def test_states_that_need_an_action_carry_a_fixed_reason(self, make_env, clock):
+        env = make_env()
+        env.call("add_to_cart", sku="FP-0020", quantity=1)
+        pending = env.call("request_checkout")
+        assert pending.reason == gateway.STATE_REASONS["pending_approval"]
+        assert env.call("request_checkout").reason == pending.reason
+        clock.advance(TTL)
+        expired = env.call("request_checkout")
+        assert (expired.outcome, expired.reason) == ("expired", gateway.STATE_REASONS["expired"])
+        assert env.call("get_checkout_status").reason is None  # read-only: status is in data
+
+    def test_rejected_reason(self, make_env):
+        env = make_env()
+        env.call("add_to_cart", sku="FP-0020", quantity=1)
+        env.call("request_checkout")
+        [pending] = approval.list_pending(env.store, env.clock)
+        approval.reject(env.store, env.clock, pending.checkout_id, pending.quote_hash)
+        rejected = env.call("request_checkout")
+        assert rejected.reason == gateway.STATE_REASONS["rejected"]
+
+    def test_denials_keep_the_policy_reason_and_no_data(self, make_env):
+        env = make_env(budget_cents=6_000)
+        env.call("add_to_cart", sku="FP-0020", quantity=1)
+        denied = env.call("request_checkout")
+        assert (denied.outcome, denied.rule_id, denied.data) == ("denied", "spend_cap", {})
+        assert denied.reason and "FP-" not in denied.reason
+
+    def test_a_checkout_is_only_in_data_checkout(self, make_env):
+        env = make_env()
+        env.call("add_to_cart", sku="FP-0001", quantity=1)
+        completed = env.call("request_checkout")
+        env.call("add_to_cart", sku="FP-0020", quantity=1)
+        results = [completed, env.call("request_checkout"), env.call("request_checkout")]
+        for result in results:
+            assert set(result.data) == {"checkout"}
+            assert {"quote_hash", "total_cents"} <= set(result.data["checkout"])
+
+    def test_seconds_left_is_from_the_effective_time(self, make_env, clock):
+        env = make_env()
+        env.call("add_to_cart", sku="FP-0020", quantity=1)
+        clock.advance(10_500)
+        [line] = env.call("view_cart").data["cart"]["lines"]
+        assert (line["lock_expires_at_ms"], line["seconds_left"]) == (
+            env.clock.now_ms() - 10_500 + TTL,
+            (TTL - 10_500) // 1000,
+        )
+        checkout = env.call("request_checkout").data["checkout"]
+        assert checkout["seconds_left"] == (TTL - 10_500) // 1000
+        clock.advance(TTL)
+        assert env.call("get_checkout_status").data["checkout"]["seconds_left"] == 0
+        assert env.call("view_cart").data["cart"]["lines"][0]["seconds_left"] == 0
+
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            {"allowed": True, "outcome": "ok", "reason": "allowed"},
+            {"allowed": True, "outcome": "completed", "reason": "allowed"},
+            {"allowed": True, "outcome": "pending_approval", "rule_id": "approval_required"},
+            {"allowed": True, "outcome": "rejected", "reason": "other text"},
+            {"allowed": False, "outcome": "denied", "rule_id": "spend_cap"},
+        ],
+    )
+    def test_reason_rules_are_enforced(self, kwargs):
+        kwargs["outcome"] = gateway.Outcome(kwargs["outcome"])
+        with pytest.raises(ValueError):
+            gateway.ToolResult(**kwargs)

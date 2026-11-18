@@ -7,6 +7,7 @@ quote hash and only before the quote expires. The CLI uses the system clock, wit
 """
 
 import argparse
+import datetime
 import json
 import os
 import re
@@ -17,7 +18,7 @@ from pathlib import Path
 
 from commerce_gateway import audit, orders
 from commerce_gateway.audit import Head
-from commerce_gateway.clock import Clock, SystemClock
+from commerce_gateway.clock import Clock, SystemClock, seconds_left
 from commerce_gateway.mandate import MandateError, parse_mandate
 from commerce_gateway.models import require_int
 from commerce_gateway.policy import (
@@ -29,7 +30,7 @@ from commerce_gateway.policy import (
     Verdict,
     evaluate,
 )
-from commerce_gateway.sessions import effective_now, load_session, open_session_id
+from commerce_gateway.sessions import Session, effective_now, load_session, open_session_id
 from commerce_gateway.store import (
     Store,
     StoreBusy,
@@ -44,6 +45,10 @@ APPROVER = "approver"
 APPROVAL_EVENT = "approval_decision"
 UNTRUSTED_NAME_MAX_CHARS = 60
 _QUOTE_HASH = re.compile(r"[0-9a-f]{64}")
+
+
+class NoSessionError(StoreError):
+    """There is no session to decide in: the database has no open session."""
 
 
 @dataclass(frozen=True)
@@ -68,12 +73,14 @@ class PendingCheckout:
     quote_hash: str
     total_cents: int
     expires_at_ms: int
+    seconds_left: int  # from the listing transaction's effective time
     lines: tuple[PendingLine, ...]
 
     def __post_init__(self) -> None:
         require_int("checkout_id", self.checkout_id, 1)
         require_int("total_cents", self.total_cents)
         require_int("expires_at_ms", self.expires_at_ms)
+        require_int("seconds_left", self.seconds_left)
 
 
 @dataclass(frozen=True)
@@ -117,6 +124,7 @@ def list_pending(store: Store, clock: Clock) -> tuple[PendingCheckout, ...]:
                 pending.quote_hash,
                 pending.total_cents,
                 pending.expires_at_ms,
+                seconds_left(pending.expires_at_ms, now_ms),
                 lines,
             ),
         )
@@ -141,8 +149,10 @@ def _decide(
         found = orders.get_checkout(conn, checkout_id)
         session_id = found.session_id if found else open_session_id(conn)
         if session_id is None:
-            raise StoreError("no session to decide in")
+            raise NoSessionError("no session to decide in")
         session = load_session(conn, session_id)
+        if not session.is_open:
+            return _refuse_closed(conn, session, clock, checkout_id, clean_hash, approve, found)
         now_ms = effective_now(conn, session_id, clock)
         orders.expire_pending(conn, session_id, now_ms)
         checkout = orders.get_checkout(conn, checkout_id)
@@ -196,6 +206,37 @@ def _decide(
         return ApprovalOutcome(decision, status, audit.head(conn))
 
 
+def _refuse_closed(
+    conn: sqlite3.Connection,
+    session: Session,
+    clock: Clock,
+    checkout_id: int,
+    quote_hash: str | None,
+    approve: bool,
+    found: orders.Checkout,
+) -> ApprovalOutcome:
+    """A checkout of a closed (superseded) session is never decided: the same fixed outcome as
+    a quote mismatch. No state table changes, not even `last_seen_ms` or lazy expiry; only the
+    refused decision is audited, as every decision is."""
+    now_ms = max(clock.now_ms(), session.last_seen_ms)
+    audit.append(
+        conn,
+        ts_ms=now_ms,
+        session_id=session.session_id,
+        actor=APPROVER,
+        event=APPROVAL_EVENT,
+        allowed=False,
+        rule_id=QUOTE_MISMATCH,
+        payload={
+            "action": "approve" if approve else "reject",
+            "checkout_id": checkout_id,
+            "quote_hash": quote_hash,
+            "status": found.status,
+        },
+    )
+    return ApprovalOutcome(DENY_MISMATCH, found.status, audit.head(conn))
+
+
 # --- Command-line interface -------------------------------------------------------------------
 
 DB_ENV = "COMMERCE_GATEWAY_DB"
@@ -203,6 +244,7 @@ EXIT_OK = 0
 EXIT_REFUSED = 1  # a decision was refused, verification failed or a mandate is invalid
 EXIT_USAGE = 2
 EXIT_STORE = 3
+EXIT_INTERNAL = 5  # an unexpected error; distinct from a refused decision
 
 _PREFIX = "commerce_gateway approval: "
 LINE_NO_DB = _PREFIX + f"{DB_ENV} must be set"
@@ -210,6 +252,8 @@ LINE_DB = _PREFIX + "the database cannot be opened"
 LINE_INTEGRITY = _PREFIX + "store integrity check failed"
 LINE_BUSY = _PREFIX + "store busy"
 LINE_NO_SESSION = _PREFIX + "there is no session to decide in"
+LINE_STORE = _PREFIX + "the store refused the command"
+LINE_INTERNAL = _PREFIX + "internal error"
 _ANCHOR = re.compile(r"([0-9]+):([0-9a-f]{64})")
 
 
@@ -224,6 +268,12 @@ def _untrusted(name: str, truncated: bool) -> str:
     """Product text for a human: marked, quoted and escaped, so it cannot pose as CLI output."""
     marker = "[untrusted, truncated]" if truncated else "[untrusted]"
     return f"{marker} {json.dumps(name, ensure_ascii=True)}"
+
+
+def _utc_iso(ms: int) -> str:
+    """Epoch milliseconds as UTC ISO 8601, computed with integers only (no float seconds)."""
+    whole = datetime.datetime.fromtimestamp(ms // 1000, tz=datetime.UTC)
+    return f"{whole:%Y-%m-%dT%H:%M:%S}.{ms % 1000:03d}Z"
 
 
 def _open_store() -> Store:
@@ -255,7 +305,10 @@ def _cmd_list(store: Store, args: argparse.Namespace) -> int:
         print(f"checkout {checkout.checkout_id} pending_approval")
         print(f"  quote_hash {checkout.quote_hash}")
         print(f"  total_cents {checkout.total_cents}")
-        print(f"  expires_at_ms {checkout.expires_at_ms}")
+        print(
+            f"  expires_at_ms {checkout.expires_at_ms} ({_utc_iso(checkout.expires_at_ms)},"
+            f" seconds_left {checkout.seconds_left})"
+        )
         for line in checkout.lines:
             print(
                 f"  line {line.sku} {line.policy_category} quantity {line.quantity}"
@@ -346,6 +399,15 @@ _STORE_COMMANDS = {
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    try:
+        return _run(args)
+    except Exception:
+        # No traceback and no exception text: it can contain paths, values or product text.
+        print(LINE_INTERNAL, file=sys.stderr)
+        return EXIT_INTERNAL
+
+
+def _run(args: argparse.Namespace) -> int:
     if args.command == "check-mandate":
         return _cmd_check_mandate(args)
     try:
@@ -361,8 +423,11 @@ def main(argv: list[str] | None = None) -> int:
     except StoreBusy:
         print(LINE_BUSY, file=sys.stderr)
         return EXIT_STORE
-    except StoreError:
+    except NoSessionError:
         print(LINE_NO_SESSION, file=sys.stderr)
+        return EXIT_STORE
+    except StoreError:
+        print(LINE_STORE, file=sys.stderr)
         return EXIT_STORE
     finally:
         store.close()

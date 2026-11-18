@@ -18,7 +18,7 @@ from pathlib import Path
 
 import anyio
 import pytest
-from mcp import ClientSession, StdioServerParameters, stdio_client
+from mcp import Client, ClientSession, StdioServerParameters, stdio_client
 
 from commerce_gateway import server
 from commerce_gateway.catalogue import load_catalogue
@@ -99,11 +99,14 @@ class RawClient:
             encoding="utf-8",
         )
         self._lines: queue.Queue[str] = queue.Queue()
-        threading.Thread(target=self._read, daemon=True).start()
+        self.stdout_lines: list[str] = []  # every line the server wrote, in order
+        self._reader = threading.Thread(target=self._read, daemon=True)
+        self._reader.start()
         self._next_id = 0
 
     def _read(self) -> None:
         for line in self.proc.stdout:
+            self.stdout_lines.append(line)
             self._lines.put(line)
 
     def _send(self, message: dict) -> None:
@@ -133,6 +136,7 @@ class RawClient:
     def close(self) -> None:
         self.proc.stdin.close()
         self.proc.wait(timeout=TIMEOUT_S)
+        self._reader.join(timeout=TIMEOUT_S)
         self._errlog.close()
 
     def kill(self) -> None:
@@ -378,3 +382,49 @@ def test_refuses_a_new_mandate_while_a_checkout_is_pending(paths):
     result = _run_refused(_env(paths))
     assert (result.returncode, result.stdout) == (server.EXIT_SESSION, "")
     assert result.stderr == server.REFUSAL_PENDING + "\n"
+
+
+def test_stdout_carries_only_json_rpc(raw, paths):
+    client = raw()
+    client.call({"name": "add_to_cart", "arguments": {"sku": "FP-0001", "quantity": 1}})
+    client.call({"name": "search_products", "arguments": {"query": MEGABYTE}})
+    client.call({"name": "view_cart", "arguments": "not an object"})
+    client.close()
+    assert len(client.stdout_lines) == 4  # initialize plus three answers
+    for line in client.stdout_lines:
+        message = json.loads(line)
+        assert message["jsonrpc"] == "2.0"
+        assert ("result" in message) != ("error" in message)
+    [serving] = _stderr_lines(paths)
+    assert SERVING.fullmatch(serving)
+
+
+SECRET = "secret-7f3a FP-0001 Ginger Syrup"
+
+
+@pytest.mark.parametrize("mode", ["legacy", "auto"], ids=["handshake-era", "modern-era"])
+def test_a_failure_after_the_gateway_returns_a_fixed_internal_error(make_env, monkeypatch, mode):
+    """Without the wrapper the handshake era would send str(exception) to the client."""
+    env = make_env()
+
+    def broken(result):
+        raise RuntimeError(SECRET)
+
+    monkeypatch.setattr(server, "to_call_result", broken)
+
+    async def call() -> object:
+        async with Client(server.build_server(env.gateway), mode=mode) as client:
+            return await client.call_tool("view_cart", {})
+
+    result = anyio.run(call)
+    assert result.is_error is True
+    assert result.structured_content == {
+        "allowed": False,
+        "outcome": "error",
+        "rule_id": None,
+        "error": "internal_error",
+        "reason": "internal error; the call was counted and audited",
+        "data": {},
+    }
+    assert "secret" not in result.model_dump_json()
+    assert env.calls_used() == 1  # the gateway counted and audited it before the failure

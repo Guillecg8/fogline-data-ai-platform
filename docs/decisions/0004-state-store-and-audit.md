@@ -74,6 +74,9 @@ human intended.
 - A server whose session was closed by another process (started with a different mandate) answers
   every later call with a fixed `session_closed` error. That is a store error, not a policy
   `rule_id`, and it is audited.
+- The approval CLI never decides a checkout of a closed session. It refuses with the outcome of a
+  quote mismatch and changes no state table; the refused decision is audited
+  ([ADR 0005](0005-mcp-tool-contract.md)).
 - **The session lifecycle is audited** with actor `system`: `session_opened` (new session id,
   mandate hash), `session_resumed` (session id, mandate hash) and `session_superseded` (old
   session id and mandate hash, new session id and mandate hash). The event is not called

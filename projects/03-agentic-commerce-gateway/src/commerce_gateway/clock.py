@@ -8,6 +8,11 @@ import time
 from typing import Protocol
 
 
+def seconds_left(expires_at_ms: int, now_ms: int) -> int:
+    """Whole seconds until an expiry, 0 once expired (`now >= expires_at_ms`), never negative."""
+    return max(0, (expires_at_ms - now_ms) // 1000)
+
+
 class Clock(Protocol):
     def now_ms(self) -> int: ...
 

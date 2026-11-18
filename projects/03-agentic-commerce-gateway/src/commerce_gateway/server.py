@@ -23,7 +23,7 @@ from mcp.server.stdio import stdio_server
 
 from commerce_gateway import __version__
 from commerce_gateway.clock import SystemClock
-from commerce_gateway.gateway import Gateway, Outcome, ToolResult
+from commerce_gateway.gateway import ERROR_REASONS, INTERNAL_ERROR, Gateway, Outcome, ToolResult
 from commerce_gateway.mandate import MandateError, load_mandate
 from commerce_gateway.sessions import SessionStartRefused, start_session
 from commerce_gateway.store import Store, StoreBusy, StoreError, StoreIntegrityError
@@ -75,15 +75,35 @@ def tool_list() -> list[types.Tool]:
     ]
 
 
+def _as_text(body: dict) -> str:
+    return json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
 def to_call_result(result: ToolResult) -> types.CallToolResult:
     """The same object as structured content and as JSON text; isError only for errors."""
     body = result.as_dict()
-    text = json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return types.CallToolResult(
-        content=[types.TextContent(type="text", text=text)],
+        content=[types.TextContent(type="text", text=_as_text(body))],
         structured_content=body,
         is_error=result.outcome is Outcome.ERROR,
     )
+
+
+# Built once from literals, so returning it cannot fail. The call it answers was already counted
+# and audited by `Gateway.call`; what failed is turning its result into a protocol response.
+_INTERNAL_ERROR_BODY = {
+    "allowed": False,
+    "outcome": "error",
+    "rule_id": None,
+    "error": INTERNAL_ERROR,
+    "reason": ERROR_REASONS[INTERNAL_ERROR],
+    "data": {},
+}
+INTERNAL_ERROR_RESULT = types.CallToolResult(
+    content=[types.TextContent(type="text", text=_as_text(_INTERNAL_ERROR_BODY))],
+    structured_content=_INTERNAL_ERROR_BODY,
+    is_error=True,
+)
 
 
 def build_server(gateway: Gateway) -> Server:
@@ -94,7 +114,12 @@ def build_server(gateway: Gateway) -> Server:
 
     async def call_tool(ctx: object, params: types.CallToolRequestParams) -> types.CallToolResult:
         # Raw name and arguments, unvalidated: the gateway validates, counts and audits them.
-        return to_call_result(gateway.call(params.name, params.arguments))
+        # Nothing may raise out of here: the SDK would send the exception text to the client
+        # (ADR 0005), and that text can contain arguments or product text.
+        try:
+            return to_call_result(gateway.call(params.name, params.arguments))
+        except Exception:
+            return INTERNAL_ERROR_RESULT
 
     return Server(
         SERVER_NAME,

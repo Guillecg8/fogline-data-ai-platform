@@ -72,8 +72,8 @@ CASES = [
     (approval.PendingLine, PENDING_LINE, ("quantity", "unit_price_cents", "line_total_cents")),
     (
         approval.PendingCheckout,
-        approval.PendingCheckout(1, "a" * 64, 650, 1_000, (PENDING_LINE,)),
-        ("checkout_id", "total_cents", "expires_at_ms"),
+        approval.PendingCheckout(1, "a" * 64, 650, 1_000, 30, (PENDING_LINE,)),
+        ("checkout_id", "total_cents", "expires_at_ms", "seconds_left"),
     ),
     (
         Mandate,
