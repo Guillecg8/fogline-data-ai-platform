@@ -155,11 +155,15 @@ Every `tools/call` that reaches the handler returns a `CallToolResult` with:
 - **A checkout appears always and only in `data.checkout`**: new, idempotent, completed, pending,
   rejected or expired. `quote_hash` and `total_cents` are fields of that object, not of `data`. A
   denied `request_checkout` created no checkout, so its `data` is `{}`, like every denial.
-- **Every expiry the agent sees has `seconds_left` next to it**: `lock_expires_at_ms` on each
-  `view_cart` line and `expires_at_ms` on a checkout. It is
-  `max(0, (expires_at_ms - now) // 1000)`, where `now` is the transaction's effective time
-  (ADR 0004), so it is `0` from the instant the boundary is reached and never negative. The
-  millisecond field is kept: it is what the quote hash and the audit trail use.
+- **`seconds_left` sits next to every expiry the agent can act on**: `lock_expires_at_ms` on each
+  `view_cart` line, and `expires_at_ms` on a checkout **only while it is `pending_approval`**. A
+  `completed`, `rejected` or `expired` checkout has `seconds_left: null`, because nothing about
+  it expires any more and a countdown on a paid order would mislead the model; its
+  `expires_at_ms` stays in every state. The value is `max(0, (expires_at_ms - now) // 1000)`,
+  where `now` is the transaction's effective time (ADR 0004). The floor makes it `0` during the
+  last second before the boundary as well as at and after it: the agent is told time is up
+  slightly early, never late, which is the safe side. It is never negative. The millisecond
+  field is kept: it is what the quote hash and the audit trail use.
 - `data` holds structured fields only (SKUs, categories, integer cents, quantities, times in epoch
   milliseconds, hashes, revisions). **Product text appears in exactly one field name,
   `untrusted_text`** (`{name, description}` in search results, plus `ingredients` in
@@ -179,18 +183,27 @@ send the exception text to the client (see above). So `on_call_tool` catches any
 raised after `Gateway.call` and returns a constant `internal_error` result, built once at import
 from literals so that returning it cannot fail. The call was already counted and audited by the
 gateway; the audit row records the gateway's decision, while the agent received `internal_error`.
-A test makes `to_call_result` raise with a secret string and checks, in both protocol eras, that
-the response is the fixed result and the secret appears nowhere in it.
+The wrapper also writes one fixed line to stderr, `commerce_gateway: result conversion failed;
+the call was recorded`, never the exception text. A test makes `to_call_result` raise with a
+secret string and checks, in both protocol eras, that the response is the fixed result, that
+stderr holds exactly that line, and that the secret appears nowhere.
+
+**A retry after `internal_error` is not idempotent for cart changes.** When the wrapper fires,
+the gateway's transaction has already committed. An agent that retries an `add_to_cart` it was
+told failed adds the units a second time (and the call is counted twice). `request_checkout` is
+safe to retry, because an unchanged cart returns the same checkout, and read-only tools are
+harmless. The agent can see the true state with `view_cart`; the eval harness should count
+`internal_error` results separately so that such a duplicate is visible.
 
 **Examples**, captured from a real server over stdio with `mandates/example.yaml` (`expired` from
 a mandate with a 2-second price lock):
 
 ```json
 {"allowed":true,"outcome":"ok","rule_id":null,"error":null,"reason":null,"data":{"cart":{"cart_revision":0,"frozen":false,"lines":[],"total_cents":0}}}
-{"allowed":true,"outcome":"completed","rule_id":null,"error":null,"reason":null,"data":{"checkout":{"checkout_id":1,"status":"completed","quote_hash":"3943720a1809a15ab1cb79a6cafae748c691157bf2cef40fd0df6e5cd176cc7e","cart_revision":1,"total_cents":1300,"expires_at_ms":1794990246267,"seconds_left":1799,"rule_id":null}}}
+{"allowed":true,"outcome":"completed","rule_id":null,"error":null,"reason":null,"data":{"checkout":{"checkout_id":1,"status":"completed","quote_hash":"3943720a1809a15ab1cb79a6cafae748c691157bf2cef40fd0df6e5cd176cc7e","cart_revision":1,"total_cents":1300,"expires_at_ms":1794990246267,"seconds_left":null,"rule_id":null}}}
 {"allowed":true,"outcome":"pending_approval","rule_id":"approval_required","error":null,"reason":"a human must decide; use get_checkout_status; do not retry","data":{"checkout":{"checkout_id":2,"status":"pending_approval","quote_hash":"ca7e0f1487f4462e0edae9cac717d65afe60e7c328b9a34f22699956e21acb5c","cart_revision":3,"total_cents":13800,"expires_at_ms":1794990246269,"seconds_left":1799,"rule_id":null}}}
-{"allowed":true,"outcome":"rejected","rule_id":null,"error":null,"reason":"this checkout was rejected; change the cart to try again","data":{"checkout":{"checkout_id":2,"status":"rejected","quote_hash":"ca7e0f1487f4462e0edae9cac717d65afe60e7c328b9a34f22699956e21acb5c","cart_revision":3,"total_cents":13800,"expires_at_ms":1794990246269,"seconds_left":1799,"rule_id":null}}}
-{"allowed":true,"outcome":"expired","rule_id":null,"error":null,"reason":"the quote expired; add the lines again to re-lock their price","data":{"checkout":{"checkout_id":1,"status":"expired","quote_hash":"6bca8e9bb11029db7d145f0a73b464ac3258c82792202afb94fc14d662d79642","cart_revision":1,"total_cents":13800,"expires_at_ms":1794988449342,"seconds_left":0,"rule_id":null}}}
+{"allowed":true,"outcome":"rejected","rule_id":null,"error":null,"reason":"this checkout was rejected; change the cart to try again","data":{"checkout":{"checkout_id":2,"status":"rejected","quote_hash":"ca7e0f1487f4462e0edae9cac717d65afe60e7c328b9a34f22699956e21acb5c","cart_revision":3,"total_cents":13800,"expires_at_ms":1794990246269,"seconds_left":null,"rule_id":null}}}
+{"allowed":true,"outcome":"expired","rule_id":null,"error":null,"reason":"the quote expired; add the lines again to re-lock their price","data":{"checkout":{"checkout_id":1,"status":"expired","quote_hash":"6bca8e9bb11029db7d145f0a73b464ac3258c82792202afb94fc14d662d79642","cart_revision":1,"total_cents":13800,"expires_at_ms":1794988449342,"seconds_left":null,"rule_id":null}}}
 {"allowed":false,"outcome":"denied","rule_id":"category_not_allowed","error":null,"reason":"product category is not allowed by the mandate","data":{}}
 {"allowed":false,"outcome":"error","rule_id":null,"error":"invalid_arguments","reason":"quantity must be an integer from 1 to 99","data":{}}
 ```
@@ -244,7 +257,8 @@ approval CLI's `check-mandate PATH`, which reports each problem as a field path 
 **stdout carries only protocol traffic**: the gateway's code never writes to it, and the SDK
 redirects fd 1 to stderr while serving. **stderr carries only fixed lines**: the startup line, a
 refusal line, or the double-fault line from ADR 0004. An end-to-end test captures stderr for a
-whole session, including invalid and huge arguments, and asserts it contains nothing else.
+whole session, including invalid and huge arguments, and asserts it contains nothing else. The
+`on_call_tool` wrapper's conversion-failure line (*Response shape*) is the one other fixed line.
 
 ### Clocks
 

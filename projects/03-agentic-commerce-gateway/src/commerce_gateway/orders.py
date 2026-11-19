@@ -97,7 +97,8 @@ class Checkout:
         require_int("expires_at_ms", self.expires_at_ms)
 
     def view(self, now_ms: int) -> dict[str, object]:
-        """What the agent sees. `seconds_left` is from the transaction's effective time."""
+        """What the agent sees. `seconds_left` is from the transaction's effective time, and only
+        for a pending checkout: no other state has an expiry the agent can act on."""
         return {
             "checkout_id": self.checkout_id,
             "status": self.status,
@@ -105,7 +106,11 @@ class Checkout:
             "cart_revision": self.cart_revision,
             "total_cents": self.total_cents,
             "expires_at_ms": self.expires_at_ms,
-            "seconds_left": seconds_left(self.expires_at_ms, now_ms),
+            "seconds_left": (
+                seconds_left(self.expires_at_ms, now_ms)
+                if self.status == PENDING_APPROVAL
+                else None
+            ),
             "rule_id": self.decision_rule_id,
         }
 

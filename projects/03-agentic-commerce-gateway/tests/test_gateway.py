@@ -782,8 +782,23 @@ class TestResponseShape:
         checkout = env.call("request_checkout").data["checkout"]
         assert checkout["seconds_left"] == (TTL - 10_500) // 1000
         clock.advance(TTL)
-        assert env.call("get_checkout_status").data["checkout"]["seconds_left"] == 0
+        expired = env.call("get_checkout_status").data["checkout"]
+        assert (expired["status"], expired["seconds_left"]) == ("expired", None)
+        assert expired["expires_at_ms"] == checkout["expires_at_ms"]
         assert env.call("view_cart").data["cart"]["lines"][0]["seconds_left"] == 0
+
+    def test_seconds_left_only_while_pending(self, make_env):
+        env = make_env()
+        env.call("add_to_cart", sku="FP-0001", quantity=1)
+        completed = env.call("request_checkout").data["checkout"]
+        env.call("add_to_cart", sku="FP-0020", quantity=1)
+        pending = env.call("request_checkout").data["checkout"]
+        [listed] = approval.list_pending(env.store, env.clock)
+        approval.reject(env.store, env.clock, listed.checkout_id, listed.quote_hash)
+        rejected = env.call("request_checkout").data["checkout"]
+        checkouts = (completed, pending, rejected)
+        assert [c["seconds_left"] for c in checkouts] == [None, TTL // 1000, None]
+        assert all(type(c["expires_at_ms"]) is int for c in checkouts)
 
     @pytest.mark.parametrize(
         "kwargs",

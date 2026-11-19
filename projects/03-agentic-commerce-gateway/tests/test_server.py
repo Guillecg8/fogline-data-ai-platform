@@ -403,7 +403,9 @@ SECRET = "secret-7f3a FP-0001 Ginger Syrup"
 
 
 @pytest.mark.parametrize("mode", ["legacy", "auto"], ids=["handshake-era", "modern-era"])
-def test_a_failure_after_the_gateway_returns_a_fixed_internal_error(make_env, monkeypatch, mode):
+def test_a_failure_after_the_gateway_returns_a_fixed_internal_error(
+    make_env, monkeypatch, capsys, mode
+):
     """Without the wrapper the handshake era would send str(exception) to the client."""
     env = make_env()
 
@@ -417,6 +419,7 @@ def test_a_failure_after_the_gateway_returns_a_fixed_internal_error(make_env, mo
             return await client.call_tool("view_cart", {})
 
     result = anyio.run(call)
+    assert capsys.readouterr().err == server.CONVERSION_FAILED + "\n"
     assert result.is_error is True
     assert result.structured_content == {
         "allowed": False,

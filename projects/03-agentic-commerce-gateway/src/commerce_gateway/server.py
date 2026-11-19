@@ -45,6 +45,7 @@ REFUSAL_INTEGRITY = _REFUSED + "store integrity check failed"
 REFUSAL_BUSY = _REFUSED + "store busy"
 REFUSAL_PENDING = _REFUSED + "a pending checkout must be decided or expire first"
 SERVING = "commerce_gateway: serving session {session_id} ({event})"
+CONVERSION_FAILED = "commerce_gateway: result conversion failed; the call was recorded"
 _EVENT_WORDS = {
     "session_opened": "opened",
     "session_resumed": "resumed",
@@ -119,6 +120,7 @@ def build_server(gateway: Gateway) -> Server:
         try:
             return to_call_result(gateway.call(params.name, params.arguments))
         except Exception:
+            print(CONVERSION_FAILED, file=sys.stderr)  # fixed text, never the exception's
             return INTERNAL_ERROR_RESULT
 
     return Server(
