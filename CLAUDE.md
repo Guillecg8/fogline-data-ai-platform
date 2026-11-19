@@ -50,7 +50,8 @@ uv run poe eval-all           # P2 evals (needs Ollama reachable)
 
 Other P1 tasks: `lh-generate`, `lh-contracts`, `lh-ingest`, `lh-silver` (incremental by default,
 `--full` rebuilds), `lh-gold`, `lh-verify`. Other P2 tasks: `ingest`, `search`, `ask`, `mcp`,
-`mcp-demo`, `eval-retrieval`, `eval`, `eval-report`, `mcp-lakehouse`.
+`mcp-demo`, `eval-retrieval`, `eval`, `eval-report`, `mcp-lakehouse`. P3 task: `cg-scenarios`
+(scripted attack scenarios and the oracle self-test; rewrites `evals/results/scenarios.*`).
 
 ## Layout
 

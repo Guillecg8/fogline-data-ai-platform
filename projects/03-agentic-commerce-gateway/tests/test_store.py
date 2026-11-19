@@ -22,7 +22,7 @@ def test_new_store_has_schema_version_1_and_strict_tables(open_store):
 def test_reopen_keeps_data(open_store):
     open_store().close()
     store = open_store()
-    assert store.conn.execute("SELECT count(*) FROM products").fetchall()[0][0] == 32
+    assert store.conn.execute("SELECT count(*) FROM products").fetchall()[0][0] == 33
 
 
 def test_refuses_unknown_schema_version(open_store, db_path):

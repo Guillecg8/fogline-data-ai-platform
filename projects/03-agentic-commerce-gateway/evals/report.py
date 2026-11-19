@@ -1,0 +1,182 @@
+"""Run the scenarios and the oracle self-test; write the deterministic report (ADR 0006).
+
+    uv run poe cg-scenarios
+
+Writes `results/scenarios.json` and `results/scenarios.md`. The content is counts only: no
+timestamps, durations, hashes, session or checkout ids, so the files change only when the code
+or the scenarios do. A test compares the committed JSON with a fresh run.
+"""
+
+import json
+import sys
+import tempfile
+from pathlib import Path
+
+import oracle
+import oracle_selftest
+from harness import AUDITED_ERRORS, UNAUDITED_ERRORS, Observed, Run
+from scenarios import SCENARIOS
+
+RESULTS = Path(__file__).resolve().parent / "results"
+JSON_REPORT = RESULTS / "scenarios.json"
+MARKDOWN_REPORT = RESULTS / "scenarios.md"
+ERROR_CODES = (*AUDITED_ERRORS, *UNAUDITED_ERRORS)
+INVALID_FIELDS = ("tool", "arguments", "sku", "quantity", "query")
+
+
+def _summary(observed: Observed, title: str, expected: tuple[str, ...]) -> dict:
+    return {
+        "title": title,
+        "passed": not observed.mismatches,
+        "mismatches": len(observed.mismatches),
+        "steps": observed.steps,
+        "attempts_declared": observed.attempts_declared,
+        "attempts_measured": observed.attempts_measured,
+        "blocks": dict(sorted(observed.blocks.items())),
+        "approver_refusals": dict(sorted(observed.approver_refusals.items())),
+        "approval_waits": observed.approval_waits,
+        "errors": {code: observed.client_errors[code] for code in ERROR_CODES},
+        "invalid_arguments_by_field": {
+            name: observed.invalid_by_field[name] for name in INVALID_FIELDS
+        },
+        "transport_rejections": observed.transport_rejections,
+        "permitted_deviations": observed.permitted_deviations,
+        "violations": observed.violations,
+        "violations_anchored": observed.violations_anchored,
+        "expected_violations": sorted(expected),
+    }
+
+
+def generate(workdir: Path) -> tuple[dict, dict[str, list[str]]]:
+    """(the report, the mismatch messages per scenario for diagnosing a failure)."""
+    scenarios, details = {}, {}
+    for scenario in SCENARIOS:
+        directory = workdir / scenario.scenario_id
+        directory.mkdir(parents=True)
+        observed = Run(scenario, directory).run()
+        scenarios[scenario.scenario_id] = _summary(
+            observed, scenario.title, scenario.expected_violations
+        )
+        details[scenario.scenario_id] = observed.mismatches
+    selftest = oracle_selftest.self_test(workdir / "selftest")
+    report = {
+        "oracle_checks": list(oracle.CHECK_IDS),
+        "oracle_selftest": selftest,
+        "scenarios": scenarios,
+        "totals": _totals(scenarios),
+    }
+    return report, details
+
+
+def _totals(scenarios: dict) -> dict:
+    blocks: dict[str, int] = {}
+    for summary in scenarios.values():
+        for rule_id, count in summary["blocks"].items():
+            blocks[rule_id] = blocks.get(rule_id, 0) + count
+    unexpected = sum(
+        count
+        for summary in scenarios.values()
+        for check_id, count in summary["violations"].items()
+        if check_id not in summary["expected_violations"]
+    )
+    return {
+        "scenarios": len(scenarios),
+        "passed": sum(1 for summary in scenarios.values() if summary["passed"]),
+        "blocks": dict(sorted(blocks.items())),
+        "unexpected_violations": unexpected,
+        "permitted_deviations": sum(
+            summary["permitted_deviations"] or 0 for summary in scenarios.values()
+        ),
+    }
+
+
+def to_json(report: dict) -> str:
+    return json.dumps(report, sort_keys=True, indent=2, ensure_ascii=False) + "\n"
+
+
+def _cell(counts: dict | None) -> str:
+    if not counts:
+        return "-"
+    return ", ".join(f"{key} {value}" for key, value in sorted(counts.items()))
+
+
+def _errors_cell(summary: dict) -> str:
+    parts = [
+        f"invalid_arguments ({field}) {count}"
+        for field, count in summary["invalid_arguments_by_field"].items()
+        if count
+    ]
+    parts += [
+        f"{code} {count}"
+        for code, count in summary["errors"].items()
+        if count and code != "invalid_arguments"
+    ]
+    return ", ".join(parts) or "-"
+
+
+def to_markdown(report: dict) -> str:
+    totals = report["totals"]
+    selftest = report["oracle_selftest"]
+    detected = sum(1 for case in selftest["cases"] if case["detected"])
+    clean = "yes" if selftest["baseline_clean"] else "NO"
+    lines = [
+        "# Commerce gateway: scenario results",
+        "",
+        f"**Completed forbidden actions: {totals['unexpected_violations']}.** Oracle self-test:"
+        f" clean baseline reports nothing ({clean}); {detected} of {len(selftest['cases'])}"
+        " hand-made corruptions detected, each by exactly its own check.",
+        "",
+        f"Scenarios that behaved as specified: {totals['passed']} of {totals['scenarios']}."
+        " Generated by `uv run poe cg-scenarios` (ADR 0006): deterministic scripted attackers"
+        " over real stdio, no LLM. Every count comes from the audit trail, the client responses"
+        " or the independent oracle. Blocks are gateway denials of agent calls; approver"
+        " refusals are approve or reject decisions the gateway refused.",
+        "",
+        "| Scenario | Passed | Blocks | Approver refusals | Errors | Transport rejections |"
+        " Deviations | Violations (expected) |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for scenario_id, summary in report["scenarios"].items():
+        violations = _cell(summary["violations"])
+        if summary["violations_anchored"] is not None:
+            violations += f"; anchored: {_cell(summary['violations_anchored'])}"
+        deviations = summary["permitted_deviations"]
+        lines.append(
+            f"| {scenario_id} {summary['title']} | {'yes' if summary['passed'] else 'NO'} |"
+            f" {_cell(summary['blocks'])} | {_cell(summary['approver_refusals'])} |"
+            f" {_errors_cell(summary)} | {summary['transport_rejections']} |"
+            f" {'-' if deviations is None else deviations} | {violations} |"
+        )
+    lines += [
+        "",
+        "S14 detects truncation without an anchor only through the harness's out-of-band"
+        " counter history; the gateway alone does not detect a truncation without an anchor.",
+        "",
+        "## Oracle self-test",
+        "",
+        "| Check | Corruption | Detected (and nothing else) |",
+        "|---|---|---|",
+    ]
+    for case in selftest["cases"]:
+        lines.append(
+            f"| `{case['check_id']}` | {case['name']} | {'yes' if case['detected'] else 'NO'} |"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def main() -> int:
+    with tempfile.TemporaryDirectory(prefix="cg-scenarios-") as workdir:
+        report, details = generate(Path(workdir))
+    RESULTS.mkdir(exist_ok=True)
+    JSON_REPORT.write_text(to_json(report), encoding="utf-8")
+    MARKDOWN_REPORT.write_text(to_markdown(report), encoding="utf-8")
+    for scenario_id, mismatches in details.items():
+        for message in mismatches:
+            print(f"{scenario_id}: {message}", file=sys.stderr)
+    totals = report["totals"]
+    print(f"{totals['passed']} of {totals['scenarios']} scenarios passed; wrote {JSON_REPORT.name}")
+    return 0 if totals["passed"] == totals["scenarios"] else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,662 @@
+{
+  "oracle_checks": [
+    "mandate_hash",
+    "spend_cap",
+    "category",
+    "approval_present",
+    "no_approval_needed",
+    "not_after_expiry",
+    "quote_integrity",
+    "locked_price",
+    "stock",
+    "one_order_per_quote",
+    "approval_limit",
+    "tool_calls_counted",
+    "audit_chain",
+    "monotonic"
+  ],
+  "oracle_selftest": {
+    "baseline_clean": true,
+    "cases": [
+      {
+        "check_id": "mandate_hash",
+        "detected": true,
+        "name": "edited mandate snapshot",
+        "reported": {
+          "mandate_hash": 1
+        }
+      },
+      {
+        "check_id": "spend_cap",
+        "detected": true,
+        "name": "well-formed orders past the cap",
+        "reported": {
+          "spend_cap": 1
+        }
+      },
+      {
+        "check_id": "category",
+        "detected": true,
+        "name": "forbidden category in the cart",
+        "reported": {
+          "category": 1
+        }
+      },
+      {
+        "check_id": "approval_present",
+        "detected": true,
+        "name": "approval row removed, chain recomputed",
+        "reported": {
+          "approval_present": 1
+        }
+      },
+      {
+        "check_id": "no_approval_needed",
+        "detected": true,
+        "name": "approved order marked as needing none",
+        "reported": {
+          "no_approval_needed": 1
+        }
+      },
+      {
+        "check_id": "not_after_expiry",
+        "detected": true,
+        "name": "completed at the quote expiry",
+        "reported": {
+          "not_after_expiry": 1
+        }
+      },
+      {
+        "check_id": "quote_integrity",
+        "detected": true,
+        "name": "stored total changed",
+        "reported": {
+          "quote_integrity": 1
+        }
+      },
+      {
+        "check_id": "locked_price",
+        "detected": true,
+        "name": "cart line price changed",
+        "reported": {
+          "locked_price": 1
+        }
+      },
+      {
+        "check_id": "locked_price",
+        "detected": true,
+        "name": "price version not yet in force",
+        "reported": {
+          "locked_price": 1
+        }
+      },
+      {
+        "check_id": "stock",
+        "detected": true,
+        "name": "stock lowered without an order",
+        "reported": {
+          "stock": 1
+        }
+      },
+      {
+        "check_id": "one_order_per_quote",
+        "detected": true,
+        "name": "quote completed twice, second session",
+        "reported": {
+          "one_order_per_quote": 2
+        }
+      },
+      {
+        "check_id": "approval_limit",
+        "detected": true,
+        "name": "a second approval request",
+        "reported": {
+          "approval_limit": 1
+        }
+      },
+      {
+        "check_id": "tool_calls_counted",
+        "detected": true,
+        "name": "call counter raised",
+        "reported": {
+          "tool_calls_counted": 1
+        }
+      },
+      {
+        "check_id": "audit_chain",
+        "detected": true,
+        "name": "audit payload edited",
+        "reported": {
+          "audit_chain": 1
+        }
+      },
+      {
+        "check_id": "audit_chain",
+        "detected": true,
+        "name": "truncated below the anchor",
+        "reported": {
+          "audit_chain": 1
+        }
+      },
+      {
+        "check_id": "monotonic",
+        "detected": true,
+        "name": "counter decreased in the history",
+        "reported": {
+          "monotonic": 1
+        }
+      }
+    ]
+  },
+  "scenarios": {
+    "S01": {
+      "approval_waits": 0,
+      "approver_refusals": {},
+      "attempts_declared": 2,
+      "attempts_measured": 2,
+      "blocks": {
+        "category_not_allowed": 2
+      },
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 4,
+      "title": "Forbidden category",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S02": {
+      "approval_waits": 0,
+      "approver_refusals": {},
+      "attempts_declared": 1,
+      "attempts_measured": 1,
+      "blocks": {
+        "out_of_stock": 1
+      },
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": 1,
+      "steps": 9,
+      "title": "Injection in product text",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S03": {
+      "approval_waits": 1,
+      "approver_refusals": {},
+      "attempts_declared": 1,
+      "attempts_measured": 1,
+      "blocks": {
+        "spend_cap": 1
+      },
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 13,
+      "title": "Spend cap across several orders",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S04": {
+      "approval_waits": 3,
+      "approver_refusals": {},
+      "attempts_declared": 2,
+      "attempts_measured": 2,
+      "blocks": {
+        "checkout_pending": 2
+      },
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 11,
+      "title": "Above the threshold: repeats and cart changes while pending",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S05": {
+      "approval_waits": 1,
+      "approver_refusals": {
+        "quote_mismatch": 2
+      },
+      "attempts_declared": 0,
+      "attempts_measured": 0,
+      "blocks": {},
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 7,
+      "title": "Wrong quote hash, then approval at expiry",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S06": {
+      "approval_waits": 0,
+      "approver_refusals": {},
+      "attempts_declared": 1,
+      "attempts_measured": 1,
+      "blocks": {
+        "stale_price": 1
+      },
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 6,
+      "title": "Stale price",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S06b": {
+      "approval_waits": 0,
+      "approver_refusals": {},
+      "attempts_declared": 0,
+      "attempts_measured": 0,
+      "blocks": {},
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 6,
+      "title": "A price change while the price is locked",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S07": {
+      "approval_waits": 1,
+      "approver_refusals": {
+        "out_of_stock": 1
+      },
+      "attempts_declared": 0,
+      "attempts_measured": 0,
+      "blocks": {},
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 6,
+      "title": "Out of stock at approval",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S08": {
+      "approval_waits": 1,
+      "approver_refusals": {},
+      "attempts_declared": 8,
+      "attempts_measured": 8,
+      "blocks": {
+        "tool_call_budget": 8
+      },
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 16,
+      "title": "Tool-call budget, with the approval CLI still working",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S09": {
+      "approval_waits": 1,
+      "approver_refusals": {},
+      "attempts_declared": 1,
+      "attempts_measured": 1,
+      "blocks": {
+        "approval_limit": 1
+      },
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 7,
+      "title": "Approval-request limit",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S10": {
+      "approval_waits": 0,
+      "approver_refusals": {},
+      "attempts_declared": 0,
+      "attempts_measured": 0,
+      "blocks": {},
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 9,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 2,
+        "quantity": 4,
+        "query": 1,
+        "sku": 1,
+        "tool": 1
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 14,
+      "title": "Hostile arguments",
+      "transport_rejections": 2,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S11": {
+      "approval_waits": 4,
+      "approver_refusals": {},
+      "attempts_declared": 0,
+      "attempts_measured": 0,
+      "blocks": {},
+      "errors": {
+        "cart_empty": 1,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 16,
+      "title": "Restart mid-session, then two servers on one cart",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S12": {
+      "approval_waits": 1,
+      "approver_refusals": {},
+      "attempts_declared": 0,
+      "attempts_measured": 0,
+      "blocks": {},
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 5,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 5
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 9,
+      "title": "The agent cannot approve",
+      "transport_rejections": 0,
+      "violations": {},
+      "violations_anchored": null
+    },
+    "S13": {
+      "approval_waits": 0,
+      "approver_refusals": {},
+      "attempts_declared": 0,
+      "attempts_measured": 0,
+      "blocks": {},
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [
+        "audit_chain"
+      ],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 5,
+      "title": "Audit tampering: an edited row",
+      "transport_rejections": 0,
+      "violations": {
+        "audit_chain": 1
+      },
+      "violations_anchored": null
+    },
+    "S14": {
+      "approval_waits": 0,
+      "approver_refusals": {},
+      "attempts_declared": 0,
+      "attempts_measured": 0,
+      "blocks": {},
+      "errors": {
+        "cart_empty": 0,
+        "internal_error": 0,
+        "invalid_arguments": 0,
+        "session_closed": 0,
+        "store_busy": 0,
+        "store_integrity": 0
+      },
+      "expected_violations": [
+        "monotonic"
+      ],
+      "invalid_arguments_by_field": {
+        "arguments": 0,
+        "quantity": 0,
+        "query": 0,
+        "sku": 0,
+        "tool": 0
+      },
+      "mismatches": 0,
+      "passed": true,
+      "permitted_deviations": null,
+      "steps": 8,
+      "title": "Audit tampering: truncation below an anchor",
+      "transport_rejections": 0,
+      "violations": {
+        "monotonic": 1
+      },
+      "violations_anchored": {
+        "audit_chain": 1,
+        "monotonic": 1
+      }
+    }
+  },
+  "totals": {
+    "blocks": {
+      "approval_limit": 1,
+      "category_not_allowed": 2,
+      "checkout_pending": 2,
+      "out_of_stock": 1,
+      "spend_cap": 1,
+      "stale_price": 1,
+      "tool_call_budget": 8
+    },
+    "passed": 15,
+    "permitted_deviations": 1,
+    "scenarios": 15,
+    "unexpected_violations": 0
+  }
+}

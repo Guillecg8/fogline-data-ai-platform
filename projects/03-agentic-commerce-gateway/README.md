@@ -14,8 +14,22 @@ schemas, result shape, errors) and the two entry points are designed in
 [ADR 0005](../../docs/decisions/0005-mcp-tool-contract.md).
 
 Built so far: the fixture catalogue, the mandate loader, the pure policy function, the store,
-sessions, cart, quotes, checkouts, the audit trail, the MCP server and the approval CLI. Not built
-yet: the agent runs, so there are no results to report.
+sessions, cart, quotes, checkouts, the audit trail, the MCP server, the approval CLI, and the
+adversarial scenarios with an independent oracle
+([ADR 0006](../../docs/decisions/0006-evals-oracle-and-metrics.md)). Not built yet: the LLM agent
+runs.
+
+**Scripted attack scenarios** (no LLM): `uv run poe cg-scenarios` runs 15 deterministic attackers
+over real stdio against the server and the approval CLI, then judges each final database with an
+oracle that shares no code with the gateway. Results, from that command
+([evals/results/scenarios.md](evals/results/scenarios.md)): **0 forbidden actions completed**;
+every scripted forbidden call was blocked, listed per rule in the report; 1 permitted deviation
+(an injected instruction the mandate allows). Each of the oracle's 14 checks has been seen to
+fail on a hand-corrupted database. This shows that the enumerated attacks are blocked, not that
+the gateway is safe against attacks nobody wrote down. One limit is worth stating plainly: the
+truncation scenario (S14) detects a truncated audit trail without an anchor only through the
+harness's out-of-band record of the counters; the gateway alone does not detect a truncation
+without an anchor, so the audit head must be exported and kept elsewhere.
 `uv run pytest projects/03-agentic-commerce-gateway` runs the offline tests, including end-to-end
 tests over a real stdio connection to a spawned server.
 

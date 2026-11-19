@@ -491,6 +491,26 @@
           "effective_from_ms": 0
         }
       ]
+    },
+    {
+      "sku": "FP-0033",
+      "policy_category": "dry_goods",
+      "name": "Fogline Pantry Cold-Pressed Olive Oil 1 L",
+      "description": "Extra virgin olive oil for finishing.",
+      "ingredients": "olive oil",
+      "stock": 20,
+      "prices": [
+        {
+          "price_version": 1,
+          "unit_price_cents": 1200,
+          "effective_from_ms": 0
+        },
+        {
+          "price_version": 2,
+          "unit_price_cents": 1350,
+          "effective_from_ms": 4102445400000
+        }
+      ]
     }
   ]
 }

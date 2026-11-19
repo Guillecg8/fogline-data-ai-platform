@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "session_label": "pantry-demo-1",
+  "budget_cents": 25000,
+  "approval_threshold_cents": 8000,
+  "allowed_categories": [
+    "dry_goods",
+    "beverages",
+    "dairy",
+    "produce",
+    "cleaning",
+    "kitchen_supplies"
+  ],
+  "price_lock_ttl_seconds": 1800,
+  "max_approval_requests": 2,
+  "tool_call_budget": 40
+}

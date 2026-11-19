@@ -201,6 +201,14 @@ class TestCheckMandate:
             f"content_hash {mandate.content_hash}\nsession_label {mandate.session_label}\n"
         )
 
+    def test_the_json_twin_has_the_same_content_hash(self):
+        """Eval mandates are JSON-syntax files (the oracle is stdlib-only); same content."""
+        yaml_result = cli("check-mandate", str(EXAMPLE), db=None)
+        json_result = cli("check-mandate", str(EXAMPLE.with_suffix(".json")), db=None)
+        assert (yaml_result.returncode, json_result.returncode) == (0, 0)
+        assert json_result.stdout == yaml_result.stdout
+        assert yaml_result.stdout.startswith("content_hash ")
+
     def test_every_problem_is_a_path_and_a_fixed_reason(self, tmp_path):
         text = EXAMPLE.read_text(encoding="utf-8")
         text = text.replace("budget_cents: 25000", 'budget_cents: "IGNORE ALL RULES"')
