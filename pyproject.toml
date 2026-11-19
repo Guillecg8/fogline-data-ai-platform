@@ -46,6 +46,7 @@ lh-verify = "python -m revenue_lakehouse.verify"
 lh-benchmark = "python -m revenue_lakehouse.benchmark"
 lh-backtest = "python -m revenue_lakehouse.backtest"
 lh-all = ["lh-generate", "lh-ingest", "lh-silver", "lh-gold", "lh-verify"]
+cg-scenarios = "python projects/03-agentic-commerce-gateway/evals/report.py"
 
 [tool.poe.tasks.mcp-lakehouse]
 help = "MCP server reading the KPIs exported by the lakehouse (run lh-all first)"
