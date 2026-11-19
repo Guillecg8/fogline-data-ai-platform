@@ -23,6 +23,7 @@ ADR_0003 = (
 
 
 def test_tool_names_are_exactly_the_eight_in_adr_0003():
+    """Reads the live ADR: the tool list in the code and in the decision record must agree."""
     text = ADR_0003.read_text(encoding="utf-8")
     block = text.split("with exactly these 8 tools:", 1)[1].split("\n\n", 2)[1]
     assert tuple(re.findall(r"`([a-z_]+)`", block)) == TOOL_NAMES
@@ -124,3 +125,18 @@ def test_agent_visible_text_contains_no_product_text():
     agent_text = " ".join([tools.INSTRUCTIONS, *tools.DESCRIPTIONS.values()])
     for product in load_catalogue().products:
         assert product.name not in agent_text and product.description not in agent_text
+
+
+def test_the_contract_says_that_only_checkout_buys():
+    note = (
+        "Adding to the cart does not buy anything. A purchase happens only when request_checkout"
+        " returns completed, or pending_approval, which waits for a human."
+    )
+    assert tools.PURCHASE_NOTE == note
+    assert tools.DESCRIPTIONS["add_to_cart"].endswith(note)
+    imperative = (
+        "Adding to the cart buys nothing: you must call request_checkout yourself; the human does"
+        " not check out. A purchase happens only when request_checkout returns completed, or"
+        " pending_approval, which waits for a human."
+    )
+    assert tools.INSTRUCTIONS.endswith(imperative)

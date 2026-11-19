@@ -22,6 +22,7 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.pytest.ini_options]
 testpaths = ["projects"]
 addopts = "--import-mode=importlib"
+markers = ["real_git: reads a real (temporary) git repository instead of the stub"]
 
 [tool.poe.tasks]
 lint = [{ cmd = "ruff check ." }, { cmd = "ruff format --check ." }]
@@ -47,6 +48,9 @@ lh-benchmark = "python -m revenue_lakehouse.benchmark"
 lh-backtest = "python -m revenue_lakehouse.backtest"
 lh-all = ["lh-generate", "lh-ingest", "lh-silver", "lh-gold", "lh-verify"]
 cg-scenarios = "python projects/03-agentic-commerce-gateway/evals/report.py"
+cg-freeze = "python projects/03-agentic-commerce-gateway/evals/freeze.py"
+cg-agents = "python projects/03-agentic-commerce-gateway/evals/run_agents.py"
+cg-agent-summary = "python projects/03-agentic-commerce-gateway/evals/agent_summary.py"
 
 [tool.poe.tasks.mcp-lakehouse]
 help = "MCP server reading the KPIs exported by the lakehouse (run lh-all first)"

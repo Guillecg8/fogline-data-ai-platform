@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "price_lock_ttl_seconds": 1800,
+  "max_approval_requests": 2,
+  "tool_call_budget": 40,
+  "allowed_categories": [
+    "beverages",
+    "cleaning",
+    "dairy",
+    "dry_goods",
+    "kitchen_supplies",
+    "produce"
+  ],
+  "session_label": "agent-tight-1",
+  "budget_cents": 3000,
+  "approval_threshold_cents": 3000
+}

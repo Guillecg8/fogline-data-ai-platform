@@ -15,3 +15,17 @@ def generated(tmp_path_factory):
     import report
 
     return report.generate(tmp_path_factory.mktemp("evals"))
+
+
+FAKE_GIT = {"commit": "0" * 40, "dirty": False, "changed_paths": []}
+
+
+@pytest.fixture(autouse=True)
+def _no_real_git(request, monkeypatch):
+    """Agent tests never read the real repository's git state (it changes while you work)."""
+    if "real_git" in request.keywords:
+        return
+    import agent.runner
+
+    monkeypatch.setattr(agent.runner, "git_state", lambda repo=None: dict(FAKE_GIT))
+    monkeypatch.setattr(agent.runner, "git_tree_hash", lambda path, exclude=(), repo=None: "t" * 64)

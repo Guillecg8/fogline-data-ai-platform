@@ -47,3 +47,13 @@ def test_the_oracle_hashes_a_mandate_as_the_gateway_does():
     )
     gateway_hash = result.stdout.splitlines()[0].split(" ", 1)[1]
     assert oracle.sha256_hex(oracle.load_mandate_file(twin)) == gateway_hash
+
+
+@pytest.mark.parametrize("first", "0123456789abcdef")
+def test_the_self_test_copy_of_a_session_never_collides(first):
+    """Regression: the copy's id was 'f' + id[1:], equal to the original 1 time in 16."""
+    import oracle_selftest
+
+    session_id = first + "a" * 31
+    copy = oracle_selftest.other_session_id(session_id)
+    assert copy != session_id and len(copy) == len(session_id)

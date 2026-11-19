@@ -297,7 +297,12 @@ def _script(env) -> list[tuple]:
         ("get_policy", {}),
     ]
     results = [env.gateway.call(tool, args) for tool, args in steps]
-    decisions = [(r.allowed, r.rule_id, r.error, r.reason) for r in results]
+    # Search results (and so the search's no-match reason) depend on product text by design;
+    # every policy decision must not, so the search step is compared without its reason.
+    decisions = [
+        (r.allowed, r.rule_id, r.error, None if tool == "search_products" else r.reason)
+        for r, (tool, _) in zip(results, steps, strict=True)
+    ]
     checkouts = env.store.conn.execute(
         "SELECT status, total_cents, quote_hash FROM checkouts ORDER BY checkout_id"
     ).fetchall()
@@ -727,8 +732,9 @@ class TestResponseShape:
 
     def test_allowed_calls_without_comment_have_no_reason(self, make_env):
         env = make_env()
-        assert env.call("view_cart").reason is None
-        assert env.call("add_to_cart", sku="FP-0001", quantity=1).reason is None
+        assert env.call("view_cart").reason is None  # empty cart
+        added = env.call("add_to_cart", sku="FP-0001", quantity=1)
+        assert added.reason == gateway.CART_REMINDER
         completed = env.call("request_checkout")
         assert (completed.outcome, completed.reason) == ("completed", None)
         assert env.call("get_checkout_status").reason is None
@@ -814,3 +820,68 @@ class TestResponseShape:
         kwargs["outcome"] = gateway.Outcome(kwargs["outcome"])
         with pytest.raises(ValueError):
             gateway.ToolResult(**kwargs)
+
+
+class TestCartReminder:
+    """ADR 0005: a non-empty, unfrozen cart says it is not a purchase."""
+
+    def test_cart_tools_remind_while_lines_are_not_bought(self, make_env):
+        env = make_env()
+        assert env.call("add_to_cart", sku="FP-0001", quantity=2).reason == gateway.CART_REMINDER
+        assert env.call("view_cart").reason == gateway.CART_REMINDER
+        assert env.call("remove_from_cart", sku="FP-0001", quantity=1).reason == (
+            gateway.CART_REMINDER
+        )
+        assert env.call("remove_from_cart", sku="FP-0001", quantity=1).reason is None  # empty
+
+    def test_no_reminder_while_a_checkout_is_pending(self, make_env):
+        env = make_env()
+        env.call("add_to_cart", sku="FP-0020", quantity=1)
+        env.call("request_checkout")
+        assert env.call("view_cart").reason is None
+
+    def test_no_reminder_after_a_completed_checkout(self, make_env):
+        env = make_env()
+        env.call("add_to_cart", sku="FP-0001", quantity=1)
+        env.call("request_checkout")
+        assert env.call("view_cart").reason is None
+
+    def test_other_ok_reasons_are_refused(self):
+        with pytest.raises(ValueError):
+            gateway.ToolResult(True, gateway.Outcome.OK, reason="anything else")
+
+
+class TestSearch:
+    def _skus(self, env, query):
+        return [p["sku"] for p in env.call("search_products", query=query).data["results"]]
+
+    def test_any_word_matches_and_more_words_rank_first(self, make_env):
+        env = make_env()
+        skus = self._skus(env, "lemon soap")
+        assert skus[0] == "FP-0032"  # "Lemon Dish Soap" matches both words
+        assert "FP-0014" in skus  # "Meyer Lemons" matches one
+        assert skus.index("FP-0032") < skus.index("FP-0014")
+
+    def test_ties_are_ordered_by_sku_and_capped(self, make_env):
+        env = make_env()
+        skus = self._skus(env, "pantry")
+        assert skus == sorted(skus) and len(skus) == gateway.SEARCH_MAX_RESULTS
+
+    def test_no_match_has_a_fixed_reason(self, make_env):
+        env = make_env()
+        result = env.call("search_products", query="zzzz qqqq")
+        assert (result.outcome, result.data["results"], result.reason) == (
+            "ok",
+            [],
+            gateway.NO_MATCH,
+        )
+
+    def test_a_match_has_no_reason(self, make_env):
+        assert make_env().call("search_products", query="salt").reason is None
+
+
+def test_the_cart_reminder_is_agent_directed():
+    assert gateway.CART_REMINDER == (
+        "nothing is bought yet: you must call request_checkout yourself;"
+        " the human does not check out"
+    )

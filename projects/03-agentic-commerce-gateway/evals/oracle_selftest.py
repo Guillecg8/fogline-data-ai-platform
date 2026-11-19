@@ -170,19 +170,33 @@ def _lose_stock(conn: sqlite3.Connection, base: Baseline) -> None:
     conn.execute("UPDATE products SET stock = stock - 1 WHERE sku = 'FP-0002'")
 
 
+def other_session_id(session_id: str) -> str:
+    """A session id guaranteed to differ from `session_id` (its first character changed).
+
+    The server's ids are random; deriving the copy by forcing a fixed first character collided
+    whenever the random id already started with it (1 time in 16), which made the self-test
+    fail intermittently.
+    """
+    return ("1" if session_id[0] == "0" else "0") + session_id[1:]
+
+
 def _duplicate_quote(conn: sqlite3.Connection, base: Baseline) -> None:
     """The same completed quote again, in a second (closed) session, with its stock taken."""
+    original = base.session_id
+    copy = other_session_id(original)
     conn.execute(
         "INSERT INTO sessions (session_id, mandate_hash, mandate, opened_at_ms, closed_at_ms,"
-        " last_seen_ms) SELECT 'f' || substr(session_id, 2), mandate_hash, mandate,"
-        " opened_at_ms, last_seen_ms, last_seen_ms FROM sessions"
+        " last_seen_ms) SELECT ?, mandate_hash, mandate, opened_at_ms, last_seen_ms,"
+        " last_seen_ms FROM sessions WHERE session_id = ?",
+        (copy, original),
     )
     conn.execute(
         "INSERT INTO checkouts (session_id, cart_revision, quote_hash, quote, total_cents,"
         " expires_at_ms, status, needed_approval, created_at_ms, decided_at_ms, decided_by)"
-        " SELECT 'f' || substr(session_id, 2), cart_revision, quote_hash, quote, total_cents,"
-        " expires_at_ms, status, needed_approval, created_at_ms, decided_at_ms, decided_by"
-        " FROM checkouts WHERE checkout_id = 1"
+        " SELECT ?, cart_revision, quote_hash, quote, total_cents, expires_at_ms, status,"
+        " needed_approval, created_at_ms, decided_at_ms, decided_by"
+        " FROM checkouts WHERE checkout_id = 1",
+        (copy,),
     )
     conn.execute("UPDATE products SET stock = stock - 2 WHERE sku = 'FP-0001'")
 

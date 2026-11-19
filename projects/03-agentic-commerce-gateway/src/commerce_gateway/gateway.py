@@ -17,7 +17,7 @@ returned and one fixed line goes to stderr).
 import sqlite3
 import sys
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import StrEnum
 
 from commerce_gateway import audit, orders
@@ -72,6 +72,13 @@ STATE_REASONS = {
     "expired": "the quote expired; add the lines again to re-lock their price",
 }
 
+# Fixed reasons an `ok` result may carry (ADR 0005, amended after dev pass 1).
+CART_REMINDER = (
+    "nothing is bought yet: you must call request_checkout yourself; the human does not check out"
+)
+NO_MATCH = "no product matches; try different or fewer words"
+OK_REASONS = frozenset({None, CART_REMINDER, NO_MATCH})
+
 TOOL_CALL_EVENT = "tool_call"
 DOUBLE_FAULT_MESSAGE = "commerce_gateway: double fault; a failed tool call could not be recorded"
 HANDLER_SAVEPOINT = "tool_handler"
@@ -117,6 +124,8 @@ class ToolResult:
             consistent = self.allowed and self.error is None and self.rule_id is None
         if self.outcome in (Outcome.ERROR, Outcome.DENIED):
             consistent = consistent and self.reason is not None
+        elif self.outcome is Outcome.OK:
+            consistent = consistent and self.reason in OK_REASONS
         else:
             consistent = consistent and self.reason == STATE_REASONS.get(str(self.outcome))
         if not consistent:
@@ -229,17 +238,32 @@ def _search_products(
     conn: sqlite3.Connection, session: Session, now_ms: int, args: dict
 ) -> _Outcome:
     query = args["query"]
-    tokens = sanitize(query, QUERY_MAX_CHARS)[0].casefold().split()
+    tokens = set(sanitize(query, QUERY_MAX_CHARS)[0].casefold().split())
     texts = product_texts(conn)
-    matches = [
-        sku
-        for sku, (name, description, _) in texts.items()
-        if all(token in f"{name} {description}".casefold() for token in tokens)
-    ][:SEARCH_MAX_RESULTS]
-    facts = product_facts(conn, tuple(matches), now_ms)
-    results = [_product_view(fact, texts[fact.sku], detail=False) for fact in facts]
+    scored = []
+    for sku, (name, description, _) in texts.items():
+        haystack = f"{name} {description}".casefold()
+        hits = sum(1 for token in tokens if token in haystack)
+        if hits:
+            scored.append((-hits, sku))
+    # Any word matches; more matching words rank first, ties by SKU.
+    matches = [sku for _, sku in sorted(scored)][:SEARCH_MAX_RESULTS]
+    facts = {fact.sku: fact for fact in product_facts(conn, tuple(matches), now_ms)}
+    results = [_product_view(facts[sku], texts[sku], detail=False) for sku in matches]
     record = {**query_audit_fields(query, QUERY_MAX_CHARS), "result_skus": matches}
-    return _Outcome(_ok({"results": results}), record)
+    result = _ok({"results": results})
+    if not results:
+        result = replace(result, reason=NO_MATCH)
+    return _Outcome(result, record)
+
+
+def _with_cart_reminder(result: ToolResult) -> ToolResult:
+    """An `ok` cart result says the cart is not a purchase while it has lines and no pending
+    checkout (ADR 0005)."""
+    cart = result.data.get("cart") or {}
+    if result.outcome is Outcome.OK and cart.get("lines") and not cart.get("frozen"):
+        return replace(result, reason=CART_REMINDER)
+    return result
 
 
 def _one_fact(conn: sqlite3.Connection, args: dict, now_ms: int) -> ProductFacts:
@@ -274,7 +298,8 @@ def _add_to_cart(conn: sqlite3.Connection, session: Session, now_ms: int, args: 
     )
     orders.put_cart_line(conn, sid, line)
     record |= {"price_version": line.price_version, "lock_expires_at_ms": line.lock_expires_at_ms}
-    return _Outcome(_from_decision(decision, {"cart": _cart_view(conn, sid, now_ms)}), record)
+    result = _from_decision(decision, {"cart": _cart_view(conn, sid, now_ms)})
+    return _Outcome(_with_cart_reminder(result), record)
 
 
 def _remove_from_cart(
@@ -294,12 +319,13 @@ def _remove_from_cart(
         reason = "quantity exceeds the quantity in the cart"
         raise state_rejection(reason, "quantity", "quantity_in_cart", args)
     orders.reduce_cart_line(conn, sid, sku, quantity)
-    return _Outcome(_from_decision(decision, {"cart": _cart_view(conn, sid, now_ms)}), record)
+    result = _from_decision(decision, {"cart": _cart_view(conn, sid, now_ms)})
+    return _Outcome(_with_cart_reminder(result), record)
 
 
 def _view_cart(conn: sqlite3.Connection, session: Session, now_ms: int, args: dict) -> _Outcome:
     cart = _cart_view(conn, session.session_id, now_ms)
-    return _Outcome(_ok({"cart": cart}), {})
+    return _Outcome(_with_cart_reminder(_ok({"cart": cart})), {})
 
 
 def _existing_checkout(existing: orders.Checkout, now_ms: int) -> ToolResult:

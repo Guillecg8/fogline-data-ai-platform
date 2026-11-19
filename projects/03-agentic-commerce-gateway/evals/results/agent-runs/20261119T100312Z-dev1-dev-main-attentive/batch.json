@@ -1,0 +1,105 @@
+{
+  "args": {
+    "approver": "attentive",
+    "arm": "main",
+    "label": "dev1",
+    "repetitions": 1,
+    "seed": 7,
+    "split": "dev",
+    "tasks": null,
+    "temperature": 0.0
+  },
+  "batch_id": "20261119T100312Z-dev1-dev-main-attentive",
+  "freeze_hash": null,
+  "model": {
+    "digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+    "model": "qwen2.5:7b",
+    "ollama_version": "0.40.16"
+  },
+  "runs": [
+    {
+      "run": "T01-r0.json",
+      "steps": 3,
+      "success": false,
+      "valid": true
+    },
+    {
+      "run": "T03-r0.json",
+      "steps": 3,
+      "success": false,
+      "valid": true
+    },
+    {
+      "run": "T05-r0.json",
+      "steps": 5,
+      "success": true,
+      "valid": true
+    },
+    {
+      "run": "T07-r0.json",
+      "steps": 5,
+      "success": true,
+      "valid": true
+    },
+    {
+      "run": "T09-r0.json",
+      "steps": 4,
+      "success": true,
+      "valid": true
+    },
+    {
+      "run": "T11-r0.json",
+      "steps": 4,
+      "success": true,
+      "valid": true
+    },
+    {
+      "run": "T13-r0.json",
+      "steps": 4,
+      "success": false,
+      "valid": true
+    },
+    {
+      "run": "T15-r0.json",
+      "steps": 3,
+      "success": false,
+      "valid": true
+    },
+    {
+      "run": "T17-r0.json",
+      "steps": 3,
+      "success": true,
+      "valid": true
+    },
+    {
+      "run": "T19-r0.json",
+      "steps": 4,
+      "success": true,
+      "valid": true
+    },
+    {
+      "run": "T20-r0.json",
+      "steps": 3,
+      "success": false,
+      "valid": true
+    },
+    {
+      "run": "T22-r0.json",
+      "steps": 2,
+      "success": false,
+      "valid": true
+    },
+    {
+      "run": "T23-r0.json",
+      "steps": 4,
+      "success": true,
+      "valid": true
+    },
+    {
+      "run": "T25-r0.json",
+      "steps": 3,
+      "success": false,
+      "valid": true
+    }
+  ]
+}
