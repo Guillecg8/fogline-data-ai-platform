@@ -1,0 +1,34 @@
+{
+  "freeze_hash": "3b195d5d999678e6f3d4cbfbb166f3ee73f7117604ac84863964bd859e3c307e",
+  "values": {
+    "catalogue": "8f006b2bf99a35352cbcf83de2c726eac6a7fb96623ac1786e9268101e52700b",
+    "code": {
+      "approver": "0b19a5aa2ed5a45375ebf12830f74a4851fcae3533e046b299d047ea8a5b97b0",
+      "batch": "c5644e24d2fdd1e9aa3c57d24943dcc05b5f0caaacf7c16d680d1cd6065521da",
+      "classifier": "5389d4de751cdc2861d6a5817bb04a10d7c8492060408bf16f549e49635cbea8",
+      "freeze": "99182b1a28ae7ab6e0e29bf75ba132338865e5c3c3d09c4a0ac18de9b994631a",
+      "model": "9b1b435b99a39c5138ef8f60b79d840c5bdd1c0dc99e160dc26d06e26a5967d2",
+      "runner": "6341f46e730fb58f1199d16b73589ce594a9041f465434d33c02da15726af5c1",
+      "summary": "7d7c43adead4d41ff53cd6dc2713501c92337fe6858bfd7686af6a9c6d7fa293"
+    },
+    "git_trees": {
+      "evals": "dde2bbacc6ab7495718a5d1461a97c019e122a69f15d5555e9ec3f6977a75ba8",
+      "src": "774220c5d00a69d04a4b6de2a0117f56c0ea65fb63759afb57bee69b573d3d04"
+    },
+    "mandates": {
+      "permissive.json": "40a0e4699f79926f2ac8761ea050e5994f5942a45d3cda35c187bea9d788f550",
+      "standard.json": "ebc89f35bce41c7c27d1b7e1e0b638be75f28b77d23fe3f7b4899690c0821aad",
+      "tight.json": "29c5c754504852b12c8702dd658091300d49aee40b334e600a00afba0c8c06ae"
+    },
+    "model": {
+      "digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+      "model": "qwen2.5:7b",
+      "ollama_version": "0.40.16"
+    },
+    "oracle": "f44499a03768aa08a4aa8ab86dafb3a1e52f49f7e8e4598c8284b22bc18b54b6",
+    "system_prompt": "9d412dba4b059bcecaac096aa51de83bd743138ed480b277c570dfe44b9d3e3e",
+    "tasks": "06fbbac02e3467b43f5b472beffeb6ca192b372dedcebb9d0714ea83e285296f",
+    "tool_contract": "7ff1852d7f42f327107aa0303cba01a23a40655c8d4bc29a2f9888ba94dff2c8"
+  },
+  "version": 1
+}
